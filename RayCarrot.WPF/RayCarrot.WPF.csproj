@@ -99,14 +99,14 @@
     <Reference Include="Newtonsoft.Json, Version=11.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
       <HintPath>..\..\packages\Newtonsoft.Json.11.0.2\lib\net45\Newtonsoft.Json.dll</HintPath>
     </Reference>
-    <Reference Include="RayCarrot.CarrotFramework, Version=1.0.22.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\RayCarrot.CarrotFramework.1.0.22\lib\netstandard2.0\RayCarrot.CarrotFramework.dll</HintPath>
+    <Reference Include="RayCarrot.CarrotFramework, Version=1.0.28.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\RayCarrot.CarrotFramework.1.0.28\lib\netstandard2.0\RayCarrot.CarrotFramework.dll</HintPath>
     </Reference>
-    <Reference Include="RayCarrot.CarrotFramework.IO, Version=1.0.26.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\RayCarrot.CarrotFramework.IO.1.0.26\lib\netstandard2.0\RayCarrot.CarrotFramework.IO.dll</HintPath>
+    <Reference Include="RayCarrot.CarrotFramework.IO, Version=1.0.28.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\RayCarrot.CarrotFramework.IO.1.0.28\lib\netstandard2.0\RayCarrot.CarrotFramework.IO.dll</HintPath>
     </Reference>
-    <Reference Include="RayCarrot.CarrotFramework.UI, Version=1.0.11.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\RayCarrot.CarrotFramework.UI.1.0.11\lib\netstandard2.0\RayCarrot.CarrotFramework.UI.dll</HintPath>
+    <Reference Include="RayCarrot.CarrotFramework.UI, Version=1.0.13.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\RayCarrot.CarrotFramework.UI.1.0.13\lib\netstandard2.0\RayCarrot.CarrotFramework.UI.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Buffers, Version=4.0.3.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
@@ -126,8 +126,8 @@
     <Reference Include="System.Numerics.Vectors, Version=4.1.4.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
       <HintPath>..\..\packages\System.Numerics.Vectors.4.5.0\lib\net46\System.Numerics.Vectors.dll</HintPath>
     </Reference>
-    <Reference Include="System.Runtime.CompilerServices.Unsafe, Version=4.0.4.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\System.Runtime.CompilerServices.Unsafe.4.5.1\lib\netstandard2.0\System.Runtime.CompilerServices.Unsafe.dll</HintPath>
+    <Reference Include="System.Runtime.CompilerServices.Unsafe, Version=4.0.4.1, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\System.Runtime.CompilerServices.Unsafe.4.5.2\lib\netstandard2.0\System.Runtime.CompilerServices.Unsafe.dll</HintPath>
     </Reference>
     <Reference Include="System.Security.AccessControl, Version=4.1.1.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
       <HintPath>..\..\packages\System.Security.AccessControl.4.5.0\lib\net461\System.Security.AccessControl.dll</HintPath>
@@ -135,8 +135,8 @@
     <Reference Include="System.Security.Permissions, Version=4.0.1.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
       <HintPath>..\..\packages\System.Security.Permissions.4.5.0\lib\net461\System.Security.Permissions.dll</HintPath>
     </Reference>
-    <Reference Include="System.Security.Principal.Windows, Version=4.1.1.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\System.Security.Principal.Windows.4.5.0\lib\net461\System.Security.Principal.Windows.dll</HintPath>
+    <Reference Include="System.Security.Principal.Windows, Version=4.1.1.1, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\System.Security.Principal.Windows.4.5.1\lib\net461\System.Security.Principal.Windows.dll</HintPath>
     </Reference>
     <Reference Include="System.ServiceProcess" />
     <Reference Include="System.Transactions" />
@@ -155,8 +155,16 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AttachedProperties\FadeHandler.cs" />
+    <Compile Include="Controls\BrowseBox\BrowseBox.xaml.cs">
+      <DependentUpon>BrowseBox.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\BrowseBox\BrowseTypes.cs" />
+    <Compile Include="Controls\BrowseBox\BrowseValidationRules.cs" />
+    <Compile Include="Controls\BrowseControl.cs" />
+    <Compile Include="Converters\BooleanToVisibilityConverter.cs" />
     <Compile Include="Converters\EnumerableEmptyVisibilityConverter.cs" />
     <Compile Include="Converters\InvertedEnumerableEmptyVisibilityConverter.cs" />
+    <Compile Include="Converters\PathExistsConverter.cs" />
     <Compile Include="EventArgs\DialogMessageActionHandledEventArgs.cs" />
     <Compile Include="ViewModels\DialogMessageActionViewModel.cs" />
     <Compile Include="Controls\DialogMessageBox\DialogMessageBox.xaml.cs">
@@ -209,10 +217,20 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
+    <Page Include="Controls\BrowseBox\BrowseBox.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Controls\DialogMessageBox\DialogMessageBox.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\Carrot Framework Extensions\RayCarrot.Windows\RayCarrot.Windows.csproj">
+      <Project>{263E695D-E98B-4A1B-8646-AC348DD126C7}</Project>
+      <Name>RayCarrot.Windows</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

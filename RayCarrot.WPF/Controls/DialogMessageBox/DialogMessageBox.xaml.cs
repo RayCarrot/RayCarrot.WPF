@@ -1,7 +1,5 @@
 ﻿using RayCarrot.CarrotFramework;
-using System.Collections.Generic;
 using System.Windows;
-using System.Windows.Media;
 
 namespace RayCarrot.WPF
 {
