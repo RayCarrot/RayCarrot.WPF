@@ -1,4 +1,6 @@
-﻿using RayCarrot.CarrotFramework.UI;
+﻿using RayCarrot.CarrotFramework;
+using RayCarrot.CarrotFramework.UI;
+using RayCarrot.Windows;
 using System.Collections.Generic;
 
 namespace RayCarrot.WPF
@@ -8,6 +10,20 @@ namespace RayCarrot.WPF
     /// </summary>
     public static class DesignTimeVM
     {
+        private static void BuildFramework()
+        {
+            if (!RCF.IsBuilt)
+            {
+                RCF.Build(x =>
+                {
+                    x.AddWindowsFileInfoManager<DefaultWindowsFileInfoManager>();
+                    x.AddWindowsManager<DefaultWindowsManager>();
+                    x.AddExceptionHandler<DefaultExceptionHandler>();
+                    x.AddRegistryManager<DefaultRegistryManager>();
+                });
+            }
+        }
+
         public static DialogMessageViewModel DialogMessageViewModel => new DialogMessageViewModel<bool>()
         {
             MessageText = "This is a text message which will appear for the user to read before pressing a button. Great huh?",
@@ -30,5 +46,33 @@ namespace RayCarrot.WPF
                 },
             }
         };
+
+        public static DriveSelectionViewModel DriveSelectionViewModel
+        {
+            get
+            {
+                BuildFramework();
+
+                var vm = new DriveSelectionViewModel(new DriveBrowserViewModel()
+                {
+                    Title = "Select a Drive"
+                });
+                vm.Refresh();
+                return vm;
+            }
+        }
+
+        public static RegistrySelectionViewModel RegistrySelectionViewModel
+        {
+            get
+            {
+                BuildFramework();
+
+                return new RegistrySelectionViewModel()
+                {
+
+                };
+            }
+        }
     }
 }

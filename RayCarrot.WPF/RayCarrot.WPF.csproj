@@ -1,5 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="..\..\packages\PropertyChanged.Fody.2.5.13\build\PropertyChanged.Fody.props" Condition="Exists('..\..\packages\PropertyChanged.Fody.2.5.13\build\PropertyChanged.Fody.props')" />
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
@@ -12,6 +13,8 @@
     <FileAlignment>512</FileAlignment>
     <ProjectTypeGuids>{60dc8134-eba5-43b8-bcc9-bb4bc16c2548};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
     <WarningLevel>4</WarningLevel>
+    <NuGetPackageImportStamp>
+    </NuGetPackageImportStamp>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -99,14 +102,17 @@
     <Reference Include="Newtonsoft.Json, Version=11.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
       <HintPath>..\..\packages\Newtonsoft.Json.11.0.2\lib\net45\Newtonsoft.Json.dll</HintPath>
     </Reference>
+    <Reference Include="PropertyChanged, Version=2.5.13.0, Culture=neutral, PublicKeyToken=ee3ee20bcf148ddd, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\PropertyChanged.Fody.2.5.13\lib\net452\PropertyChanged.dll</HintPath>
+    </Reference>
     <Reference Include="RayCarrot.CarrotFramework, Version=1.0.28.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\..\packages\RayCarrot.CarrotFramework.1.0.28\lib\netstandard2.0\RayCarrot.CarrotFramework.dll</HintPath>
     </Reference>
     <Reference Include="RayCarrot.CarrotFramework.IO, Version=1.0.28.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\..\packages\RayCarrot.CarrotFramework.IO.1.0.28\lib\netstandard2.0\RayCarrot.CarrotFramework.IO.dll</HintPath>
     </Reference>
-    <Reference Include="RayCarrot.CarrotFramework.UI, Version=1.0.13.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\RayCarrot.CarrotFramework.UI.1.0.13\lib\netstandard2.0\RayCarrot.CarrotFramework.UI.dll</HintPath>
+    <Reference Include="RayCarrot.CarrotFramework.UI, Version=1.0.24.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\RayCarrot.CarrotFramework.UI.1.0.24\lib\netstandard2.0\RayCarrot.CarrotFramework.UI.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Buffers, Version=4.0.3.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
@@ -161,16 +167,37 @@
     <Compile Include="Controls\BrowseBox\BrowseTypes.cs" />
     <Compile Include="Controls\BrowseBox\BrowseValidationRules.cs" />
     <Compile Include="Controls\BrowseControl.cs" />
+    <Compile Include="Controls\Dialogs\RegistryBrowser\ViewModels\FavoritesItemViewModel.cs" />
+    <Compile Include="Controls\Dialogs\StringInputDialog\StringInputDialog.xaml.cs">
+      <DependentUpon>StringInputDialog.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\Dialogs\StringInputDialog\ViewModels\StringInputResult.cs" />
+    <Compile Include="Controls\Dialogs\StringInputDialog\ViewModels\StringInputViewModel.cs" />
+    <Compile Include="Controls\DialogVMWindow.cs" />
+    <Compile Include="Controls\Dialogs\DriveSelectionDialog\DriveSelectionDialog.xaml.cs">
+      <DependentUpon>DriveSelectionDialog.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\Dialogs\RegistryBrowser\AccessDeniedToIconConverter.cs" />
+    <Compile Include="Controls\Dialogs\RegistryBrowser\ViewModels\RegistryKeyViewModel.cs" />
+    <Compile Include="Controls\Dialogs\RegistryBrowser\RegistrySelectionDialog.xaml.cs">
+      <DependentUpon>RegistrySelectionDialog.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\Dialogs\RegistryBrowser\ViewModels\RegistrySelectionViewModel.cs" />
+    <Compile Include="Controls\VMWindow.cs" />
+    <Compile Include="Controls\Dialogs\DriveSelectionDialog\ViewModels\DriveViewModel.cs" />
+    <Compile Include="Controls\Dialogs\DriveSelectionDialog\ViewModels\DriveSelectionViewModel.cs" />
+    <Compile Include="Controls\MultiDataGrid.cs" />
+    <Compile Include="Converters\BooleanToDataGridSelectionModeConverter.cs" />
     <Compile Include="Converters\BooleanToVisibilityConverter.cs" />
     <Compile Include="Converters\EnumerableEmptyVisibilityConverter.cs" />
     <Compile Include="Converters\InvertedEnumerableEmptyVisibilityConverter.cs" />
     <Compile Include="Converters\PathExistsConverter.cs" />
     <Compile Include="EventArgs\DialogMessageActionHandledEventArgs.cs" />
-    <Compile Include="ViewModels\DialogMessageActionViewModel.cs" />
-    <Compile Include="Controls\DialogMessageBox\DialogMessageBox.xaml.cs">
+    <Compile Include="Controls\Dialogs\DialogMessageBox\ViewModels\DialogMessageActionViewModel.cs" />
+    <Compile Include="Controls\Dialogs\DialogMessageBox\DialogMessageBox.xaml.cs">
       <DependentUpon>DialogMessageBox.xaml</DependentUpon>
     </Compile>
-    <Compile Include="ViewModels\DialogMessageViewModel.cs" />
+    <Compile Include="Controls\Dialogs\DialogMessageBox\ViewModels\DialogMessageViewModel.cs" />
     <Compile Include="Design\DesignTimeVM.cs" />
     <Compile Include="Framework\DefaultWPFBrowseUIManager.cs" />
     <Compile Include="Framework\DefaultWPFMessageUIManager.cs" />
@@ -221,9 +248,21 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Controls\DialogMessageBox\DialogMessageBox.xaml">
+    <Page Include="Controls\Dialogs\DialogMessageBox\DialogMessageBox.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Controls\Dialogs\DriveSelectionDialog\DriveSelectionDialog.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Controls\Dialogs\RegistryBrowser\RegistrySelectionDialog.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Controls\Dialogs\StringInputDialog\StringInputDialog.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
     </Page>
   </ItemGroup>
   <ItemGroup>
@@ -232,5 +271,20 @@
       <Name>RayCarrot.Windows</Name>
     </ProjectReference>
   </ItemGroup>
+  <ItemGroup>
+    <Resource Include="FodyWeavers.xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Controls\Dialogs\RegistryBrowser\Icons\Folder.png" />
+    <Resource Include="Controls\Dialogs\RegistryBrowser\Icons\Hidden Folder.png" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <Import Project="..\..\packages\Fody.3.2.9\build\Fody.targets" Condition="Exists('..\..\packages\Fody.3.2.9\build\Fody.targets')" />
+  <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
+    <PropertyGroup>
+      <ErrorText>This project references NuGet package(s) that are missing on this computer. Use NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
+    </PropertyGroup>
+    <Error Condition="!Exists('..\..\packages\Fody.3.2.9\build\Fody.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\..\packages\Fody.3.2.9\build\Fody.targets'))" />
+    <Error Condition="!Exists('..\..\packages\PropertyChanged.Fody.2.5.13\build\PropertyChanged.Fody.props')" Text="$([System.String]::Format('$(ErrorText)', '..\..\packages\PropertyChanged.Fody.2.5.13\build\PropertyChanged.Fody.props'))" />
+  </Target>
 </Project>

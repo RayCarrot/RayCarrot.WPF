@@ -1,0 +1,140 @@
+﻿<local:DialogVMWindow x:Class="RayCarrot.WPF.RegistrySelectionDialog"
+                      x:TypeArguments="local:RegistrySelectionViewModel, win:RegistryBrowserResult"
+                      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                      xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+                      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+                      xmlns:local="clr-namespace:RayCarrot.WPF"
+                      xmlns:win="clr-namespace:RayCarrot.Windows;assembly=RayCarrot.Windows"
+                      mc:Ignorable="d"
+                      d:DataContext="{Binding Source={x:Static local:DesignTimeVM.RegistrySelectionViewModel}}"
+                      Title="{Binding Path=BrowseVM.Title, FallbackValue='Select a Registry Key'}"
+                      Height="450" Width="800"
+                      MinHeight="300" MinWidth="400">
+    <!-- Keyboard Shortcuts -->
+    
+    <Window.InputBindings>
+        <KeyBinding Key="F5" Command="{Binding Path=RefreshCommand}" />
+    </Window.InputBindings>
+    
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+        
+        <!-- Menu -->
+        
+        <Menu Grid.Row="0">
+            
+            <!-- File -->
+            
+            <MenuItem Header="File">
+                <MenuItem Header="Open in RegEdit" Command="{Binding Path=OpenInRegeditCommand}">
+                    <MenuItem.Icon>
+                        <Image Source="{Binding Path=RegeditIcon, Converter={local:BitmapToImageSourceConverter}}" />
+                    </MenuItem.Icon>
+                </MenuItem>
+                <MenuItem Header="Exit" InputGestureText="Alt + F4" Click="ExitMenuItem_Click" />
+            </MenuItem>
+
+            <!-- View -->
+
+            <MenuItem Header="View">
+                <MenuItem Header="Registry View">
+                    <MenuItem Header="Default" IsCheckable="True" IsEnabled="{Binding Path=BrowseVM.AllowCustomRegistryView}"
+                              IsChecked="{Binding Path=CurrentRegistryView, Converter={local:EnumBooleanConverter}, ConverterParameter=Default}" />
+                    <MenuItem Header="32-bit" IsCheckable="True" IsEnabled="{Binding Path=BrowseVM.AllowCustomRegistryView}"
+                              IsChecked="{Binding Path=CurrentRegistryView, Converter={local:EnumBooleanConverter}, ConverterParameter=Registry32}" />
+                    <MenuItem Header="64-bit" IsCheckable="True" IsEnabled="{Binding Path=BrowseVM.AllowCustomRegistryView}"
+                              IsChecked="{Binding Path=CurrentRegistryView, Converter={local:EnumBooleanConverter}, ConverterParameter=Registry64}" />
+                </MenuItem>
+                <MenuItem Header="Refresh" InputGestureText="F5" Command="{Binding Path=RefreshCommand}"/>
+                <MenuItem Header="Expand to Key" Command="{Binding Path=ExpandToKeyCommand}" />
+                <Separator/>
+                <MenuItem Header="Auto Select on Expand" IsCheckable="True" IsChecked="{Binding Path=AutoSelectOnExpand}" />
+                <MenuItem Header="Show Empty Default Values" IsEnabled="{Binding Path=BrowseVM.AllowEmptyDefaultValues}" />
+            </MenuItem>
+            
+            <!-- Favorites -->
+
+            <MenuItem x:Name="FavoritesMenu" Header="Favorites" ItemsSource="{Binding Path=Favorites}">
+                <MenuItem.ItemContainerStyle>
+                    <Style TargetType="{x:Type MenuItem}" BasedOn="{StaticResource {x:Type MenuItem}}">
+                        <Setter Property="Header" Value="{Binding Path=Name}" />
+                        <Setter Property="ToolTip" Value="{Binding Path=KeyPath}" />
+                        <Setter Property="Command" Value="{Binding Path=NavigateCommand}" />
+                    </Style>
+                </MenuItem.ItemContainerStyle>
+            </MenuItem>
+        </Menu>
+        
+        <!-- Path Box -->
+
+        <TextBox Grid.Row="1" Text="{Binding Path=SelectedItemFullPath}" KeyDown="TextBox_KeyDown" />
+
+        <!-- Registry Selection -->
+        
+        <Grid Grid.Row="2">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="1*" />
+                <ColumnDefinition Width="5"/>
+                <ColumnDefinition Width="2*" />
+            </Grid.ColumnDefinitions>
+
+            <!-- Key Tree View -->
+
+            <TreeView Grid.Column="0" ItemsSource="{Binding Path=Keys}" SelectedItemChanged="TreeView_SelectedItemChanged">
+                <TreeView.ItemContainerStyle>
+                    <Style TargetType="{x:Type TreeViewItem}" BasedOn="{StaticResource {x:Type TreeViewItem}}">
+                        <Setter Property="IsExpanded" Value="{Binding Path=IsExpanded, Mode=TwoWay}" />
+                        <Setter Property="IsSelected" Value="{Binding Path=IsSelected, Mode=TwoWay}" />
+                        
+                        <!-- Context Menu -->
+                        
+                        <Setter Property="ContextMenu">
+                            <Setter.Value>
+                                <ContextMenu>
+                                    
+                                    <!-- Open in RegEdit -->
+                                    
+                                    <MenuItem Header="Open in RegEdit" Command="{Binding Path=OpenInRegeditCommand}">
+                                        <MenuItem.Icon>
+                                            <Image Source="{Binding Path=VM.RegeditIcon, Converter={local:BitmapToImageSourceConverter}}" />
+                                        </MenuItem.Icon>
+                                    </MenuItem>
+                                    
+                                    <!-- Add to Favorites -->
+                                    
+                                    <MenuItem Header="Add to Favorites" Command="{Binding Path=AddFavoritesCommand}" />
+
+                                </ContextMenu>
+                            </Setter.Value>
+                        </Setter>
+                    </Style>
+                </TreeView.ItemContainerStyle>
+                
+                <TreeView.ItemTemplate>
+                    <HierarchicalDataTemplate ItemsSource="{Binding}">
+                        <StackPanel Orientation="Horizontal">
+                            <Image Width="16" Margin="3" Source="{Binding Path=AccessDenied, Converter={local:AccessDeniedToIconConverter}}" />
+                            <TextBlock VerticalAlignment="Center" Text="{Binding Path=Name}" />
+                        </StackPanel>
+                    </HierarchicalDataTemplate>
+                </TreeView.ItemTemplate>
+            </TreeView>
+
+            <!-- Splitter -->
+            
+            <GridSplitter Grid.Column="1" ResizeDirection="Columns" ResizeBehavior="PreviousAndNext" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" />
+
+            <!-- Value Data Grid -->
+            
+            <DataGrid Grid.Column="2" BorderThickness="0" />
+
+        </Grid>
+        
+    </Grid>
+</local:DialogVMWindow>

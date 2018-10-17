@@ -110,13 +110,6 @@ namespace RayCarrot.WPF
         }
 
         /// <summary>
-        /// The implementation for allowing the user to browse for a drive
-        /// </summary>
-        /// <param name="driveBrowserModel">The drive browser information</param>
-        /// <returns>The browse drive result</returns>
-        protected abstract DriveBrowserResult BrowseDriveImplementation(DriveBrowserViewModel driveBrowserModel);
-
-        /// <summary>
         /// Allows the user to browse for a drive
         /// </summary>
         /// <param name="driveBrowserModel">The drive browser information</param>
@@ -126,7 +119,19 @@ namespace RayCarrot.WPF
             if (LogRequests)
                 RCF.Logger.LogTraceSource($"A browse drive dialog was opened with the title of: {driveBrowserModel.Title}", origin: origin, filePath: filePath, lineNumber: lineNumber);
 
-            return BrowseDriveImplementation(driveBrowserModel);
+            // Create the dialog
+            var driveSelectionDialog = new DriveSelectionDialog(driveBrowserModel);
+
+            // Show the dialog and get the result
+            var result = driveSelectionDialog.ShowDialog();
+
+            if (result.CanceledByUser)
+                RCF.Logger.LogTraceSource($"The browse drive dialog was canceled by the user");
+            else
+                RCF.Logger.LogTraceSource($"The browse drive dialog returned the selected drive paths {result.SelectedDrives.JoinItems(", ")}");
+
+            // Return the result
+            return result;
         }
     }
 }
