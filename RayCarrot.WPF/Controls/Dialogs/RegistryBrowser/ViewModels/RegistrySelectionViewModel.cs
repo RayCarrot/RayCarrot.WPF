@@ -37,15 +37,16 @@ namespace RayCarrot.WPF
         {
             Keys = new ObservableCollection<RegistryKeyViewModel>();
             Favorites = new ObservableCollection<FavoritesItemViewModel>();
+            Values = new ObservableCollection<RegistryValueViewModel>();
             BrowseVM = browseVM;
-            Result = new RegistryBrowserResult();
 
             // Set values from defaults
             CurrentRegistryView = BrowseVM.DefaultRegistryView;
             ShowEmptyDefaultValues = BrowseVM.AllowEmptyDefaultValues;
 
-            // Reset
-            _ = ResetAsync();
+            // Reset the view with the default path
+            string[] pathID = BrowseVM.DefaultKeyPath.Split(RCFWin.RegistryManager.KeySeparatorCharacter);
+            _ = UpdateViewAsync(pathID, pathID);
         }
 
         #endregion
@@ -56,14 +57,11 @@ namespace RayCarrot.WPF
 
         private RegistryKeyViewModel _selectedItem;
 
+        private bool _showEmptyDefaultValues;
+
         #endregion
 
         #region Public Properties
-
-        /// <summary>
-        /// The current result
-        /// </summary>
-        public virtual RegistryBrowserResult Result { get; }
 
         /// <summary>
         /// The browse view model
@@ -79,6 +77,11 @@ namespace RayCarrot.WPF
         /// The favorites items
         /// </summary>
         public virtual ObservableCollection<FavoritesItemViewModel> Favorites { get; }
+
+        /// <summary>
+        /// The available values for the selected key
+        /// </summary>
+        public virtual ObservableCollection<RegistryValueViewModel> Values { get; }
 
         /// <summary>
         /// The icon for RegEdit
@@ -122,12 +125,24 @@ namespace RayCarrot.WPF
         /// <summary>
         /// True if empty default values should be shown
         /// </summary>
-        public virtual bool ShowEmptyDefaultValues { get; set; }
+        public virtual bool ShowEmptyDefaultValues
+        {
+            get => _showEmptyDefaultValues;
+            set
+            {
+                if (value == _showEmptyDefaultValues)
+                    return;
+
+                _showEmptyDefaultValues = value;
+
+                RefreshValues();
+            }
+        }
 
         /// <summary>
-        /// The currently selected item
+        /// The currently selected key
         /// </summary>
-        public virtual RegistryKeyViewModel SelectedItem
+        public virtual RegistryKeyViewModel SelectedKey
         {
             get => _selectedItem;
             set
@@ -144,18 +159,26 @@ namespace RayCarrot.WPF
                 _selectedItem = value;
 
                 // Update command status
-                OpenInRegeditCommand.CanExecuteCommand = SelectedItem != null;
+                OpenInRegeditCommand.CanExecuteCommand = SelectedKey != null;
+
+                // Update the values
+                RefreshValues();
             }
         }
 
         /// <summary>
         /// The full key path of the currently selected item
         /// </summary>
-        public virtual string SelectedItemFullPath
+        public virtual string SelectedKeyFullPath
         {
-            get => SelectedItem?.FullPath;
+            get => SelectedKey?.FullPath;
             set => _ = ExpandToPathAsync(value);
         }
+
+        /// <summary>
+        /// The currently selected value
+        /// </summary>
+        public virtual RegistryValueViewModel SelectedValue { get; set; }
 
         #endregion
 
@@ -208,7 +231,7 @@ namespace RayCarrot.WPF
                     throw new Exception("The registry selection can not have 0 root keys");
 
                 // Select the first item
-                SelectedItem = Keys[0];
+                SelectedKey = Keys[0];
 
                 // Reset the favorites
                 ResetFavorites();
@@ -258,7 +281,7 @@ namespace RayCarrot.WPF
             {
                 Title = "Expand to Key",
                 HeaderText = "Enter the key path:",
-                StringInput = SelectedItem?.FullPath
+                StringInput = SelectedKey?.FullPath
             }).ShowDialog();
 
             // Make sure it was not canceled
@@ -361,7 +384,7 @@ namespace RayCarrot.WPF
 
                     // Select it if found
                     if (lastSelected != null)
-                        SelectedItem = lastSelected;
+                        SelectedKey = lastSelected;
                 }
             }
             finally
@@ -375,13 +398,55 @@ namespace RayCarrot.WPF
         /// </summary>
         public virtual void OpenInRegedit()
         {
-            if (SelectedItem == null)
+            if (SelectedKey == null)
             {
                 RCFUI.MessageUI.DisplayMessage("No key has been selected", "Error Opening Key", MessageType.Information);
                 return;
             }
 
-            SelectedItem.OpenInRegedit();
+            SelectedKey.OpenInRegedit();
+        }
+
+        /// <summary>
+        /// Refreshes the list of values
+        /// </summary>
+        public virtual void RefreshValues()
+        {
+            // Clear the values
+            Values.Clear();
+
+            // Make sure a key is selected
+            if (SelectedKey == null)
+                return;
+
+            try
+            {
+                using (RegistryKey key = RCFWin.RegistryManager.GetKeyFromFullPath(SelectedKeyFullPath, CurrentRegistryView))
+                {
+                    // Add values
+                    Values.AddRange(key.GetValues().Select(x => new RegistryValueViewModel()
+                    {
+                        Name = x.Name,
+                        Data = x.Value,
+                        Type = x.ValueKind
+                    }));
+
+                    // Add empty default if non has been added and if set to do so
+                    if (ShowEmptyDefaultValues && !Values.Any(x => x.IsDefault))
+                    {
+                        Values.Add(new RegistryValueViewModel()
+                        {
+                            Name = String.Empty,
+                            Type = RegistryValueKind.String
+                        });
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                ex.HandleExpected("Getting Registry key values");
+                RCFUI.MessageUI.DisplayMessage("The Registry key values could not be obtained for the selected key", "Error retrieving values", MessageType.Error);
+            }
         }
 
         #endregion
@@ -404,7 +469,7 @@ namespace RayCarrot.WPF
             }
 
             // Save the selected path
-            var selected = SelectedItem?.FullID;
+            var selected = SelectedKey?.FullID;
 
             // Update view to specified paths
             await UpdateViewAsync(selected, expanded.ToArray());
@@ -426,7 +491,7 @@ namespace RayCarrot.WPF
         /// <summary>
         /// Command for opening the selected key in RegEdit
         /// </summary>
-        public RelayCommand OpenInRegeditCommand => _OpenInRegeditCommand ?? (_OpenInRegeditCommand = new RelayCommand(OpenInRegedit, SelectedItem != null));
+        public RelayCommand OpenInRegeditCommand => _OpenInRegeditCommand ?? (_OpenInRegeditCommand = new RelayCommand(OpenInRegedit, SelectedKey != null));
 
         private AsyncRelayCommand _RefreshCommand;
 

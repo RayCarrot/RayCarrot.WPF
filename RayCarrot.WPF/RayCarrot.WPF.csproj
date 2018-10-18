@@ -167,7 +167,10 @@
     <Compile Include="Controls\BrowseBox\BrowseTypes.cs" />
     <Compile Include="Controls\BrowseBox\BrowseValidationRules.cs" />
     <Compile Include="Controls\BrowseControl.cs" />
+    <Compile Include="Framework\FrameworkConstructionExtensions.cs" />
+    <Compile Include="Framework\IWPFStyle.cs" />
     <Compile Include="Controls\Dialogs\RegistryBrowser\ViewModels\FavoritesItemViewModel.cs" />
+    <Compile Include="Controls\Dialogs\RegistryBrowser\ViewModels\RegistryValueViewModel.cs" />
     <Compile Include="Controls\Dialogs\StringInputDialog\StringInputDialog.xaml.cs">
       <DependentUpon>StringInputDialog.xaml</DependentUpon>
     </Compile>

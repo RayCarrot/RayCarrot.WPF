@@ -55,7 +55,7 @@
                 <MenuItem Header="Expand to Key" Command="{Binding Path=ExpandToKeyCommand}" />
                 <Separator/>
                 <MenuItem Header="Auto Select on Expand" IsCheckable="True" IsChecked="{Binding Path=AutoSelectOnExpand}" />
-                <MenuItem Header="Show Empty Default Values" IsEnabled="{Binding Path=BrowseVM.AllowEmptyDefaultValues}" />
+                <MenuItem Header="Show Empty Default Values" IsEnabled="{Binding Path=BrowseVM.AllowEmptyDefaultValues}" IsCheckable="True" IsChecked="{Binding Path=ShowEmptyDefaultValues}" />
             </MenuItem>
             
             <!-- Favorites -->
@@ -73,7 +73,7 @@
         
         <!-- Path Box -->
 
-        <TextBox Grid.Row="1" Text="{Binding Path=SelectedItemFullPath}" KeyDown="TextBox_KeyDown" />
+        <TextBox Grid.Row="1" Text="{Binding Path=SelectedKeyFullPath}" KeyDown="TextBox_KeyDown" />
 
         <!-- Registry Selection -->
         
@@ -131,10 +131,70 @@
             <GridSplitter Grid.Column="1" ResizeDirection="Columns" ResizeBehavior="PreviousAndNext" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" />
 
             <!-- Value Data Grid -->
-            
-            <DataGrid Grid.Column="2" BorderThickness="0" />
 
+            <DataGrid Grid.Column="2" BorderThickness="0" AutoGenerateColumns="False" CanUserAddRows="False" CanUserDeleteRows="False" CanUserReorderColumns="True"
+                      CanUserResizeColumns="True" CanUserResizeRows="False" CanUserSortColumns="True" IsReadOnly="True" SelectionMode="Single"
+                      ItemsSource="{Binding Path=Values}" SelectedItem="{Binding Path=SelectedValue}" GridLinesVisibility="Horizontal">
+                <DataGrid.CellStyle>
+                    <Style TargetType="DataGridCell" BasedOn="{StaticResource {x:Type DataGridCell}}">
+                        <Setter Property="BorderThickness" Value="0"/>
+                        <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
+                    </Style>
+                </DataGrid.CellStyle>
+                <DataGrid.Columns>
+
+                    <!-- Name -->
+
+                    <DataGridTextColumn Header="Name" Binding="{Binding Path=DisplayName}"/>
+
+                    <!-- Type -->
+
+                    <DataGridTextColumn Header="Type" Binding="{Binding Path=Type}"/>
+
+                    <!-- Data -->
+
+                    <DataGridTextColumn Header="Data" Binding="{Binding Path=DisplayData}"/>
+
+                </DataGrid.Columns>
+            </DataGrid>
         </Grid>
+        
+        <!-- Dialog Options -->
+
+        <StackPanel Grid.Row="3" Margin="10">
+            <Grid Margin="5">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+
+                <TextBlock Grid.Column="0" Text="Selected Key Path:" VerticalAlignment="Center" />
+
+                <TextBox Grid.Column="1" Text="{Binding Path=SelectedKeyFullPath, Mode=OneWay}" Margin="10 0 0 0" IsReadOnly="True"/>
+
+            </Grid>
+
+            <Grid Margin="5">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+
+                <TextBlock Grid.Column="0" Text="Selected Value:" VerticalAlignment="Center"
+                           Visibility="{Binding Path=BrowseVM.BrowseValue, Converter={local:BooleanToVisibilityConverter}}" />
+
+                <TextBox Grid.Column="1" Text="{Binding Path=SelectedValue.DisplayName, Mode=OneWay}" Margin="10 0 0 0" IsReadOnly="True"
+                         Visibility="{Binding Path=BrowseVM.BrowseValue, Converter={local:BooleanToVisibilityConverter}}"/>
+
+                <StackPanel Grid.Column="2" Orientation="Horizontal">
+                    <Button Content="Continue" Margin="10 0" Click="Continue_Click" IsDefault="True"/>
+                    <Button Content="Cancel" Click="Cancel_Click" IsCancel="True"/>
+                </StackPanel>
+
+            </Grid>
+            
+        </StackPanel>
         
     </Grid>
 </local:DialogVMWindow>

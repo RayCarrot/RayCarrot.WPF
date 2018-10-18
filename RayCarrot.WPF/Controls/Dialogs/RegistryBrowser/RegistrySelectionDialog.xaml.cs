@@ -1,9 +1,5 @@
-﻿using Microsoft.Win32;
-using RayCarrot.CarrotFramework;
-using RayCarrot.CarrotFramework.UI;
+﻿using RayCarrot.CarrotFramework.UI;
 using RayCarrot.Windows;
-using System;
-using System.Collections.Generic;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -21,9 +17,9 @@ namespace RayCarrot.WPF
         /// Creates a new instance of <see cref="RegistrySelectionDialog"/> with default values
         /// </summary>
         /// <param name="vm">The view model</param>
-        public RegistrySelectionDialog()
+        public RegistrySelectionDialog() : this(new RegistryBrowserViewModel())
         {
-            InitializeComponent();
+
         }
 
         /// <summary>
@@ -33,6 +29,29 @@ namespace RayCarrot.WPF
         public RegistrySelectionDialog(RegistryBrowserViewModel vm) : base(new RegistrySelectionViewModel(vm))
         {
             InitializeComponent();
+            CanceledByUser = true;
+        }
+
+        #endregion
+
+        #region Private Methods
+
+        private void AttemptConfirm()
+        {
+            if (!RCFWin.RegistryManager.KeyExists(ViewModel.SelectedKeyFullPath, ViewModel.CurrentRegistryView))
+            {
+                RCFUI.MessageUI.DisplayMessage("The selected key could not be found", "Invalid selection", MessageType.Information);
+                return;
+            }
+
+            if (ViewModel.BrowseVM.BrowseValue && ViewModel.SelectedValue == null)
+            {
+                RCFUI.MessageUI.DisplayMessage("A value has to be selected", "Invalid selection", MessageType.Information);
+                return;
+            }
+
+            CanceledByUser = false;
+            Close();
         }
 
         #endregion
@@ -45,17 +64,35 @@ namespace RayCarrot.WPF
         /// <returns>The result</returns>
         protected override RegistryBrowserResult GetResult()
         {
-            return ViewModel.Result;
+            return new RegistryBrowserResult()
+            {
+                KeyPath = ViewModel.SelectedKeyFullPath,
+                ValueName = ViewModel.SelectedValue?.Name,
+                SelectedRegistryView = ViewModel.CurrentRegistryView,
+                CanceledByUser = CanceledByUser
+            };
         }
+
+        #endregion
+
+        #region Public Properties
+
+        /// <summary>
+        /// Indicates if the dialog was canceled by the user, default is true
+        /// </summary>
+        public bool CanceledByUser { get; set; }
 
         #endregion
 
         #region Event Handlers
 
-        private void TextBox_KeyDown(object sender, System.Windows.Input.KeyEventArgs e)
+        private void TextBox_KeyDown(object sender, KeyEventArgs e)
         {
             if (sender is TextBox textBox && e.Key == Key.Enter)
+            {
                 textBox.MoveFocus(new TraversalRequest(FocusNavigationDirection.Next));
+                e.Handled = true;
+            }
         }
 
         private void ExitMenuItem_Click(object sender, RoutedEventArgs e)
@@ -67,7 +104,18 @@ namespace RayCarrot.WPF
         private void TreeView_SelectedItemChanged(object sender, RoutedPropertyChangedEventArgs<object> e)
         {
             // Update the view model
-            ViewModel.SelectedItem = e.NewValue as RegistryKeyViewModel;
+            ViewModel.SelectedKey = e.NewValue as RegistryKeyViewModel;
+        }
+
+        private void Continue_Click(object sender, RoutedEventArgs e)
+        {
+            AttemptConfirm();
+        }
+
+        private void Cancel_Click(object sender, RoutedEventArgs e)
+        {
+            CanceledByUser = true;
+            Close();
         }
 
         #endregion

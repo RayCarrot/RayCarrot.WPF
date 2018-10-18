@@ -7,12 +7,12 @@ namespace RayCarrot.WPF
     /// <summary>
     /// Converts a <see cref="Boolean"/> to a <see cref="Visibility"/>
     /// </summary>
-    public class BooleanToVisibilityConverter : BaseValueConverter<InvertedBooleanToVisibilityConverter, bool, Visibility>
+    public class BooleanToVisibilityConverter : BaseValueConverter<BooleanToVisibilityConverter, bool, Visibility>
     {
         public override Visibility ConvertValue(bool value, Type targetType, object parameter, CultureInfo culture) => 
             value ? Visibility.Visible : Visibility.Collapsed;
 
         public override bool ConvertValueBack(Visibility value, Type targetType, object parameter, CultureInfo culture) =>
-            value == Visibility.Visible ? false : true;
+            value == Visibility.Visible ? true : false;
     }
 }

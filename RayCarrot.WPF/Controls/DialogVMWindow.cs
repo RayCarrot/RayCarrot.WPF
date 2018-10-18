@@ -1,4 +1,5 @@
-﻿using RayCarrot.CarrotFramework.UI;
+﻿using RayCarrot.CarrotFramework;
+using RayCarrot.CarrotFramework.UI;
 using System.ComponentModel;
 using System.Windows;
 
@@ -15,14 +16,15 @@ namespace RayCarrot.WPF
     {
         #region Constructors
 
-        public DialogVMWindow()
+        public DialogVMWindow() : this(new VM())
         {
 
         }
 
         public DialogVMWindow(VM viewModel) : base(viewModel)
         {
-
+            // Attempt to get default Window style from Framework
+            Style = RCF.GetService<IWPFStyle>(false)?.WindowStyle ?? Style;
         }
 
         #endregion

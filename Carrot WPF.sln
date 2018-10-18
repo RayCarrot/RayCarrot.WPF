@@ -17,6 +17,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RayCarrot.Windows", "..\Car
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WpfApp1", "WpfApp1\WpfApp1.csproj", "{97D8DAE2-8E50-4C81-AD31-B4BA65372929}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WpfApp2MD", "WpfApp2MD\WpfApp2MD.csproj", "{513C0E17-9299-49D9-B0B0-B13198025EAE}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -35,6 +37,10 @@ Global
 		{97D8DAE2-8E50-4C81-AD31-B4BA65372929}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{97D8DAE2-8E50-4C81-AD31-B4BA65372929}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{97D8DAE2-8E50-4C81-AD31-B4BA65372929}.Release|Any CPU.Build.0 = Release|Any CPU
+		{513C0E17-9299-49D9-B0B0-B13198025EAE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{513C0E17-9299-49D9-B0B0-B13198025EAE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{513C0E17-9299-49D9-B0B0-B13198025EAE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{513C0E17-9299-49D9-B0B0-B13198025EAE}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
