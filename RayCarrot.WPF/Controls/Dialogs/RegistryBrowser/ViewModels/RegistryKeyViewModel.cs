@@ -42,9 +42,11 @@ namespace RayCarrot.WPF
 
         private bool _cacheSubKeys = true;
 
-        private bool _IsExpanded = false;
+        private bool _IsExpanded;
 
         private bool _accessDenied;
+
+        private bool _isEditing;
 
         #endregion
 
@@ -73,12 +75,12 @@ namespace RayCarrot.WPF
         /// <summary>
         /// The full path of the key
         /// </summary>
-        public virtual string FullPath { get; }
+        public virtual string FullPath { get; set; }
 
         /// <summary>
         /// The name of the key
         /// </summary>
-        public virtual string Name { get; }
+        public virtual string Name { get; set; }
 
         /// <summary>
         /// The Registry selection view model
@@ -118,6 +120,32 @@ namespace RayCarrot.WPF
         /// Indicates if the key is selected
         /// </summary>
         public virtual bool IsSelected { get; set; }
+
+        /// <summary>
+        /// Indicates if the key name is currently being edited
+        /// </summary>
+        public virtual bool IsEditing
+        {
+            get => _isEditing;
+            set
+            {
+                if (value == _isEditing)
+                    return;
+
+                if (value)
+                    EditName = Name;
+
+                _isEditing = value;
+
+                if (!IsEditing)
+                    ProcessEdit();
+            }
+        }
+
+        /// <summary>
+        /// The edited name
+        /// </summary>
+        public virtual string EditName { get; set; }
 
         #endregion
 
@@ -224,6 +252,88 @@ namespace RayCarrot.WPF
             }
         }
 
+        /// <summary>
+        /// Begins renaming the key
+        /// </summary>
+        public void Rename()
+        {
+            // Make sure the key is selected
+            VM.SelectedKey = this;
+
+            // Put key into edit mode
+            VM.BeginEdit();
+        }
+
+        /// <summary>
+        /// Processes the current edit name
+        /// </summary>
+        public virtual void ProcessEdit()
+        {
+            // Make sure the name has changed
+            if (EditName.Equals(Name, StringComparison.CurrentCultureIgnoreCase))
+                return;
+
+            // Make sure the name is not empty
+            if (EditName.IsNullOrWhiteSpace())
+            {
+                RCFUI.MessageUI.DisplayMessage("The key name can not be blank", "Invalid name", MessageType.Error);
+                return;
+            }
+
+            // Make sure the name does not contain invalid characters
+            if (EditName.Contains("\\"))
+            {
+                RCFUI.MessageUI.DisplayMessage(@"The key name can not contain backslashes ('\')", "Invalid name", MessageType.Error);
+                return;
+            }
+
+            try
+            {
+                // Save the parent path
+                string parentPath;
+
+                // Get the parent key
+                using (var key = RCFWin.RegistryManager.GetKeyFromFullPath(FullPath, VM.CurrentRegistryView).RunAndDispose(x => x.GetParentKey(true)))
+                {
+                    // Store parent path
+                    parentPath = key.Name;
+
+                    // Move the sub key to new name
+                    key.MoveSubKey(Name, EditName);
+                }
+
+                // TODO: Possibly just refresh and expand to this key?
+
+                // Update name
+                Name = EditName;
+
+                // Update full path
+                FullPath = RCFWin.RegistryManager.CombinePaths(parentPath, EditName);
+
+                // Reset sub keys
+                Reset();
+
+                // Set expanded to false
+                IsExpanded = false;
+
+                // Make sure it is selected
+                IsSelected = true;
+
+                // Notify UI that the key has changed
+                VM.OnPropertyChanged(nameof(VM.SelectedKey));
+                VM.OnPropertyChanged(nameof(VM.SelectedKeyFullPath));
+
+                // Refresh the values
+                VM.RefreshValues();
+            }
+            catch (Exception ex)
+            {
+                ex.HandleError("Renaming Registry key", this);
+                RCFUI.MessageUI.DisplayMessage($"Renaming the key failed with the following error message:{Environment.NewLine}{ex.Message}", "Operation Failed", MessageType.Error);
+                VM.RefreshCommand.Execute();
+            }
+        }
+
         #endregion
 
         #region Protected Methods
@@ -231,35 +341,40 @@ namespace RayCarrot.WPF
         /// <summary>
         /// Resets the collection of sub keys
         /// </summary>
+        protected virtual void Reset()
+        {
+            // Clear the collection
+            Clear();
+
+            try
+            {
+                // Check if there are any sub keys
+                if (RCFWin.RegistryManager.GetKeyFromFullPath(FullPath, VM.CurrentRegistryView).SubKeyCount > 0)
+                    // Add dummy item
+                    Add(null);
+
+                // Indicate that access is not denied
+                AccessDenied = false;
+            }
+            catch (Exception ex)
+            {
+                ex.HandleExpected("Getting sub key count");
+
+                // Indicate that access is denied
+                AccessDenied = true;
+            }
+
+            // Indicate that the sub keys are no longer loaded
+            LoadedSubKeys = false;
+        }
+
+        /// <summary>
+        /// Resets the collection of sub keys async
+        /// </summary>
         /// <returns>The task</returns>
         protected virtual async Task ResetAsync()
         {
-            await Task.Run(() =>
-            {
-                // Clear the collection
-                Clear();
-
-                try
-                {
-                    // Check if there are any sub keys
-                    if (RCFWin.RegistryManager.GetKeyFromFullPath(FullPath, VM.CurrentRegistryView).SubKeyCount > 0)
-                        // Add dummy item
-                        Add(null);
-
-                    // Indicate that access is not denied
-                    AccessDenied = false;
-                }
-                catch (Exception ex)
-                {
-                    ex.HandleExpected("Getting sub key count");
-
-                    // Indicate that access is denied
-                    AccessDenied = true;
-                }
-
-                // Indicate the the sub keys are no longer loaded
-                LoadedSubKeys = false;
-            });
+            await Task.Run(() => Reset());
         }
 
         /// <summary>
@@ -323,88 +438,23 @@ namespace RayCarrot.WPF
         private AsyncRelayCommand _LoadSubItemsCommand;
 
         /// <summary>
-        /// The command for loading all sub items
+        /// Command for loading all sub items
         /// </summary>
         public AsyncRelayCommand LoadSubItemsCommand => _LoadSubItemsCommand ?? (_LoadSubItemsCommand = new AsyncRelayCommand(LoadSubItemsAsync));
 
         private AsyncRelayCommand _ResetCommand;
 
         /// <summary>
-        /// The command for resetting the collection of sub keys
+        /// Command for resetting the collection of sub keys
         /// </summary>
         public AsyncRelayCommand ResetCommand => _ResetCommand ?? (_ResetCommand = new AsyncRelayCommand(ResetAsync));
 
-        #endregion
-
-        #region WIP
-
-        private bool _isEditing;
+        private RelayCommand _RenameCommand;
 
         /// <summary>
-        /// Indicates if the key name is currently being edited
+        /// Command for renaming the key
         /// </summary>
-        public virtual bool IsEditing
-        {
-            get => _isEditing;
-            set
-            {
-                if (value == _isEditing)
-                    return;
-
-                if (value)
-                    EditName = Name;
-
-                _isEditing = value;
-
-                if (!IsEditing)
-                    ProcessEdit();
-            }
-        }
-
-        /// <summary>
-        /// Processes the current edit name
-        /// </summary>
-        public virtual void ProcessEdit()
-        {
-            //TODO: rename, refresh and select new name
-
-            // Make sure the name has changed
-            if (EditName.Equals(Name, StringComparison.CurrentCultureIgnoreCase))
-                return;
-
-            // Make sure the name is not empty
-            if (EditName.IsNullOrWhiteSpace())
-            {
-                RCFUI.MessageUI.DisplayMessage("The key name can not be blank", "Invalid name", MessageType.Error);
-                return;
-            }
-
-            // Make sure the name does not contain invalid characters
-            if (EditName.Contains("\\"))
-            {
-                RCFUI.MessageUI.DisplayMessage(@"The key name can not contain backslashes ('\')", "Invalid name", MessageType.Error);
-                return;
-            }
-
-            try
-            {
-                using (var key = RCFWin.RegistryManager.GetKeyFromFullPath(FullPath, VM.CurrentRegistryView).RunAndDispose(x => x.GetParentKey()))
-                {
-                    key.MoveSubKey(Name, EditName);
-
-                    // TODO: Either do full refresh, or change name on this item and refresh its sub items
-                }
-            }
-            catch (Exception ex)
-            {
-
-            }
-        }
-
-        /// <summary>
-        /// The edited name
-        /// </summary>
-        public virtual string EditName { get; set; }
+        public RelayCommand RenameCommand => _RenameCommand ?? (_RenameCommand = new RelayCommand(Rename));
 
         #endregion
     }

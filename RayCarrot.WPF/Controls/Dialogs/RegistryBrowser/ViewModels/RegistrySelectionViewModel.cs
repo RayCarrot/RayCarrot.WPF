@@ -59,6 +59,8 @@ namespace RayCarrot.WPF
 
         private bool _showEmptyDefaultValues;
 
+        private RegistryKeyViewModel _editingKey;
+
         #endregion
 
         #region Public Properties
@@ -118,11 +120,6 @@ namespace RayCarrot.WPF
         }
 
         /// <summary>
-        /// True if nodes should be automatically selected when expanded
-        /// </summary>
-        public virtual bool AutoSelectOnExpand { get; set; }
-
-        /// <summary>
         /// True if empty default values should be shown
         /// </summary>
         public virtual bool ShowEmptyDefaultValues
@@ -179,6 +176,39 @@ namespace RayCarrot.WPF
         /// The currently selected value
         /// </summary>
         public virtual RegistryValueViewModel SelectedValue { get; set; }
+
+        /// <summary>
+        /// The key currently being edited
+        /// </summary>
+        public RegistryKeyViewModel EditingKey
+        {
+            get => _editingKey;
+            set
+            {
+                if (value == _editingKey)
+                    return;
+
+                if (_editingKey != null)
+                    _editingKey.IsEditing = false;
+
+                _editingKey = value;
+
+                if (EditingKey != null)
+                    EditingKey.IsEditing = true;
+            }
+        }
+
+        //TODO: Save setting between instances
+        /// <summary>
+        /// True if nodes should be automatically selected when expanded
+        /// </summary>
+        public virtual bool AutoSelectOnExpand { get; set; }
+
+        //TODO: Save setting between instances
+        /// <summary>
+        /// Indicates if nodes should expand on double click or enter rename state
+        /// </summary>
+        public virtual bool DoubleClickToExpand { get; set; } = true;
 
         #endregion
 
@@ -449,6 +479,24 @@ namespace RayCarrot.WPF
             }
         }
 
+        /// <summary>
+        /// Begins editing of the currently selected key
+        /// </summary>
+        public virtual void BeginEdit()
+        {
+            // Make sure a key is selected and the selected key has a parent key in the list and it does not have access denied
+            if (SelectedKey != null && SelectedKey.FullID.Length > 1 && !SelectedKey.AccessDenied)
+                EditingKey = SelectedKey;
+        }
+
+        /// <summary>
+        /// End editing of key in edit state
+        /// </summary>
+        public virtual void EndEdit()
+        {
+            EditingKey = null;
+        }
+
         #endregion
 
         #region Protected Methods
@@ -500,49 +548,19 @@ namespace RayCarrot.WPF
         /// </summary>
         public AsyncRelayCommand RefreshCommand => _RefreshCommand ?? (_RefreshCommand = new AsyncRelayCommand(RefreshAsync));
 
-        #endregion
-
-        #region WIP
-
         private RelayCommand _BeginEditCommand;
 
+        /// <summary>
+        /// Command for beginning editing of the selected key
+        /// </summary>
         public RelayCommand BeginEditCommand => _BeginEditCommand ?? (_BeginEditCommand = new RelayCommand(BeginEdit));
-
-        public void BeginEdit()
-        {
-            // Make sure a key is selected and the selected key has a parent key in the list and it does not have access denied
-            if (SelectedKey != null && SelectedKey.FullID.Length > 1 && !SelectedKey.AccessDenied)
-                EditingKey = SelectedKey;
-        }
 
         private RelayCommand _EndEditCommand;
 
+        /// <summary>
+        /// Command for ending editing of key in edit state
+        /// </summary>
         public RelayCommand EndEditCommand => _EndEditCommand ?? (_EndEditCommand = new RelayCommand(EndEdit));
-
-        public void EndEdit()
-        {
-            EditingKey = null;
-        }
-
-        public RegistryKeyViewModel EditingKey
-        {
-            get => _editingKey;
-            set
-            {
-                if (value == _editingKey)
-                    return;
-
-                if (_editingKey != null)
-                    _editingKey.IsEditing = false;
-
-                _editingKey = value;
-
-                if (EditingKey != null)
-                    EditingKey.IsEditing = true;
-            }
-        }
-
-        private RegistryKeyViewModel _editingKey;
 
         #endregion
     }

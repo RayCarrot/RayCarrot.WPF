@@ -34,18 +34,18 @@
             <!-- File -->
             
             <MenuItem Header="File">
-                <MenuItem Header="Open in RegEdit" Command="{Binding Path=OpenInRegeditCommand}">
+                <MenuItem Header="Open in RegEdit" Command="{Binding Path=OpenInRegeditCommand}" ToolTip="Opens the currently selected key in RegEdit">
                     <MenuItem.Icon>
                         <Image Source="{Binding Path=RegeditIcon, Converter={local:BitmapToImageSourceConverter}}" />
                     </MenuItem.Icon>
                 </MenuItem>
-                <MenuItem Header="Exit" InputGestureText="Alt + F4" Click="ExitMenuItem_Click" />
+                <MenuItem Header="Exit" InputGestureText="Alt + F4" Click="ExitMenuItem_Click" ToolTip="Closes the dialog" />
             </MenuItem>
 
             <!-- View -->
 
             <MenuItem Header="View">
-                <MenuItem Header="Registry View">
+                <MenuItem Header="Registry View" ToolTip="The view used to retrieve the Registry keys">
                     <MenuItem Header="Default" IsCheckable="True" IsEnabled="{Binding Path=BrowseVM.AllowCustomRegistryView}"
                               IsChecked="{Binding Path=CurrentRegistryView, Converter={local:EnumBooleanConverter}, ConverterParameter=Default}" />
                     <MenuItem Header="32-bit" IsCheckable="True" IsEnabled="{Binding Path=BrowseVM.AllowCustomRegistryView}"
@@ -53,11 +53,12 @@
                     <MenuItem Header="64-bit" IsCheckable="True" IsEnabled="{Binding Path=BrowseVM.AllowCustomRegistryView}"
                               IsChecked="{Binding Path=CurrentRegistryView, Converter={local:EnumBooleanConverter}, ConverterParameter=Registry64}" />
                 </MenuItem>
-                <MenuItem Header="Refresh" InputGestureText="F5" Command="{Binding Path=RefreshCommand}"/>
-                <MenuItem Header="Expand to Key" Command="{Binding Path=ExpandToKeyCommand}" />
+                <MenuItem Header="Refresh" InputGestureText="F5" Command="{Binding Path=RefreshCommand}" ToolTip="Refreshes the available keys and values" />
+                <MenuItem Header="Expand to Key" Command="{Binding Path=ExpandToKeyCommand}" ToolTip="Expands to a specific key" />
                 <Separator/>
-                <MenuItem Header="Auto Select on Expand" IsCheckable="True" IsChecked="{Binding Path=AutoSelectOnExpand}" />
-                <MenuItem Header="Show Empty Default Values" IsEnabled="{Binding Path=BrowseVM.AllowEmptyDefaultValues}" IsCheckable="True" IsChecked="{Binding Path=ShowEmptyDefaultValues}" />
+                <MenuItem Header="Auto Select on Expand" IsCheckable="True" IsChecked="{Binding Path=AutoSelectOnExpand}" ToolTip="Automatically select the key node when expanding" />
+                <MenuItem Header="Double Click to Expand" IsCheckable="True" IsChecked="{Binding Path=DoubleClickToExpand}" ToolTip="Double click a key node to expand it, otherwise begin renaming it" />
+                <MenuItem Header="Show Empty Default Values" IsEnabled="{Binding Path=BrowseVM.AllowEmptyDefaultValues}" IsCheckable="True" IsChecked="{Binding Path=ShowEmptyDefaultValues}" ToolTip="Show default values even if they are not set" />
             </MenuItem>
             
             <!-- Favorites -->
@@ -93,6 +94,7 @@
                     <Style TargetType="{x:Type TreeViewItem}" BasedOn="{StaticResource {x:Type TreeViewItem}}">
                         <Setter Property="IsExpanded" Value="{Binding Path=IsExpanded, Mode=TwoWay}" />
                         <Setter Property="IsSelected" Value="{Binding Path=IsSelected, Mode=TwoWay}" />
+                        <EventSetter Event="MouseLeftButtonDown" Handler="TreeViewItem_MouseDown" />
 
                         <!-- Context Menu -->
                         
@@ -112,12 +114,15 @@
                                     
                                     <MenuItem Header="Add to Favorites" Command="{Binding Path=AddFavoritesCommand}" />
 
-                                    <!-- WIP expanded context menu -->
-                                    <!--<Separator/>
+                                    <Separator/>
 
-                                    --><!-- Add Sub Key --><!--
+                                     <!-- Add Sub Key --> 
 
-                                    <MenuItem Header="Add Sub Key" Command="{Binding Path=AddSubKeyCommand}" />-->
+                                    <MenuItem Header="Add Sub Key" />
+
+                                    <!-- Rename Key -->
+
+                                    <MenuItem Header="Rename Key" Command="{Binding Path=RenameCommand}" InputGestureText="F2" />
 
                                 </ContextMenu>
                             </Setter.Value>
@@ -128,8 +133,8 @@
                 <TreeView.ItemTemplate>
                     <HierarchicalDataTemplate ItemsSource="{Binding}">
                         <StackPanel Orientation="Horizontal">
-                            <Image Width="16" Margin="3" Source="{Binding Path=AccessDenied, Converter={local:AccessDeniedToIconConverter}}" />
-                            <TextBlock VerticalAlignment="Center" Text="{Binding Path=Name}" Visibility="{Binding Path=IsEditing, Converter={local:InvertedBooleanToVisibilityConverter}}" />
+                            <Image Width="16" Margin="3" Source="{Binding Path=AccessDenied, Converter={local:AccessDeniedToIconConverter}}" MouseLeftButtonDown="TreeViewItem_MouseDown" />
+                            <TextBlock VerticalAlignment="Center" Text="{Binding Path=Name}" Visibility="{Binding Path=IsEditing, Converter={local:InvertedBooleanToVisibilityConverter}}" MouseLeftButtonDown="TreeViewItem_MouseDown"/>
                             <TextBox Text="{Binding Path=EditName}" Visibility="{Binding Path=IsEditing,Converter={local:BooleanToVisibilityConverter}}"
                                      KeyDown="TextBox_KeyDown" LostFocus="EditTextBox_LostFocus" IsVisibleChanged="EditTextBox_IsVisibleChanged" />
                         </StackPanel>

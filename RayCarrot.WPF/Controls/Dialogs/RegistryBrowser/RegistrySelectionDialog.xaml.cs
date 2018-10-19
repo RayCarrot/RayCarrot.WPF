@@ -118,8 +118,6 @@ namespace RayCarrot.WPF
             Close();
         }
 
-        #endregion
-
         private void EditTextBox_LostFocus(object sender, RoutedEventArgs e)
         {
             ViewModel.EndEdit();
@@ -133,5 +131,22 @@ namespace RayCarrot.WPF
                 tb.SelectAll();
             }
         }
+
+        private void TreeViewItem_MouseDown(object sender, MouseButtonEventArgs e)
+        {
+            if (ViewModel.DoubleClickToExpand)
+                return;
+
+            if (e.LeftButton != MouseButtonState.Pressed)
+                return;
+
+            if (sender is FrameworkElement fe && fe.DataContext is RegistryKeyViewModel vm && vm.IsSelected)
+            {
+                vm.Rename();
+                e.Handled = true;
+            }
+        }
+
+        #endregion
     }
 }
