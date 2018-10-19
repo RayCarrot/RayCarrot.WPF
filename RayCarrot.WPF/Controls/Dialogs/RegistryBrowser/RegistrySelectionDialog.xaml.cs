@@ -119,5 +119,19 @@ namespace RayCarrot.WPF
         }
 
         #endregion
+
+        private void EditTextBox_LostFocus(object sender, RoutedEventArgs e)
+        {
+            ViewModel.EndEdit();
+        }
+
+        private void EditTextBox_IsVisibleChanged(object sender, DependencyPropertyChangedEventArgs e)
+        {
+            if (e.NewValue is bool v && v && sender is TextBox tb)
+            {
+                tb.Focus();
+                tb.SelectAll();
+            }
+        }
     }
 }

@@ -501,5 +501,49 @@ namespace RayCarrot.WPF
         public AsyncRelayCommand RefreshCommand => _RefreshCommand ?? (_RefreshCommand = new AsyncRelayCommand(RefreshAsync));
 
         #endregion
+
+        #region WIP
+
+        private RelayCommand _BeginEditCommand;
+
+        public RelayCommand BeginEditCommand => _BeginEditCommand ?? (_BeginEditCommand = new RelayCommand(BeginEdit));
+
+        public void BeginEdit()
+        {
+            // Make sure a key is selected and the selected key has a parent key in the list and it does not have access denied
+            if (SelectedKey != null && SelectedKey.FullID.Length > 1 && !SelectedKey.AccessDenied)
+                EditingKey = SelectedKey;
+        }
+
+        private RelayCommand _EndEditCommand;
+
+        public RelayCommand EndEditCommand => _EndEditCommand ?? (_EndEditCommand = new RelayCommand(EndEdit));
+
+        public void EndEdit()
+        {
+            EditingKey = null;
+        }
+
+        public RegistryKeyViewModel EditingKey
+        {
+            get => _editingKey;
+            set
+            {
+                if (value == _editingKey)
+                    return;
+
+                if (_editingKey != null)
+                    _editingKey.IsEditing = false;
+
+                _editingKey = value;
+
+                if (EditingKey != null)
+                    EditingKey.IsEditing = true;
+            }
+        }
+
+        private RegistryKeyViewModel _editingKey;
+
+        #endregion
     }
 }

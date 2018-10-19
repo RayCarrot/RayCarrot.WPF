@@ -15,6 +15,8 @@
     
     <Window.InputBindings>
         <KeyBinding Key="F5" Command="{Binding Path=RefreshCommand}" />
+        <KeyBinding Key="F2" Command="{Binding Path=BeginEditCommand}" />
+        <KeyBinding Key="Esc" Command="{Binding Path=EndEditCommand}" />
     </Window.InputBindings>
     
     <Grid>
@@ -91,7 +93,7 @@
                     <Style TargetType="{x:Type TreeViewItem}" BasedOn="{StaticResource {x:Type TreeViewItem}}">
                         <Setter Property="IsExpanded" Value="{Binding Path=IsExpanded, Mode=TwoWay}" />
                         <Setter Property="IsSelected" Value="{Binding Path=IsSelected, Mode=TwoWay}" />
-                        
+
                         <!-- Context Menu -->
                         
                         <Setter Property="ContextMenu">
@@ -110,6 +112,13 @@
                                     
                                     <MenuItem Header="Add to Favorites" Command="{Binding Path=AddFavoritesCommand}" />
 
+                                    <!-- WIP expanded context menu -->
+                                    <!--<Separator/>
+
+                                    --><!-- Add Sub Key --><!--
+
+                                    <MenuItem Header="Add Sub Key" Command="{Binding Path=AddSubKeyCommand}" />-->
+
                                 </ContextMenu>
                             </Setter.Value>
                         </Setter>
@@ -120,7 +129,9 @@
                     <HierarchicalDataTemplate ItemsSource="{Binding}">
                         <StackPanel Orientation="Horizontal">
                             <Image Width="16" Margin="3" Source="{Binding Path=AccessDenied, Converter={local:AccessDeniedToIconConverter}}" />
-                            <TextBlock VerticalAlignment="Center" Text="{Binding Path=Name}" />
+                            <TextBlock VerticalAlignment="Center" Text="{Binding Path=Name}" Visibility="{Binding Path=IsEditing, Converter={local:InvertedBooleanToVisibilityConverter}}" />
+                            <TextBox Text="{Binding Path=EditName}" Visibility="{Binding Path=IsEditing,Converter={local:BooleanToVisibilityConverter}}"
+                                     KeyDown="TextBox_KeyDown" LostFocus="EditTextBox_LostFocus" IsVisibleChanged="EditTextBox_IsVisibleChanged" />
                         </StackPanel>
                     </HierarchicalDataTemplate>
                 </TreeView.ItemTemplate>

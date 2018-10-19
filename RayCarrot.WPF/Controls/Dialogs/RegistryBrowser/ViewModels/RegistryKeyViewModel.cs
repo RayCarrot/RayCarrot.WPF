@@ -23,7 +23,7 @@ namespace RayCarrot.WPF
         /// <param name="vm">The Registry selection view model</param>
         /// <param name="uifactory">The task factory for the UI</param>
         public RegistryKeyViewModel(string fullPath, RegistrySelectionViewModel vm, TaskFactory uifactory) : base(RCFWin.RegistryManager.GetSubKeyName(fullPath))
-        {    
+        {
             // Set properties
             FullPath = fullPath;
             VM = vm;
@@ -333,6 +333,78 @@ namespace RayCarrot.WPF
         /// The command for resetting the collection of sub keys
         /// </summary>
         public AsyncRelayCommand ResetCommand => _ResetCommand ?? (_ResetCommand = new AsyncRelayCommand(ResetAsync));
+
+        #endregion
+
+        #region WIP
+
+        private bool _isEditing;
+
+        /// <summary>
+        /// Indicates if the key name is currently being edited
+        /// </summary>
+        public virtual bool IsEditing
+        {
+            get => _isEditing;
+            set
+            {
+                if (value == _isEditing)
+                    return;
+
+                if (value)
+                    EditName = Name;
+
+                _isEditing = value;
+
+                if (!IsEditing)
+                    ProcessEdit();
+            }
+        }
+
+        /// <summary>
+        /// Processes the current edit name
+        /// </summary>
+        public virtual void ProcessEdit()
+        {
+            //TODO: rename, refresh and select new name
+
+            // Make sure the name has changed
+            if (EditName.Equals(Name, StringComparison.CurrentCultureIgnoreCase))
+                return;
+
+            // Make sure the name is not empty
+            if (EditName.IsNullOrWhiteSpace())
+            {
+                RCFUI.MessageUI.DisplayMessage("The key name can not be blank", "Invalid name", MessageType.Error);
+                return;
+            }
+
+            // Make sure the name does not contain invalid characters
+            if (EditName.Contains("\\"))
+            {
+                RCFUI.MessageUI.DisplayMessage(@"The key name can not contain backslashes ('\')", "Invalid name", MessageType.Error);
+                return;
+            }
+
+            try
+            {
+                using (var key = RCFWin.RegistryManager.GetKeyFromFullPath(FullPath, VM.CurrentRegistryView).RunAndDispose(x => x.GetParentKey()))
+                {
+                    key.MoveSubKey(Name, EditName);
+
+                    // TODO: Either do full refresh, or change name on this item and refresh its sub items
+                }
+            }
+            catch (Exception ex)
+            {
+
+            }
+        }
+
+        /// <summary>
+        /// The edited name
+        /// </summary>
+        public virtual string EditName { get; set; }
 
         #endregion
     }

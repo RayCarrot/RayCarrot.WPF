@@ -53,6 +53,16 @@ namespace RayCarrot.WPF
         /// <returns>A string representing the data</returns>
         public virtual string GetDisplayData()
         {
+            // Return if a string
+            if (Data is string s)
+            {
+                // Remove invalid characters if not correctly null-terminated
+                if (s.Contains(Convert.ToChar(0x0).ToString()))
+                    s = s.Substring(0, s.IndexOf(Convert.ToChar(0x0).ToString()));
+
+                return s;
+            }
+
             // Check if there is any data
             if (Data == null)
                 return "(Value is not set)";
