@@ -1,5 +1,6 @@
 ﻿using RayCarrot.CarrotFramework.UI;
 using RayCarrot.Windows;
+using System.ComponentModel;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -29,6 +30,8 @@ namespace RayCarrot.WPF
         public RegistrySelectionDialog(RegistryBrowserViewModel vm) : base(new RegistrySelectionViewModel(vm))
         {
             InitializeComponent();
+            Closing += DialogVMWindow_Closing;
+
             CanceledByUser = true;
         }
 
@@ -132,6 +135,15 @@ namespace RayCarrot.WPF
             }
         }
 
+        private void TextBox_Loaded(object sender, RoutedEventArgs e)
+        {
+            if (sender is TextBox tb && tb.DataContext is RegistryKeyViewModel vm && vm.IsEditing)
+            {
+                tb.Focus();
+                tb.SelectAll();
+            }
+        }
+
         private void TreeViewItem_MouseDown(object sender, MouseButtonEventArgs e)
         {
             if (ViewModel.DoubleClickToExpand)
@@ -145,6 +157,12 @@ namespace RayCarrot.WPF
                 vm.Rename();
                 e.Handled = true;
             }
+        }
+
+        private void DialogVMWindow_Closing(object sender, CancelEventArgs e)
+        {
+            // Save values
+            ViewModel.SaveSavedValues();
         }
 
         #endregion

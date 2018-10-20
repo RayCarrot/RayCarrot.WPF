@@ -35,6 +35,7 @@ namespace RayCarrot.WPF
         /// <param name="browseVM">The view model</param>
         public RegistrySelectionViewModel(RegistryBrowserViewModel browseVM)
         {
+            UIFactory = new TaskFactory(TaskScheduler.FromCurrentSynchronizationContext());
             Keys = new ObservableCollection<RegistryKeyViewModel>();
             Favorites = new ObservableCollection<FavoritesItemViewModel>();
             Values = new ObservableCollection<RegistryValueViewModel>();
@@ -45,8 +46,11 @@ namespace RayCarrot.WPF
             ShowEmptyDefaultValues = BrowseVM.AllowEmptyDefaultValues;
 
             // Reset the view with the default path
-            string[] pathID = BrowseVM.DefaultKeyPath.Split(RCFWin.RegistryManager.KeySeparatorCharacter);
-            _ = UpdateViewAsync(pathID, pathID);
+            string[] pathID = BrowseVM.DefaultKeyPath?.Split(RCFWin.RegistryManager.KeySeparatorCharacter);
+            _ = UpdateViewAsync(pathID ?? new string[] { RCFWin.RegistryManager.GetSubKeyName(browseVM.AvailableBaseKeys[0]) }, pathID ?? new string[] { });
+
+            // Retrieve saved values
+            RetrieveSavedValues();
         }
 
         #endregion
@@ -64,6 +68,11 @@ namespace RayCarrot.WPF
         #endregion
 
         #region Public Properties
+
+        /// <summary>
+        /// The task factory for the UI
+        /// </summary>
+        public virtual TaskFactory UIFactory { get; }
 
         /// <summary>
         /// The browse view model
@@ -198,13 +207,11 @@ namespace RayCarrot.WPF
             }
         }
 
-        //TODO: Save setting between instances
         /// <summary>
         /// True if nodes should be automatically selected when expanded
         /// </summary>
         public virtual bool AutoSelectOnExpand { get; set; }
 
-        //TODO: Save setting between instances
         /// <summary>
         /// Indicates if nodes should expand on double click or enter rename state
         /// </summary>
@@ -234,6 +241,46 @@ namespace RayCarrot.WPF
         #region Public Method
 
         /// <summary>
+        /// Retrieves the saved values
+        /// </summary>
+        public virtual void RetrieveSavedValues()
+        {
+            try
+            {
+                // Get the path
+                var path = WPFRegistryPaths.BaseKeyPath;
+
+                // Get values
+                AutoSelectOnExpand = Registry.GetValue(path, nameof(AutoSelectOnExpand), AutoSelectOnExpand ? 1 : 0).CastTo<int>() == 1;
+                DoubleClickToExpand = Registry.GetValue(path, nameof(DoubleClickToExpand), DoubleClickToExpand ? 1 : 0).CastTo<int>() == 1;
+            }
+            catch (Exception ex)
+            {
+                ex.HandleUnexpected("Getting Registry values for Registry selection options");
+            }
+        }
+
+        /// <summary>
+        /// Saves the saved values
+        /// </summary>
+        public virtual void SaveSavedValues()
+        {
+            try
+            {
+                // Get the path
+                var path = WPFRegistryPaths.BaseKeyPath;
+
+                // Set values
+                Registry.SetValue(path, nameof(AutoSelectOnExpand), AutoSelectOnExpand ? 1 : 0);
+                Registry.SetValue(path, nameof(DoubleClickToExpand), DoubleClickToExpand ? 1 : 0);
+            }
+            catch (Exception ex)
+            {
+                ex.HandleUnexpected("Setting Registry values for Registry selection options");
+            }
+        }
+
+        /// <summary>
         /// Resets the keys to the default keys and the favorites
         /// </summary>
         /// <returns>The task</returns>
@@ -252,7 +299,8 @@ namespace RayCarrot.WPF
                 // Add root keys
                 foreach (string baseKey in BrowseVM.AvailableBaseKeys)
                 {
-                    var vm = new RegistryKeyViewModel(baseKey, this, new TaskFactory(TaskScheduler.FromCurrentSynchronizationContext()));
+                    var vm = new RegistryKeyViewModel(baseKey, this);
+                    await vm.EnableSynchronizationAsync();
                     Keys.Add(vm);
                     await vm.ResetCommand.ExecuteAsync();
                 }
@@ -485,7 +533,7 @@ namespace RayCarrot.WPF
         public virtual void BeginEdit()
         {
             // Make sure a key is selected and the selected key has a parent key in the list and it does not have access denied
-            if (SelectedKey != null && SelectedKey.FullID.Length > 1 && !SelectedKey.AccessDenied)
+            if (SelectedKey != null && SelectedKey.Parent != null && !SelectedKey.AccessDenied && SelectedKey.CanEditKey)
                 EditingKey = SelectedKey;
         }
 
@@ -495,6 +543,14 @@ namespace RayCarrot.WPF
         public virtual void EndEdit()
         {
             EditingKey = null;
+        }
+
+        /// <summary>
+        /// Deletes the selected key
+        /// </summary>
+        public virtual void DeleteKey()
+        {
+            SelectedKey?.DeleteKey();
         }
 
         #endregion
@@ -553,7 +609,7 @@ namespace RayCarrot.WPF
         /// <summary>
         /// Command for beginning editing of the selected key
         /// </summary>
-        public RelayCommand BeginEditCommand => _BeginEditCommand ?? (_BeginEditCommand = new RelayCommand(BeginEdit));
+        public RelayCommand BeginEditCommand => _BeginEditCommand ?? (_BeginEditCommand = new RelayCommand(BeginEdit, !BrowseVM.DisableEditing));
 
         private RelayCommand _EndEditCommand;
 
@@ -561,6 +617,13 @@ namespace RayCarrot.WPF
         /// Command for ending editing of key in edit state
         /// </summary>
         public RelayCommand EndEditCommand => _EndEditCommand ?? (_EndEditCommand = new RelayCommand(EndEdit));
+
+        private RelayCommand _DeleteKeyCommand;
+
+        /// <summary>
+        /// Command for deleting the selected key
+        /// </summary>
+        public RelayCommand DeleteKeyCommand => _DeleteKeyCommand ?? (_DeleteKeyCommand = new RelayCommand(DeleteKey, !BrowseVM.DisableEditing));
 
         #endregion
     }

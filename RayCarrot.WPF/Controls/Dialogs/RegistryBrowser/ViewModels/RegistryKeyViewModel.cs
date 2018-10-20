@@ -5,6 +5,7 @@ using RayCarrot.Windows;
 using System;
 using System.ComponentModel;
 using System.Threading.Tasks;
+using System.Windows;
 using System.Windows.Data;
 
 namespace RayCarrot.WPF
@@ -22,18 +23,12 @@ namespace RayCarrot.WPF
         /// <param name="fullPath">The full path of the key</param>
         /// <param name="vm">The Registry selection view model</param>
         /// <param name="uifactory">The task factory for the UI</param>
-        public RegistryKeyViewModel(string fullPath, RegistrySelectionViewModel vm, TaskFactory uifactory) : base(RCFWin.RegistryManager.GetSubKeyName(fullPath))
+        public RegistryKeyViewModel(string fullPath, RegistrySelectionViewModel vm) : base(RCFWin.RegistryManager.GetSubKeyName(fullPath))
         {
             // Set properties
             FullPath = fullPath;
             VM = vm;
             Name = RCFWin.RegistryManager.GetSubKeyName(fullPath);
-
-            // Save the UI thread so we can use it for collection synchronization
-            UIFactory = uifactory;
-
-            // Enable collection synchronization on the UI thread so we can update sub items on another thread
-            UIFactory.StartNew(() => BindingOperations.EnableCollectionSynchronization(this, FullID)).Wait();
         }
 
         #endregion
@@ -51,11 +46,6 @@ namespace RayCarrot.WPF
         #endregion
 
         #region Public Properties
-
-        /// <summary>
-        /// The task factory for the UI
-        /// </summary>
-        public virtual TaskFactory UIFactory { get; }
 
         /// <summary>
         /// Indicates if sub keys should be cached when the key is not expanded
@@ -147,9 +137,29 @@ namespace RayCarrot.WPF
         /// </summary>
         public virtual string EditName { get; set; }
 
+        /// <summary>
+        /// Indicates if the key can be edited
+        /// </summary>
+        public virtual bool CanEditKey => CanAddSubKey && Parent != null;
+
+        /// <summary>
+        /// Indicates if sub keys can be added
+        /// </summary>
+        public virtual bool CanAddSubKey => !VM.BrowseVM.DisableEditing && !AccessDenied;
+
         #endregion
 
         #region Public Methods
+
+        /// <summary>
+        /// Enables synchronization for this collection
+        /// </summary>
+        /// <returns>The task</returns>
+        public virtual async Task EnableSynchronizationAsync()
+        {
+            // Enable collection synchronization on the UI thread so we can update sub items on another thread
+            await VM.UIFactory.StartNew(() => BindingOperations.EnableCollectionSynchronization(this, FullID));
+        }
 
         /// <summary>
         /// Adds a sub key to the collection
@@ -257,6 +267,10 @@ namespace RayCarrot.WPF
         /// </summary>
         public void Rename()
         {
+            // Make sure the key can be edited
+            if (!CanEditKey)
+                return;
+
             // Make sure the key is selected
             VM.SelectedKey = this;
 
@@ -269,6 +283,10 @@ namespace RayCarrot.WPF
         /// </summary>
         public virtual void ProcessEdit()
         {
+            // Make sure the key can be edited
+            if (!CanEditKey)
+                return;
+
             // Make sure the name has changed
             if (EditName.Equals(Name, StringComparison.CurrentCultureIgnoreCase))
                 return;
@@ -289,17 +307,18 @@ namespace RayCarrot.WPF
 
             try
             {
-                // Save the parent path
-                string parentPath;
+                // Check all sub keys for write permission
+                if (!GetKey().RunAndDispose(x => x.HasSubKeyTreeWritePermissions()))
+                {
+                    RCFUI.MessageUI.DisplayMessage(@"You do not have the required permissions to rename this key", "Error", MessageType.Error);
+                    return;
+                }
 
                 // Get the parent key
-                using (var key = RCFWin.RegistryManager.GetKeyFromFullPath(FullPath, VM.CurrentRegistryView).RunAndDispose(x => x.GetParentKey(true)))
+                using (var parent = Parent.GetKey(true))
                 {
-                    // Store parent path
-                    parentPath = key.Name;
-
                     // Move the sub key to new name
-                    key.MoveSubKey(Name, EditName);
+                    parent.MoveSubKey(Name, EditName);
                 }
 
                 // TODO: Possibly just refresh and expand to this key?
@@ -308,7 +327,7 @@ namespace RayCarrot.WPF
                 Name = EditName;
 
                 // Update full path
-                FullPath = RCFWin.RegistryManager.CombinePaths(parentPath, EditName);
+                FullPath = RCFWin.RegistryManager.CombinePaths(Parent.FullPath, EditName);
 
                 // Reset sub keys
                 Reset();
@@ -334,6 +353,120 @@ namespace RayCarrot.WPF
             }
         }
 
+        /// <summary>
+        /// Adds a new sub key and puts it in edit mode
+        /// </summary>
+        /// <returns>The task</returns>
+        public async Task AddSubKeyAsync()
+        {
+            // Make sure the key can be edited
+            if (!CanEditKey)
+                return;
+
+            string name = "New Key #";
+            int keyNum = 1;
+
+            try
+            {
+                while (RCFWin.RegistryManager.KeyExists(RCFWin.RegistryManager.CombinePaths(FullPath, name + keyNum)))
+                    keyNum++;
+            }
+            catch (Exception ex)
+            {
+                ex.HandleError("Getting new sub key name");
+                RCFUI.MessageUI.DisplayMessage("An unknown error occurred", "Error", MessageType.Error);
+                return;
+            }
+
+            try
+            {
+                // Get this key
+                using (var key = GetKey(true))
+                    // Create the sub key
+                    key.CreateSubKey(name + keyNum).Dispose();
+            }
+            catch (Exception ex)
+            {
+                ex.HandleError("Creating sub key");
+                RCFUI.MessageUI.DisplayMessage($"The sub key could not be created with the error message of: {Environment.NewLine}{ex.Message}", "Error", MessageType.Error);
+                return;
+            }
+
+            try
+            {
+                if (!IsExpanded)
+                    await ExpandAsync();
+
+                var vm = new RegistryKeyViewModel(RCFWin.RegistryManager.CombinePaths(FullPath, name + keyNum), VM);
+                await vm.EnableSynchronizationAsync();
+                Add(vm);
+                vm.IsSelected = true;
+                VM.BeginEdit();
+            }
+            catch (Exception ex)
+            {
+                ex.HandleError("Handling new sub key creation");
+                VM.RefreshCommand.Execute();
+                return;
+            }
+        }
+
+        /// <summary>
+        /// Gets a new <see cref="RegistryKey"/> for the current key item
+        /// </summary>
+        /// <param name="writable">True if the key should be writable, otherwise false</param>
+        /// <returns>The key</returns>
+        public virtual RegistryKey GetKey(bool writable = false) => RCFWin.RegistryManager.GetKeyFromFullPath(FullPath, VM.CurrentRegistryView, writable);
+
+        /// <summary>
+        /// Deletes the key
+        /// </summary>
+        public virtual void DeleteKey()
+        {
+            // Make sure the key can be edited
+            if (!CanEditKey)
+                return;
+
+            // Have user confirm deleting key
+            if (!RCFUI.MessageUI.DisplayMessage("Are you sure you want to permanently delete this key and all of its subkeys? This operation can not be undone and may cause system instability.", "Confirm Delete", MessageType.Warning, true))
+                return;
+
+            // Check all sub keys for write permission
+            if (!GetKey().RunAndDispose(x => x.HasSubKeyTreeWritePermissions()))
+            {
+                RCFUI.MessageUI.DisplayMessage(@"You do not have the required permissions to delete this key", "Error", MessageType.Error);
+                return;
+            }
+
+            try
+            {
+                // Delete the key
+                Parent.GetKey(true).DeleteSubKeyTree(Name);
+            }
+            catch (Exception ex)
+            {
+                ex.HandleError("Deleting key");
+                RCFUI.MessageUI.DisplayMessage("The key could not be deleted. Some of its subkeys may have been deleted.", "Operation Failed", MessageType.Error);
+
+                VM.RefreshCommand.Execute();
+                return;
+            }
+
+            // Remove item from parent
+            Parent.Remove(this);
+
+            // Select parent
+            VM.SelectedKey = Parent;
+        }
+
+        /// <summary>
+        /// Copies the full key name to the clipboard
+        /// </summary>
+        public virtual void CopyKeyName()
+        {
+            Clipboard.SetText(FullPath);
+        }
+
         #endregion
 
         #region Protected Methods
@@ -349,7 +482,7 @@ namespace RayCarrot.WPF
             try
             {
                 // Check if there are any sub keys
-                if (RCFWin.RegistryManager.GetKeyFromFullPath(FullPath, VM.CurrentRegistryView).SubKeyCount > 0)
+                if (GetKey().SubKeyCount > 0)
                     // Add dummy item
                     Add(null);
 
@@ -391,11 +524,12 @@ namespace RayCarrot.WPF
                 try
                 {
                     // Add the sub keys
-                    using (var key = RCFWin.RegistryManager.GetKeyFromFullPath(FullPath, VM.CurrentRegistryView))
+                    using (var key = GetKey())
                     {
                         foreach (var subKey in key.GetSubKeyNames())
                         {
-                            var vm = new RegistryKeyViewModel(RCFWin.RegistryManager.CombinePaths(FullPath, subKey), VM, UIFactory);
+                            var vm = new RegistryKeyViewModel(RCFWin.RegistryManager.CombinePaths(FullPath, subKey), VM);
+                            await vm.EnableSynchronizationAsync();
                             Add(vm);
                             await vm.ResetCommand.ExecuteAsync();
                         }
@@ -454,7 +588,28 @@ namespace RayCarrot.WPF
         /// <summary>
         /// Command for renaming the key
         /// </summary>
-        public RelayCommand RenameCommand => _RenameCommand ?? (_RenameCommand = new RelayCommand(Rename));
+        public RelayCommand RenameCommand => _RenameCommand ?? (_RenameCommand = new RelayCommand(Rename, CanEditKey));
+
+        private AsyncRelayCommand _AddSubKeyCommand;
+
+        /// <summary>
+        /// Command for adding a new sub key
+        /// </summary>
+        public AsyncRelayCommand AddSubKeyCommand => _AddSubKeyCommand ?? (_AddSubKeyCommand = new AsyncRelayCommand(AddSubKeyAsync, CanAddSubKey));
+
+        private RelayCommand _DeleteCommand;
+
+        /// <summary>
+        /// Command for deleting the key
+        /// </summary>
+        public RelayCommand DeleteCommand => _DeleteCommand ?? (_DeleteCommand = new RelayCommand(DeleteKey, CanEditKey));
+
+        private RelayCommand _CopyKeyNameCommand;
+
+        /// <summary>
+        /// Command for copying the key name
+        /// </summary>
+        public RelayCommand CopyKeyNameCommand => _CopyKeyNameCommand ?? (_CopyKeyNameCommand = new RelayCommand(CopyKeyName));
 
         #endregion
     }
