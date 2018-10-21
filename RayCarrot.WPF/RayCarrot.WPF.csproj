@@ -161,6 +161,8 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AttachedProperties\FadeHandler.cs" />
+    <Compile Include="AttachedProperties\UserLevelTag.cs" />
+    <Compile Include="AttachedProperties\UserLevelTagBehavior.cs" />
     <Compile Include="Controls\BrowseBox\BrowseBox.xaml.cs">
       <DependentUpon>BrowseBox.xaml</DependentUpon>
     </Compile>
