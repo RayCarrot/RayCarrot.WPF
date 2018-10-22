@@ -18,6 +18,11 @@
         /// <summary>
         /// Drive browsing
         /// </summary>
-        Drive
+        Drive,
+
+        /// <summary>
+        /// Registry Key browsing
+        /// </summary>
+        RegistryKey
     }
 }

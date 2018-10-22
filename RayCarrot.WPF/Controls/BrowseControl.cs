@@ -1,4 +1,5 @@
-﻿using RayCarrot.CarrotFramework;
+﻿using Microsoft.Win32;
+using RayCarrot.CarrotFramework;
 using RayCarrot.CarrotFramework.IO;
 using RayCarrot.CarrotFramework.UI;
 using RayCarrot.Windows;
@@ -25,8 +26,14 @@ namespace RayCarrot.WPF
                     return File.Exists(FilePath);
 
                 case BrowseTypes.Directory:
-                case BrowseTypes.Drive:
                     return Directory.Exists(FilePath);
+
+                case BrowseTypes.Drive:
+                    FileSystemPath path = FilePath;
+                    return path.DirectoryExists && path.IsDirectoryRoot();
+
+                case BrowseTypes.RegistryKey:
+                    return RCFWin.RegistryManager.KeyExists(FilePath, SelectedRegistryView);
 
                 default:
                     return false;
@@ -72,13 +79,22 @@ namespace RayCarrot.WPF
 
                     break;
 
-                //case BrowseTypes.RegistryKey:
-                //    RCFUI.MessageUI.DisplayMessage("Browsing for a registry key is currently not supported", "Unsupported feature", MessageType.Information);
-                //    break;
+                case BrowseTypes.RegistryKey:
+                    var keyResult = RCFWin.RegistryBrowseUIManager.BrowseRegistryKey(new RegistryBrowserViewModel()
+                    {
+                        Title = "Select a Registry key",
+                        AllowCustomRegistryView = AllowCustomRegistryView,
+                        DefaultRegistryView = SelectedRegistryView,
+                        BrowseValue = false,
+                        DefaultKeyPath = UseCurrentPathAsDefaultDirectoryIfValid && IsPathValid() ? FilePath : InitialDirectory,
+                    });
 
-                //case BrowseTypes.RegistryBaseKey:
-                //    RCFUI.MessageUI.DisplayMessage("Browsing for a registry base key is currently not supported", "Unsupported feature", MessageType.Information);
-                //    break;
+                    if (keyResult.CanceledByUser)
+                        return;
+
+                    FilePath = keyResult.KeyPath;
+                    SelectedRegistryView = keyResult.SelectedRegistryView;
+                    break;
 
                 case BrowseTypes.Drive:
                     var driveResult = RCFUI.BrowseUI.BrowseDrive(new DriveBrowserViewModel()
@@ -119,10 +135,9 @@ namespace RayCarrot.WPF
                         RCFWin.WindowsManager.OpenExplorerPath(FilePath);
                         break;
 
-                        //case BrowseTypes.RegistryBaseKey:
-                        //case BrowseTypes.RegistryKey:
-                        //    RCFWin.WindowsManager.OpenRegistryPath(FullPath);
-                        //    break;
+                    case BrowseTypes.RegistryKey:
+                        RCFWin.WindowsManager.OpenRegistryPath(FilePath);
+                        break;
                 }
             }
             catch (Exception ex)
@@ -251,20 +266,20 @@ namespace RayCarrot.WPF
 
         #endregion
 
-        //#region SelectedRegistryView
+        #region SelectedRegistryView
 
-        ///// <summary>
-        ///// The selected <see cref="RegistryView"/>
-        ///// </summary>
-        //public RegistryView SelectedRegistryView
-        //{
-        //    get => (RegistryView)GetValue(SelectedRegistryViewProperty);
-        //    set => SetValue(SelectedRegistryViewProperty, value);
-        //}
+        /// <summary>
+        /// The selected <see cref="RegistryView"/>
+        /// </summary>
+        public RegistryView SelectedRegistryView
+        {
+            get => (RegistryView)GetValue(SelectedRegistryViewProperty);
+            set => SetValue(SelectedRegistryViewProperty, value);
+        }
 
-        //public static readonly DependencyProperty SelectedRegistryViewProperty = DependencyProperty.Register(nameof(SelectedRegistryView), typeof(RegistryView), typeof(BrowseBox));
+        public static readonly DependencyProperty SelectedRegistryViewProperty = DependencyProperty.Register(nameof(SelectedRegistryView), typeof(RegistryView), typeof(BrowseBox));
 
-        //#endregion
+        #endregion
 
         #region UseCurrentPathAsDefaultDirectoryIfValid
 
@@ -308,6 +323,21 @@ namespace RayCarrot.WPF
         }
 
         public static readonly DependencyProperty AllowNonReadyDrivesProperty = DependencyProperty.Register(nameof(AllowNonReadyDrives), typeof(bool), typeof(BrowseControl));
+
+        #endregion
+
+        #region AllowNonReadyDrives
+
+        /// <summary>
+        /// True if the user can change the <see cref="RegistryView"/>, false if not
+        /// </summary>
+        public bool AllowCustomRegistryView
+        {
+            get => (bool)GetValue(AllowCustomRegistryViewProperty);
+            set => SetValue(AllowCustomRegistryViewProperty, value);
+        }
+
+        public static readonly DependencyProperty AllowCustomRegistryViewProperty = DependencyProperty.Register(nameof(AllowCustomRegistryView), typeof(bool), typeof(BrowseControl));
 
         #endregion
 
