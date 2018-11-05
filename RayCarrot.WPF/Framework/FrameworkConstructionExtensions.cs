@@ -14,10 +14,26 @@ namespace RayCarrot.WPF
         /// <param name="construction">The construction</param>
         /// <returns>The construction</returns>
         public static FrameworkConstruction AddWPFStyle<S>(this FrameworkConstruction construction)
-            where S : class, IWPFStyle, new ()
+            where S : class, IWPFStyle, new()
         {
             // Add the service
             construction.AddTransient<IWPFStyle, S>();
+
+            // Return the framework
+            return construction;
+        }
+
+        /// <summary>
+        /// Adds a <see cref="IDialogBaseManager"/> to the construction
+        /// </summary>
+        /// <typeparam name="D">The dialog base manager to add</typeparam>
+        /// <param name="construction">The construction</param>
+        /// <returns>The construction</returns>
+        public static FrameworkConstruction AddDialogBaseManager<D>(this FrameworkConstruction construction)
+            where D : class, IDialogBaseManager, new()
+        {
+            // Add the service
+            construction.AddTransient<IDialogBaseManager, D>();
 
             // Return the framework
             return construction;

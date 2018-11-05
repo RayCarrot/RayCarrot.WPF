@@ -1,20 +1,13 @@
-﻿<Window x:Class="RayCarrot.WPF.DialogMessageBox"
+﻿<UserControl x:Class="RayCarrot.WPF.DialogMessageBox"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:local="clr-namespace:RayCarrot.WPF"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         mc:Ignorable="d"
-        MinWidth="430"
-        MinHeight="170"
-        MaxWidth="400"
-        SizeToContent="WidthAndHeight"
-        WindowStartupLocation="CenterOwner"
-        ResizeMode="NoResize"
-        Title="{Binding Path=MessageHeader}"
         d:DataContext="{x:Static local:DesignTimeVM.DialogMessageViewModel}">
-    
-    <Grid Margin="1">
+
+    <Grid Margin="1" MinWidth="430" MinHeight="170" MaxWidth="400">
         <Grid.RowDefinitions>
             <RowDefinition MinHeight="100"/>
             <RowDefinition Height="50"/>
@@ -59,4 +52,4 @@
             </ItemsControl.ItemsPanel>
         </ItemsControl>
     </Grid>
-</Window>
+</UserControl>

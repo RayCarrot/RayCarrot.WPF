@@ -1,5 +1,4 @@
 ﻿using RayCarrot.CarrotFramework;
-using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Windows;
@@ -102,25 +101,26 @@ namespace RayCarrot.WPF
             RCF.Data.UserLevelChanged -= RCF_UserLevelChanged;
             RCF.Data.UserLevelChanged += RCF_UserLevelChanged;
 
-            // Subscribe to when the element is unloaded
-            uIElement.Unloaded -= UIElement_Unloaded;
-            uIElement.Unloaded += UIElement_Unloaded;
+            //// Subscribe to when the element is unloaded
+            //uIElement.Unloaded -= UIElement_Unloaded;
+            //uIElement.Unloaded += UIElement_Unloaded;
 
             // Refresh the element
             RefreshElement(uIElement);
         }
 
-        private static void UIElement_Unloaded(object sender, RoutedEventArgs e)
-        {
-            if (!(sender is FrameworkElement element))
-                return;
+        // TODO: Find way to remove unused references - such as when a window has closed
+        //private static void UIElement_Unloaded(object sender, RoutedEventArgs e)
+        //{
+        //    if (!(sender is FrameworkElement element))
+        //        return;
 
-            // Remove the item
-            Items.Remove(element);
+        //    // Remove the item
+        //    Items.Remove(element);
 
-            // Unsubscribe the event for the item
-            element.Unloaded -= UIElement_Unloaded;
-        }
+        //    // Unsubscribe the event for the item
+        //    element.Unloaded -= UIElement_Unloaded;
+        //}
 
         private static void RCF_UserLevelChanged(object sender, PropertyChangedEventArgs<UserLevel> e)
         {

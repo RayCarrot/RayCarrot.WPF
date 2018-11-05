@@ -1,5 +1,4 @@
-﻿using RayCarrot.CarrotFramework;
-using RayCarrot.CarrotFramework.UI;
+﻿using RayCarrot.CarrotFramework.UI;
 using System;
 using System.Windows.Input;
 
@@ -69,47 +68,6 @@ namespace RayCarrot.WPF
         /// Occurs when the action is chosen by the user
         /// </summary>
         public event EventHandler<DialogMessageActionHandledEventArgs> ActionHandled;
-
-        #endregion
-    }
-
-    /// <summary>
-    /// Generic view model for a dialog message action
-    /// </summary>
-    public class DialogMessageActionViewModel<T> : DialogMessageActionViewModel
-    {
-        #region Properties
-
-        /// <summary>
-        /// The action result
-        /// </summary>
-        public new T ActionResult
-        {
-            get => base.ActionResult.CastTo<T>();
-            set => base.ActionResult = value;
-        }
-
-        #endregion
-
-        #region Public Methods
-
-        /// <summary>
-        /// Handles that the action was chosen by the user
-        /// </summary>
-        public override void HandleAction()
-        {
-            base.HandleAction();
-            ActionHandled?.Invoke(this, new DialogMessageActionHandledEventArgs<T>(ActionResult));
-        }
-
-        #endregion
-
-        #region Events
-
-        /// <summary>
-        /// Occurs when the action is chosen by the user
-        /// </summary>
-        public new event EventHandler<DialogMessageActionHandledEventArgs<T>> ActionHandled;
 
         #endregion
     }

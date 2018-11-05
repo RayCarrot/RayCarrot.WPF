@@ -1,21 +1,25 @@
-﻿using System.Windows;
+﻿using System;
+using System.Windows;
+using System.Windows.Controls;
 
 namespace RayCarrot.WPF
 {
     /// <summary>
     /// Interaction logic for StringInputDialog.xaml
     /// </summary>
-    public partial class StringInputDialog : DialogVMWindow<StringInputViewModel, StringInputResult>
-    {
+    public partial class StringInputDialog : UserControl, IDialogBaseControl<StringInputViewModel, StringInputResult>
+    { 
         #region Constructor
 
         /// <summary>
         /// Default constructor
         /// </summary>
         /// <param name="vm">The view model</param>
-        public StringInputDialog(StringInputViewModel vm) : base(vm)
+        public StringInputDialog(StringInputViewModel vm)
         {
             InitializeComponent();
+            ViewModel = vm;
+            DataContext = ViewModel;
             CanceledByUser = true;
         }
 
@@ -28,15 +32,30 @@ namespace RayCarrot.WPF
         /// </summary>
         public bool CanceledByUser { get; set; }
 
+        /// <summary>
+        /// The view model
+        /// </summary>
+        public StringInputViewModel ViewModel { get; }
+
+        /// <summary>
+        /// The dialog content
+        /// </summary>
+        public object DialogContent => this;
+
+        /// <summary>
+        /// Indicates if the dialog should be resizable
+        /// </summary>
+        public bool Resizable => false;
+
         #endregion
 
-        #region Protected Overrides
+        #region Public Methods
 
         /// <summary>
         /// Gets the current result for the dialog
         /// </summary>
         /// <returns>The result</returns>
-        protected override StringInputResult GetResult()
+        public StringInputResult GetResult()
         {
             return new StringInputResult()
             {
@@ -47,6 +66,15 @@ namespace RayCarrot.WPF
 
         #endregion
 
+        #region Events
+
+        /// <summary>
+        /// Invoke to request the dialog to close
+        /// </summary>
+        public event EventHandler CloseDialog;
+
+        #endregion
+
         #region Event Handlers
 
         private void OKButton_Click(object sender, RoutedEventArgs e)
@@ -54,13 +82,13 @@ namespace RayCarrot.WPF
             CanceledByUser = false;
 
             // Close the dialog
-            Close();
+            CloseDialog?.Invoke(this, new EventArgs());
         }
 
         private void CancelButton_Click(object sender, RoutedEventArgs e)
         {
             // Close the dialog
-            Close();
+            CloseDialog?.Invoke(this, new EventArgs());
         }
 
         #endregion

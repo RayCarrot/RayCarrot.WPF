@@ -5,6 +5,7 @@ using System;
 using System.IO;
 using System.Linq;
 using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Input;
 
 namespace RayCarrot.WPF
@@ -12,7 +13,7 @@ namespace RayCarrot.WPF
     /// <summary>
     /// Interaction logic for DriveSelectionDialog.xaml
     /// </summary>
-    public partial class DriveSelectionDialog : DialogVMWindow<DriveSelectionViewModel, DriveBrowserResult>
+    public partial class DriveSelectionDialog : UserControl, IDialogBaseControl<DriveBrowserViewModel, DriveBrowserResult>
     {
         #region Constructors
 
@@ -22,37 +23,69 @@ namespace RayCarrot.WPF
         public DriveSelectionDialog()
         {
             InitializeComponent();
+
+            ViewModel = new DriveBrowserViewModel()
+            {
+                Title = "Select a Drive"
+            };
+            DataContext = new DriveSelectionViewModel(ViewModel);
         }
 
         /// <summary>
         /// Creates a new instance of <see cref="DriveSelectionDialog"/> from a browse view model
         /// </summary>
         /// <param name="vm">The view model</param>
-        public DriveSelectionDialog(DriveBrowserViewModel vm) : base(new DriveSelectionViewModel(vm))
+        public DriveSelectionDialog(DriveBrowserViewModel vm)
         {
             InitializeComponent();
+            ViewModel = vm;
+            DataContext = new DriveSelectionViewModel(ViewModel);
         }
 
         #endregion
-        
+
+        #region Public Properties
+
+        /// <summary>
+        /// The view model
+        /// </summary>
+        public DriveBrowserViewModel ViewModel { get; }
+
+        /// <summary>
+        /// The drive selection view model
+        /// </summary>
+        public DriveSelectionViewModel DriveSelectionVM => DataContext as DriveSelectionViewModel;
+
+        /// <summary>
+        /// The dialog content
+        /// </summary>
+        public object DialogContent => this;
+
+        /// <summary>
+        /// Indicates if the dialog should be resizable
+        /// </summary>
+        public bool Resizable => true;
+
+        #endregion
+
         #region Private Methods
 
         private void AttemptConfirm()
         {
-            ViewModel.UpdateReturnValue();
+            DriveSelectionVM.UpdateReturnValue();
 
-            if (ViewModel.Result.SelectedDrives == null || ViewModel.Result.SelectedDrives.Count < 1 || ViewModel.Result.SelectedDrives.All(x => x == null))
+            if (DriveSelectionVM.Result.SelectedDrives == null || DriveSelectionVM.Result.SelectedDrives.Count < 1 || DriveSelectionVM.Result.SelectedDrives.All(x => x == null))
             {
                 RCFUI.MessageUI.DisplayMessage("At least one drive has to be selected", "No drive selected", MessageType.Information);
                 return;
             }
-            if (!ViewModel.Result.SelectedDrives.Select(x => new FileSystemPath(x)).DirectoriesExist())
+            if (!DriveSelectionVM.Result.SelectedDrives.Select(x => new FileSystemPath(x)).DirectoriesExist())
             {
                 RCFUI.MessageUI.DisplayMessage("One or more of the selected drives could not be found", "Invalid selection", MessageType.Information);
-                ViewModel.Refresh();
+                DriveSelectionVM.Refresh();
                 return;
             }
-            if (!ViewModel.BrowseVM.AllowNonReadyDrives && ViewModel.Result.SelectedDrives.Any(x =>
+            if (!DriveSelectionVM.BrowseVM.AllowNonReadyDrives && DriveSelectionVM.Result.SelectedDrives.Any(x =>
             {
                 try
                 {
@@ -66,27 +99,36 @@ namespace RayCarrot.WPF
             }))
             {
                 RCFUI.MessageUI.DisplayMessage("One or more of the selected drives are not ready", "Invalid selection", MessageType.Information);
-                ViewModel.Refresh();
+                DriveSelectionVM.Refresh();
                 return;
             }
 
-            ViewModel.Result.CanceledByUser = false;
-            Close();
+            DriveSelectionVM.Result.CanceledByUser = false;
+            CloseDialog?.Invoke(this, new EventArgs());
         }
 
         #endregion
 
-        #region Protected Overrides
+        #region Public Methods
 
         /// <summary>
-        /// Gets the current result for the dialog
+        /// Gets the current result
         /// </summary>
         /// <returns>The result</returns>
-        protected override DriveBrowserResult GetResult()
+        public DriveBrowserResult GetResult()
         {
-            ViewModel.UpdateReturnValue();
-            return ViewModel.Result;
+            DriveSelectionVM.UpdateReturnValue();
+            return DriveSelectionVM.Result;
         }
+
+        #endregion
+
+        #region Events
+
+        /// <summary>
+        /// Invoke to request the dialog to close
+        /// </summary>
+        public event EventHandler CloseDialog;
 
         #endregion
 
@@ -99,8 +141,8 @@ namespace RayCarrot.WPF
 
         private void Cancel_Click(object sender, RoutedEventArgs e)
         {
-            ViewModel.Result.CanceledByUser = true;
-            Close();
+            DriveSelectionVM.Result.CanceledByUser = true;
+            CloseDialog?.Invoke(this, new EventArgs());
         }
 
         private void DataGrid_KeyDown(object sender, KeyEventArgs e)

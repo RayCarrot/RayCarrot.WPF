@@ -1,6 +1,6 @@
 ﻿using RayCarrot.CarrotFramework.UI;
 using RayCarrot.Windows;
-using System.ComponentModel;
+using System;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -10,7 +10,7 @@ namespace RayCarrot.WPF
     /// <summary>
     /// Interaction logic for RegistrySelectionDialog.xaml
     /// </summary>
-    public partial class RegistrySelectionDialog : DialogVMWindow<RegistrySelectionViewModel, RegistryBrowserResult>
+    public partial class RegistrySelectionDialog : UserControl, IDialogBaseControl<RegistryBrowserViewModel, RegistryBrowserResult>
     {
         #region Constructors
 
@@ -18,7 +18,10 @@ namespace RayCarrot.WPF
         /// Creates a new instance of <see cref="RegistrySelectionDialog"/> with default values
         /// </summary>
         /// <param name="vm">The view model</param>
-        public RegistrySelectionDialog() : this(new RegistryBrowserViewModel())
+        public RegistrySelectionDialog() : this(new RegistryBrowserViewModel()
+        {
+            Title = "Select a Registry Key"
+        })
         {
 
         }
@@ -27,12 +30,15 @@ namespace RayCarrot.WPF
         /// Creates a new instance of <see cref="RegistrySelectionDialog"/> from a browse view model
         /// </summary>
         /// <param name="vm">The view model</param>
-        public RegistrySelectionDialog(RegistryBrowserViewModel vm) : base(new RegistrySelectionViewModel(vm))
+        public RegistrySelectionDialog(RegistryBrowserViewModel vm)
         {
             InitializeComponent();
-            Closing += DialogVMWindow_Closing;
 
+            ViewModel = vm;
+            DataContext = new RegistrySelectionViewModel(vm);
             CanceledByUser = true;
+
+            Unloaded += RegistrySelectionDialog_Unloaded;
         }
 
         #endregion
@@ -41,37 +47,37 @@ namespace RayCarrot.WPF
 
         private void AttemptConfirm()
         {
-            if (!RCFWin.RegistryManager.KeyExists(ViewModel.SelectedKeyFullPath, ViewModel.CurrentRegistryView))
+            if (!RCFWin.RegistryManager.KeyExists(RegistrySelectionVM.SelectedKeyFullPath, RegistrySelectionVM.CurrentRegistryView))
             {
                 RCFUI.MessageUI.DisplayMessage("The selected key could not be found", "Invalid selection", MessageType.Information);
                 return;
             }
 
-            if (ViewModel.BrowseVM.BrowseValue && ViewModel.SelectedValue == null)
+            if (RegistrySelectionVM.BrowseVM.BrowseValue && RegistrySelectionVM.SelectedValue == null)
             {
                 RCFUI.MessageUI.DisplayMessage("A value has to be selected", "Invalid selection", MessageType.Information);
                 return;
             }
 
             CanceledByUser = false;
-            Close();
+            CloseDialog?.Invoke(this, new EventArgs());
         }
 
         #endregion
 
-        #region Protected Overrides
+        #region Public Methods
 
         /// <summary>
         /// Gets the current result for the dialog
         /// </summary>
         /// <returns>The result</returns>
-        protected override RegistryBrowserResult GetResult()
+        public RegistryBrowserResult GetResult()
         {
             return new RegistryBrowserResult()
             {
-                KeyPath = ViewModel.SelectedKeyFullPath,
-                ValueName = ViewModel.SelectedValue?.Name,
-                SelectedRegistryView = ViewModel.CurrentRegistryView,
+                KeyPath = RegistrySelectionVM.SelectedKeyFullPath,
+                ValueName = RegistrySelectionVM.SelectedValue?.Name,
+                SelectedRegistryView = RegistrySelectionVM.CurrentRegistryView,
                 CanceledByUser = CanceledByUser
             };
         }
@@ -81,9 +87,38 @@ namespace RayCarrot.WPF
         #region Public Properties
 
         /// <summary>
+        /// The view model
+        /// </summary>
+        public RegistryBrowserViewModel ViewModel { get; }
+
+        /// <summary>
+        /// The drive selection view model
+        /// </summary>
+        public RegistrySelectionViewModel RegistrySelectionVM => DataContext as RegistrySelectionViewModel;
+
+        /// <summary>
+        /// The dialog content
+        /// </summary>
+        public object DialogContent => this;
+
+        /// <summary>
+        /// Indicates if the dialog should be resizable
+        /// </summary>
+        public bool Resizable => true;
+
+        /// <summary>
         /// Indicates if the dialog was canceled by the user, default is true
         /// </summary>
         public bool CanceledByUser { get; set; }
+
+        #endregion
+
+        #region Events
+
+        /// <summary>
+        /// Invoke to request the dialog to close
+        /// </summary>
+        public event EventHandler CloseDialog;
 
         #endregion
 
@@ -100,14 +135,14 @@ namespace RayCarrot.WPF
 
         private void ExitMenuItem_Click(object sender, RoutedEventArgs e)
         {
-            // Close the window
-            Close();
+            // Close the dialog
+            CloseDialog?.Invoke(this, new EventArgs());
         }
 
         private void TreeView_SelectedItemChanged(object sender, RoutedPropertyChangedEventArgs<object> e)
         {
             // Update the view model
-            ViewModel.SelectedKey = e.NewValue as RegistryKeyViewModel;
+            RegistrySelectionVM.SelectedKey = e.NewValue as RegistryKeyViewModel;
         }
 
         private void Continue_Click(object sender, RoutedEventArgs e)
@@ -118,12 +153,12 @@ namespace RayCarrot.WPF
         private void Cancel_Click(object sender, RoutedEventArgs e)
         {
             CanceledByUser = true;
-            Close();
+            CloseDialog?.Invoke(this, new EventArgs());
         }
 
         private void EditTextBox_LostFocus(object sender, RoutedEventArgs e)
         {
-            ViewModel.EndEdit();
+            RegistrySelectionVM.EndEdit();
         }
 
         private void EditTextBox_IsVisibleChanged(object sender, DependencyPropertyChangedEventArgs e)
@@ -146,7 +181,7 @@ namespace RayCarrot.WPF
 
         private void TreeViewItem_MouseDown(object sender, MouseButtonEventArgs e)
         {
-            if (ViewModel.DoubleClickToExpand)
+            if (RegistrySelectionVM.DoubleClickToExpand)
                 return;
 
             if (e.LeftButton != MouseButtonState.Pressed)
@@ -159,10 +194,10 @@ namespace RayCarrot.WPF
             }
         }
 
-        private void DialogVMWindow_Closing(object sender, CancelEventArgs e)
+        private void RegistrySelectionDialog_Unloaded(object sender, RoutedEventArgs e)
         {
             // Save values
-            ViewModel.SaveSavedValues();
+            RegistrySelectionVM.SaveSavedValues();
         }
 
         #endregion

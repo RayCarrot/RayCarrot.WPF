@@ -4,7 +4,6 @@ using RayCarrot.CarrotFramework.UI;
 using RayCarrot.Windows;
 using System;
 using System.Collections;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Drawing;
 using System.IO;

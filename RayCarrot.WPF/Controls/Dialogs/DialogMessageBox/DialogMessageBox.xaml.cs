@@ -1,12 +1,14 @@
 ﻿using RayCarrot.CarrotFramework;
+using System;
 using System.Windows;
+using System.Windows.Controls;
 
 namespace RayCarrot.WPF
 {
     /// <summary>
     /// A dialog message box with standard WPF controls
     /// </summary>
-    public partial class DialogMessageBox : Window
+    public partial class DialogMessageBox : UserControl, IDialogBaseControl<DialogMessageViewModel, object>
     {
         #region Constructor
 
@@ -14,67 +16,75 @@ namespace RayCarrot.WPF
         /// Creates a new instance of <see cref="DialogMessageBox"/>
         /// </summary>
         /// <param name="dialogVM">The dialog view model</param>
+        public DialogMessageBox(DialogMessageViewModel dialogVM) : this(dialogVM, null)
+        {
+        }
+
+        /// <summary>
+        /// Creates a new instance of <see cref="DialogMessageBox"/>
+        /// </summary>
+        /// <param name="dialogVM">The dialog view model</param>
+        /// <param name="owner">The owner window</param>
         public DialogMessageBox(DialogMessageViewModel dialogVM, Window owner)
         {
-            DialogVM = dialogVM;
-
-            if (owner != null)
-            {
-                Owner = owner;
-                WindowStartupLocation = WindowStartupLocation.CenterOwner;
-            }
-            else
-            {
-                WindowStartupLocation = WindowStartupLocation.CenterScreen;
-            }
-
             InitializeComponent();
+
+            // Set the data context
+            DataContext = dialogVM;
+
+            // Reset the result
+            DialogResult = ViewModel.DefaultActionResult;
+
+            // Subscribe to events
+            ViewModel.DialogActions?.ForEach(x => x.ActionHandled += DialogAction_ActionHandled);
         }
+
+        #endregion
+
+        #region Protected Properties
+
+        /// <summary>
+        /// The dialog result
+        /// </summary>
+        protected object DialogResult { get; set; }
+
+        #endregion
+
+        #region Public Properties
+
+        /// <summary>
+        /// The view model
+        /// </summary>
+        public DialogMessageViewModel ViewModel => DataContext as DialogMessageViewModel;
+
+        /// <summary>
+        /// The dialog content
+        /// </summary>
+        public object DialogContent => this;
+
+        /// <summary>
+        /// Indicates if the dialog should be resizable
+        /// </summary>
+        public bool Resizable => false;
 
         #endregion
 
         #region Public Methods
 
         /// <summary>
-        /// Shows the dialog and returns the <see cref="DialogResult"/>
+        /// Gets the current result
         /// </summary>
-        /// <returns>The <see cref="DialogResult"/></returns>
-        public new object ShowDialog()
-        {
-            base.ShowDialog();
-            return DialogResult;
-        }
+        /// <returns>The result</returns>
+        public object GetResult() => DialogResult;
 
         #endregion
 
-        #region Properties
+        #region Events
 
         /// <summary>
-        /// The dialog result
+        /// Invoke to request the dialog to close
         /// </summary>
-        public new object DialogResult { get; private set; }
-
-        /// <summary>
-        /// The dialog view model
-        /// </summary>
-        public DialogMessageViewModel DialogVM
-        {
-            get => DataContext as DialogMessageViewModel;
-            set
-            {
-                // Unsubscribe previous events
-                DialogVM?.DialogActions?.ForEach(x => x.ActionHandled -= DialogAction_ActionHandled);
-
-                // Set the data context
-                DataContext = value;
-
-                // Reset the result
-                DialogResult = DialogVM.DefaultActionResult;
-
-                // Subscribe to new events
-                DialogVM?.DialogActions?.ForEach(x => x.ActionHandled += DialogAction_ActionHandled);
-            }
-        }
+        public event EventHandler CloseDialog;
 
         #endregion
 
@@ -83,56 +93,7 @@ namespace RayCarrot.WPF
         private void DialogAction_ActionHandled(object sender, DialogMessageActionHandledEventArgs e)
         {
             DialogResult = e.ActionResult;
-            Close();
-        }
-
-        #endregion
-    }
-
-    /// <summary>
-    /// A generic dialog message box with standard WPF controls
-    /// </summary>
-    public class DialogMessageBox<T> : DialogMessageBox
-    {
-        #region Constructor
-
-        /// <summary>
-        /// Creates a new instance of <see cref="DialogMessageBox"/>
-        /// </summary>
-        /// <param name="dialogVM">The generic dialog view model</param>
-        public DialogMessageBox(DialogMessageViewModel<T> dialogVM, Window owner) : base(dialogVM, owner)
-        {
-        }
-
-        #endregion
-
-        #region Public Methods
-
-        /// <summary>
-        /// Shows the dialog and returns the <see cref="DialogResult"/>
-        /// </summary>
-        /// <returns>The <see cref="DialogResult"/></returns>
-        public new T ShowDialog()
-        {
-            return base.ShowDialog().CastTo<T>();
-        }
-
-        #endregion
-
-        #region Properties
-
-        /// <summary>
-        /// The dialog result
-        /// </summary>
-        public new T DialogResult { get; private set; }
-
-        /// <summary>
-        /// The dialog view model
-        /// </summary>
-        public new DialogMessageViewModel<T> DialogVM
-        {
-            get => base.DialogVM as DialogMessageViewModel<T>;
-            set => base.DialogVM = value;
+            CloseDialog?.Invoke(this, new EventArgs());
         }
 
         #endregion

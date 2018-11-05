@@ -1,5 +1,4 @@
-﻿using RayCarrot.CarrotFramework.UI;
-using System.ComponentModel;
+﻿using System.ComponentModel;
 using System.Windows;
 
 namespace RayCarrot.WPF
