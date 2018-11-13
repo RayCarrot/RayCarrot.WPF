@@ -1,4 +1,5 @@
-﻿using System.Windows;
+﻿using System.Threading.Tasks;
+using System.Windows;
 
 namespace RayCarrot.WPF
 {
@@ -25,14 +26,14 @@ namespace RayCarrot.WPF
 
         #region Methods
 
-        private void BrowseFile(object sender, RoutedEventArgs e)
+        private async void BrowseFileAsync(object sender, RoutedEventArgs e)
         {
-            Browse();
+            await BrowseAsync();
         }
 
-        private void ContextMenu_OpenLocation(object sender, RoutedEventArgs e)
+        private async void ContextMenu_OpenLocationAsync(object sender, RoutedEventArgs e)
         {
-            OpenLocation();
+            await OpenLocationAsync();
         }
 
         private void BrowseButton_DragEnter(object sender, DragEventArgs e)

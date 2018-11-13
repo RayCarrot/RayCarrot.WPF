@@ -1,4 +1,5 @@
 ﻿using RayCarrot.CarrotFramework.UI;
+using System.Threading.Tasks;
 using System.Windows;
 
 namespace RayCarrot.WPF
@@ -16,10 +17,10 @@ namespace RayCarrot.WPF
         /// <param name="dialog">The dialog to show</param>
         /// <param name="owner">The owner window</param>
         /// <returns>The result</returns>
-        public static R ShowDialog<V, R>(this IDialogBaseControl<V, R> dialog, Window owner = null)
+        public static async Task<R> ShowDialogAsync<V, R>(this IDialogBaseControl<V, R> dialog, Window owner = null)
             where V : UserInputViewModel
         {
-            return RCFWPF.DialogBaseManager.ShowDialog(dialog, owner);
+            return await RCFWPF.DialogBaseManager.ShowDialogAsync(dialog, owner);
         }
 
         /// <summary>
@@ -31,11 +32,11 @@ namespace RayCarrot.WPF
         /// <param name="dialog">The dialog to show</param>
         /// <param name="owner">The owner window</param>
         /// <returns>The result</returns>
-        public static R ShowDialog<D, V, R>(this IDialogBaseControl<V, R> dialog, Window owner = null)
+        public static async Task<R> ShowDialogAsync<D, V, R>(this IDialogBaseControl<V, R> dialog, Window owner = null)
             where D : IDialogBaseManager, new()
             where V : UserInputViewModel
         {
-            return new D().ShowDialog(dialog, owner);
+            return await new D().ShowDialogAsync(dialog, owner);
         }
     }
 }

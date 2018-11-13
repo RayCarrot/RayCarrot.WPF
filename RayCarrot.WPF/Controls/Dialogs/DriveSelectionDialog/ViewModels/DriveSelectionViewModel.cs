@@ -8,6 +8,8 @@ using System.Collections.ObjectModel;
 using System.Drawing;
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
+using System.Windows;
 using System.Windows.Input;
 
 namespace RayCarrot.WPF
@@ -38,6 +40,7 @@ namespace RayCarrot.WPF
                 Title = "Select a drive"
             };
             Setup();
+            Drives = new ObservableCollection<DriveViewModel>();
         }
 
         /// <summary>
@@ -47,6 +50,7 @@ namespace RayCarrot.WPF
         {
             BrowseVM = browseVM;
             Setup();
+            Drives = new ObservableCollection<DriveViewModel>();
         }
 
         #endregion
@@ -61,7 +65,7 @@ namespace RayCarrot.WPF
         /// <summary>
         /// The currently available drives
         /// </summary>
-        public ObservableCollection<DriveViewModel> Drives { get; set; }
+        public ObservableCollection<DriveViewModel> Drives { get; }
 
         /// <summary>
         /// The current result
@@ -91,7 +95,6 @@ namespace RayCarrot.WPF
             {
                 CanceledByUser = true
             };
-            Refresh();
         }
 
         #endregion
@@ -110,12 +113,9 @@ namespace RayCarrot.WPF
         /// <summary>
         /// Refreshes the available drives
         /// </summary>
-        public void Refresh()
+        public async Task RefreshAsync()
         {
-            Drives?.Clear();
-
-            if (Drives == null)
-                Drives = new ObservableCollection<DriveViewModel>();
+            Drives.Clear();
 
             try
             {
@@ -230,7 +230,7 @@ namespace RayCarrot.WPF
             catch (Exception ex)
             {
                 ex.HandleUnexpected("Getting drives");
-                RCFUI.MessageUI.DisplayMessage("An error occurred getting the drives", "Error", MessageType.Error);
+                await RCFUI.MessageUI.DisplayMessageAsync("An error occurred getting the drives", "Error", MessageType.Error);
             }
         }
 
@@ -243,7 +243,7 @@ namespace RayCarrot.WPF
         /// <summary>
         /// A command for <see cref="Refresh"/>
         /// </summary>
-        public ICommand RefreshCommand => _RefreshCommand ?? (_RefreshCommand = new RelayCommand(Refresh));
+        public ICommand RefreshCommand => _RefreshCommand ?? (_RefreshCommand = new AsyncRelayCommand(RefreshAsync));
 
         #endregion
     }

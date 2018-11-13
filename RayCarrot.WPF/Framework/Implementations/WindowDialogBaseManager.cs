@@ -1,6 +1,8 @@
 ﻿using RayCarrot.CarrotFramework;
 using RayCarrot.CarrotFramework.UI;
 using System;
+using System.Linq;
+using System.Threading.Tasks;
 using System.Windows;
 
 namespace RayCarrot.WPF
@@ -18,7 +20,7 @@ namespace RayCarrot.WPF
         /// <param name="dialog">The dialog to show</param>
         /// <param name="owner">The owner window</param>
         /// <returns>The result</returns>
-        public R ShowDialog<V, R>(IDialogBaseControl<V, R> dialog, Window owner)
+        public Task<R> ShowDialogAsync<V, R>(IDialogBaseControl<V, R> dialog, Window owner)
             where V : UserInputViewModel
         {
             // Create the window
@@ -30,23 +32,75 @@ namespace RayCarrot.WPF
                 SizeToContent = dialog.Resizable ? SizeToContent.Manual : SizeToContent.WidthAndHeight
             };
 
-            // Set size if resizable
-            if (dialog.Resizable)
+            // Set size properties
+            switch (dialog.BaseSize)
             {
-                window.Height = 475;
-                window.Width = 750;
-                window.MinHeight = 300;
-                window.MinWidth = 400;
+                case DialogBaseSize.Smallest:
+                    if (dialog.Resizable)
+                    {
+                        window.Height = 100;
+                        window.Width = 150;
+                    }
+
+                    window.MinHeight = 100;
+                    window.MinWidth = 150;
+
+                    break;
+
+                case DialogBaseSize.Small:
+                    if (dialog.Resizable)
+                    {
+                        window.Height = 200;
+                        window.Width = 250;
+                    }
+
+                    window.MinHeight = 200;
+                    window.MinWidth = 250;
+
+                    break;
+
+                case DialogBaseSize.Medium:
+                    if (dialog.Resizable)
+                    {
+                        window.Height = 350;
+                        window.Width = 500;
+                    }
+
+                    window.MinHeight = 300;
+                    window.MinWidth = 400;
+
+                    break;
+
+                case DialogBaseSize.Large:
+                    if (dialog.Resizable)
+                    {
+                        window.Height = 475;
+                        window.Width = 750;
+                    }
+
+                    window.MinHeight = 350;
+                    window.MinWidth = 500;
+
+                    break;
+
+                case DialogBaseSize.Largest:
+                    if (dialog.Resizable)
+                    {
+                        window.Height = 600;
+                        window.Width = 900;
+                    }
+
+                    window.MinHeight = 500;
+                    window.MinWidth = 650;
+
+                    break;
             }
 
-            if (owner != null)
-            {
-                // Set startup location
-                window.WindowStartupLocation = WindowStartupLocation.CenterOwner;
+            // Set startup location
+            window.WindowStartupLocation = WindowStartupLocation.CenterOwner;
 
-                // Set owner
-                window.Owner = owner;
-            }
+            // Set owner
+            window.Owner = owner ?? Application.Current.Windows.Cast<Window>().FindItem(x => x.IsActive);
 
             // Attempt to get default Window style from Framework
             window.Style = RCF.GetService<IWPFStyle>(false)?.WindowStyle ?? window.Style;
@@ -66,7 +120,7 @@ namespace RayCarrot.WPF
             dialog.CloseDialog -= Dialog_CloseDialog;
 
             // Return the result
-            return dialog.GetResult();
+            return Task.FromResult(dialog.GetResult());
         }
     }
 }

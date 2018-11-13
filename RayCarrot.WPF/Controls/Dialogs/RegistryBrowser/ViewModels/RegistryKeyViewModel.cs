@@ -114,23 +114,7 @@ namespace RayCarrot.WPF
         /// <summary>
         /// Indicates if the key name is currently being edited
         /// </summary>
-        public virtual bool IsEditing
-        {
-            get => _isEditing;
-            set
-            {
-                if (value == _isEditing)
-                    return;
-
-                if (value)
-                    EditName = Name;
-
-                _isEditing = value;
-
-                if (!IsEditing)
-                    ProcessEdit();
-            }
-        }
+        public virtual bool IsEditing => _isEditing;
 
         /// <summary>
         /// The edited name
@@ -203,7 +187,7 @@ namespace RayCarrot.WPF
         /// <summary>
         /// Opens the key in RegEdit
         /// </summary>
-        public virtual void OpenInRegedit()
+        public virtual async Task OpenInRegeditAsync()
         {
             try
             {
@@ -212,22 +196,22 @@ namespace RayCarrot.WPF
             catch (Exception ex)
             {
                 ex.HandleError("Opening key in RegEdit");
-                RCFUI.MessageUI.DisplayMessage("The selected key could not be opened in RegEdit", "Error Opening Key", MessageType.Error);
+                await RCFUI.MessageUI.DisplayMessageAsync("The selected key could not be opened in RegEdit", "Error Opening Key", MessageType.Error);
             }
         }
 
         /// <summary>
         /// Adds the key to the favorites
         /// </summary>
-        public virtual void AddFavorites()
+        public virtual async Task AddFavoritesAsync()
         {
             // Get the name
-            var result = new StringInputDialog(new StringInputViewModel()
+            var result = await new StringInputDialog(new StringInputViewModel()
             {
                 Title = "Add to Favorites",
                 HeaderText = "Favorite name:",
                 StringInput = Name
-            }).ShowDialog();
+            }).ShowDialogAsync();
 
             // Make sure it was not canceled by the user
             if (result.CanceledByUser)
@@ -236,14 +220,14 @@ namespace RayCarrot.WPF
             // Make sure the name is not empty
             if (result.StringInput.IsNullOrWhiteSpace())
             {
-                RCFUI.MessageUI.DisplayMessage("The name cannot be empty", "Name is not valid", MessageType.Warning);
+                await RCFUI.MessageUI.DisplayMessageAsync("The name cannot be empty", "Name is not valid", MessageType.Warning);
                 return;
             }
 
             // Make sure the name doesn't already exist
             if (RCFWin.RegistryManager.ValueExists(CommonRegistryPaths.RegeditFavoritesPath, result.StringInput, RegistryView.Default))
             {
-                RCFUI.MessageUI.DisplayMessage("The name already exists", "Name is not valid", MessageType.Warning);
+                await RCFUI.MessageUI.DisplayMessageAsync("The name already exists", "Name is not valid", MessageType.Warning);
                 return;
             }
 
@@ -253,19 +237,19 @@ namespace RayCarrot.WPF
                 Registry.SetValue(CommonRegistryPaths.RegeditFavoritesPath, result.StringInput, FullPath);
 
                 // Reset the favorites
-                VM.ResetFavorites();
+                await VM.ResetFavoritesAsync();
             }
             catch (Exception ex)
             {
                 ex.HandleError("Add registry favorites path");
-                RCFUI.MessageUI.DisplayMessage($"An error occurred saving the name{Environment.NewLine}{ex.Message}", MessageType.Error);
+                await RCFUI.MessageUI.DisplayMessageAsync($"An error occurred saving the name{Environment.NewLine}{ex.Message}", MessageType.Error);
             }
         }
 
         /// <summary>
         /// Begins renaming the key
         /// </summary>
-        public void Rename()
+        public async Task RenameAsync()
         {
             // Make sure the key can be edited
             if (!CanEditKey)
@@ -275,13 +259,33 @@ namespace RayCarrot.WPF
             VM.SelectedKey = this;
 
             // Put key into edit mode
-            VM.BeginEdit();
+            await VM.BeginEditAsync();
+        }
+
+        /// <summary>
+        /// Sets the <see cref="IsEditing"/> value
+        /// </summary>
+        /// <param name="isEditing">Indicates if the key is in edit mode</param>
+        /// <returns>The task</returns>
+        public async Task SetIsEditingAsync(bool isEditing)
+        {
+            if (isEditing == _isEditing)
+                return;
+
+            if (isEditing)
+                EditName = Name;
+
+            _isEditing = isEditing;
+            OnPropertyChanged(new PropertyChangedEventArgs(nameof(IsEditing)));
+
+            if (!IsEditing)
+                await ProcessEditAsync();
         }
 
         /// <summary>
         /// Processes the current edit name
         /// </summary>
-        public virtual void ProcessEdit()
+        public virtual async Task ProcessEditAsync()
         {
             // Make sure the key can be edited
             if (!CanEditKey)
@@ -294,14 +298,14 @@ namespace RayCarrot.WPF
             // Make sure the name is not empty
             if (EditName.IsNullOrWhiteSpace())
             {
-                RCFUI.MessageUI.DisplayMessage("The key name can not be blank", "Invalid name", MessageType.Error);
+                await RCFUI.MessageUI.DisplayMessageAsync("The key name can not be blank", "Invalid name", MessageType.Error);
                 return;
             }
 
             // Make sure the name does not contain invalid characters
             if (EditName.Contains("\\"))
             {
-                RCFUI.MessageUI.DisplayMessage(@"The key name can not contain backslashes ('\')", "Invalid name", MessageType.Error);
+                await RCFUI.MessageUI.DisplayMessageAsync(@"The key name can not contain backslashes ('\')", "Invalid name", MessageType.Error);
                 return;
             }
 
@@ -310,7 +314,7 @@ namespace RayCarrot.WPF
                 // Check all sub keys for write permission
                 if (!GetKey().RunAndDispose(x => x.HasSubKeyTreeWritePermissions()))
                 {
-                    RCFUI.MessageUI.DisplayMessage(@"You do not have the required permissions to rename this key", "Error", MessageType.Error);
+                    await RCFUI.MessageUI.DisplayMessageAsync(@"You do not have the required permissions to rename this key", "Error", MessageType.Error);
                     return;
                 }
 
@@ -343,12 +347,12 @@ namespace RayCarrot.WPF
                 VM.OnPropertyChanged(nameof(VM.SelectedKeyFullPath));
 
                 // Refresh the values
-                VM.RefreshValues();
+                await VM.RefreshValuesAsync();
             }
             catch (Exception ex)
             {
                 ex.HandleError("Renaming Registry key", this);
-                RCFUI.MessageUI.DisplayMessage($"Renaming the key failed with the following error message:{Environment.NewLine}{ex.Message}", "Operation Failed", MessageType.Error);
+                await RCFUI.MessageUI.DisplayMessageAsync($"Renaming the key failed with the following error message:{Environment.NewLine}{ex.Message}", "Operation Failed", MessageType.Error);
                 VM.RefreshCommand.Execute();
             }
         }
@@ -374,7 +378,7 @@ namespace RayCarrot.WPF
             catch (Exception ex)
             {
                 ex.HandleError("Getting new sub key name");
-                RCFUI.MessageUI.DisplayMessage("An unknown error occurred", "Error", MessageType.Error);
+                await RCFUI.MessageUI.DisplayMessageAsync("An unknown error occurred", "Error", MessageType.Error);
                 return;
             }
 
@@ -388,7 +392,7 @@ namespace RayCarrot.WPF
             catch (Exception ex)
             {
                 ex.HandleError("Creating sub key");
-                RCFUI.MessageUI.DisplayMessage($"The sub key could not be created with the error message of: {Environment.NewLine}{ex.Message}", "Error", MessageType.Error);
+                await RCFUI.MessageUI.DisplayMessageAsync($"The sub key could not be created with the error message of: {Environment.NewLine}{ex.Message}", "Error", MessageType.Error);
                 return;
             }
 
@@ -401,7 +405,7 @@ namespace RayCarrot.WPF
                 await vm.EnableSynchronizationAsync();
                 Add(vm);
                 vm.IsSelected = true;
-                VM.BeginEdit();
+                await VM.BeginEditAsync();
             }
             catch (Exception ex)
             {
@@ -421,20 +425,20 @@ namespace RayCarrot.WPF
         /// <summary>
         /// Deletes the key
         /// </summary>
-        public virtual void DeleteKey()
+        public virtual async Task DeleteKeyAsync()
         {
             // Make sure the key can be edited
             if (!CanEditKey)
                 return;
 
             // Have user confirm deleting key
-            if (!RCFUI.MessageUI.DisplayMessage("Are you sure you want to permanently delete this key and all of its subkeys? This operation can not be undone and may cause system instability.", "Confirm Delete", MessageType.Warning, true))
+            if (!await RCFUI.MessageUI.DisplayMessageAsync("Are you sure you want to permanently delete this key and all of its subkeys? This operation can not be undone and may cause system instability.", "Confirm Delete", MessageType.Warning, true))
                 return;
 
             // Check all sub keys for write permission
             if (!GetKey().RunAndDispose(x => x.HasSubKeyTreeWritePermissions()))
             {
-                RCFUI.MessageUI.DisplayMessage(@"You do not have the required permissions to delete this key", "Error", MessageType.Error);
+                await RCFUI.MessageUI.DisplayMessageAsync(@"You do not have the required permissions to delete this key", "Error", MessageType.Error);
                 return;
             }
 
@@ -446,7 +450,7 @@ namespace RayCarrot.WPF
             catch (Exception ex)
             {
                 ex.HandleError("Deleting key");
-                RCFUI.MessageUI.DisplayMessage("The key could not be deleted. Some of its subkeys may have been deleted.", "Operation Failed", MessageType.Error);
+                await RCFUI.MessageUI.DisplayMessageAsync("The key could not be deleted. Some of its subkeys may have been deleted.", "Operation Failed", MessageType.Error);
 
                 VM.RefreshCommand.Execute();
                 return;
@@ -555,19 +559,19 @@ namespace RayCarrot.WPF
 
         #region Commands
 
-        private RelayCommand _AddFavoritesCommand;
+        private AsyncRelayCommand _AddFavoritesCommand;
 
         /// <summary>
         /// Command for adding the key to the favorites
         /// </summary>
-        public RelayCommand AddFavoritesCommand => _AddFavoritesCommand ?? (_AddFavoritesCommand = new RelayCommand(AddFavorites));
+        public AsyncRelayCommand AddFavoritesCommand => _AddFavoritesCommand ?? (_AddFavoritesCommand = new AsyncRelayCommand(AddFavoritesAsync));
 
-        private RelayCommand _OpenInRegeditCommand;
+        private AsyncRelayCommand _OpenInRegeditCommand;
 
         /// <summary>
         /// Command for opening the key in RegEdit
         /// </summary>
-        public RelayCommand OpenInRegeditCommand => _OpenInRegeditCommand ?? (_OpenInRegeditCommand = new RelayCommand(OpenInRegedit));
+        public AsyncRelayCommand OpenInRegeditCommand => _OpenInRegeditCommand ?? (_OpenInRegeditCommand = new AsyncRelayCommand(OpenInRegeditAsync));
 
         private AsyncRelayCommand _LoadSubItemsCommand;
 
@@ -583,12 +587,12 @@ namespace RayCarrot.WPF
         /// </summary>
         public AsyncRelayCommand ResetCommand => _ResetCommand ?? (_ResetCommand = new AsyncRelayCommand(ResetAsync));
 
-        private RelayCommand _RenameCommand;
+        private AsyncRelayCommand _RenameCommand;
 
         /// <summary>
         /// Command for renaming the key
         /// </summary>
-        public RelayCommand RenameCommand => _RenameCommand ?? (_RenameCommand = new RelayCommand(Rename, CanEditKey));
+        public AsyncRelayCommand RenameCommand => _RenameCommand ?? (_RenameCommand = new AsyncRelayCommand(RenameAsync, CanEditKey));
 
         private AsyncRelayCommand _AddSubKeyCommand;
 
@@ -597,12 +601,12 @@ namespace RayCarrot.WPF
         /// </summary>
         public AsyncRelayCommand AddSubKeyCommand => _AddSubKeyCommand ?? (_AddSubKeyCommand = new AsyncRelayCommand(AddSubKeyAsync, CanAddSubKey));
 
-        private RelayCommand _DeleteCommand;
+        private AsyncRelayCommand _DeleteCommand;
 
         /// <summary>
         /// Command for deleting the key
         /// </summary>
-        public RelayCommand DeleteCommand => _DeleteCommand ?? (_DeleteCommand = new RelayCommand(DeleteKey, CanEditKey));
+        public AsyncRelayCommand DeleteCommand => _DeleteCommand ?? (_DeleteCommand = new AsyncRelayCommand(DeleteKeyAsync, CanEditKey));
 
         private RelayCommand _CopyKeyNameCommand;
 

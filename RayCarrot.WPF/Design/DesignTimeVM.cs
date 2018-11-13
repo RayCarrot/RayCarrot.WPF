@@ -57,7 +57,7 @@ namespace RayCarrot.WPF
                 {
                     Title = "Select a Drive"
                 });
-                vm.Refresh();
+                _ = vm.RefreshAsync();
                 return vm;
             }
         }

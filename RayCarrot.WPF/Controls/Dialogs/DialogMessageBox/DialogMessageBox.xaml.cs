@@ -67,6 +67,11 @@ namespace RayCarrot.WPF
         /// </summary>
         public bool Resizable => false;
 
+        /// <summary>
+        /// The base size for the dialog
+        /// </summary>
+        public DialogBaseSize BaseSize => DialogBaseSize.Small;
+
         #endregion
 
         #region Public Methods

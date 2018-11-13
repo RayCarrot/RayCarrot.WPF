@@ -1,6 +1,7 @@
 ﻿using RayCarrot.CarrotFramework;
 using RayCarrot.Windows;
 using System.Runtime.CompilerServices;
+using System.Threading.Tasks;
 
 namespace RayCarrot.WPF
 {
@@ -19,12 +20,12 @@ namespace RayCarrot.WPF
         /// </summary>
         /// <param name="registryBrowserViewModel">The Registry browser information</param>
         /// <returns>The Registry browser result</returns>
-        public RegistryBrowserResult BrowseRegistryKey(RegistryBrowserViewModel registryBrowserViewModel, [CallerMemberName] string origin = "", [CallerFilePath] string filePath = "", [CallerLineNumber] int lineNumber = 0)
+        public async Task<RegistryBrowserResult> BrowseRegistryKeyAsync(RegistryBrowserViewModel registryBrowserViewModel, [CallerMemberName] string origin = "", [CallerFilePath] string filePath = "", [CallerLineNumber] int lineNumber = 0)
         {
             if (LogRequests)
                 RCF.Logger.LogTraceSource($"A browse Registry key dialog was opened with the title of: {registryBrowserViewModel.Title}", origin: origin, filePath: filePath, lineNumber: lineNumber);
 
-            return new RegistrySelectionDialog(registryBrowserViewModel).ShowDialog();
+            return await new RegistrySelectionDialog(registryBrowserViewModel).ShowDialogAsync();
         }
     }
 }

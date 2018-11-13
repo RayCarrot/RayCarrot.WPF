@@ -4,6 +4,7 @@ using RayCarrot.CarrotFramework.UI;
 using System;
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -66,23 +67,28 @@ namespace RayCarrot.WPF
         /// </summary>
         public bool Resizable => true;
 
+        /// <summary>
+        /// The base size for the dialog
+        /// </summary>
+        public DialogBaseSize BaseSize => DialogBaseSize.Large;
+
         #endregion
 
         #region Private Methods
 
-        private void AttemptConfirm()
+        private async Task AttemptConfirmAsync()
         {
             DriveSelectionVM.UpdateReturnValue();
 
             if (DriveSelectionVM.Result.SelectedDrives == null || DriveSelectionVM.Result.SelectedDrives.Count < 1 || DriveSelectionVM.Result.SelectedDrives.All(x => x == null))
             {
-                RCFUI.MessageUI.DisplayMessage("At least one drive has to be selected", "No drive selected", MessageType.Information);
+                await RCFUI.MessageUI.DisplayMessageAsync("At least one drive has to be selected", "No drive selected", MessageType.Information);
                 return;
             }
             if (!DriveSelectionVM.Result.SelectedDrives.Select(x => new FileSystemPath(x)).DirectoriesExist())
             {
-                RCFUI.MessageUI.DisplayMessage("One or more of the selected drives could not be found", "Invalid selection", MessageType.Information);
-                DriveSelectionVM.Refresh();
+                await RCFUI.MessageUI.DisplayMessageAsync("One or more of the selected drives could not be found", "Invalid selection", MessageType.Information);
+                await DriveSelectionVM.RefreshAsync();
                 return;
             }
             if (!DriveSelectionVM.BrowseVM.AllowNonReadyDrives && DriveSelectionVM.Result.SelectedDrives.Any(x =>
@@ -98,8 +104,8 @@ namespace RayCarrot.WPF
                 }
             }))
             {
-                RCFUI.MessageUI.DisplayMessage("One or more of the selected drives are not ready", "Invalid selection", MessageType.Information);
-                DriveSelectionVM.Refresh();
+                await RCFUI.MessageUI.DisplayMessageAsync("One or more of the selected drives are not ready", "Invalid selection", MessageType.Information);
+                await DriveSelectionVM.RefreshAsync();
                 return;
             }
 
@@ -134,9 +140,9 @@ namespace RayCarrot.WPF
 
         #region Event Handlers
 
-        private void Continue_Click(object sender, RoutedEventArgs e)
+        private async void Continue_Click(object sender, RoutedEventArgs e)
         {
-            AttemptConfirm();
+            await AttemptConfirmAsync();
         }
 
         private void Cancel_Click(object sender, RoutedEventArgs e)
@@ -145,13 +151,18 @@ namespace RayCarrot.WPF
             CloseDialog?.Invoke(this, new EventArgs());
         }
 
-        private void DataGrid_KeyDown(object sender, KeyEventArgs e)
+        private async void DataGrid_KeyDown(object sender, KeyEventArgs e)
         {
             if (e.Key == Key.Enter)
             {
                 e.Handled = true;
-                AttemptConfirm();
+                await AttemptConfirmAsync();
             }
+        }
+
+        private async void UserControl_Loaded(object sender, RoutedEventArgs e)
+        {
+            await DriveSelectionVM.RefreshAsync();
         }
 
         #endregion

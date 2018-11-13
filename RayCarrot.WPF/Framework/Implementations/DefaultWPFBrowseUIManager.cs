@@ -3,6 +3,7 @@ using RayCarrot.CarrotFramework;
 using RayCarrot.CarrotFramework.UI;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
+using System.Threading.Tasks;
 
 namespace RayCarrot.WPF
 {
@@ -21,19 +22,26 @@ namespace RayCarrot.WPF
         /// </summary>
         /// <param name="directoryBrowserModel">The directory browser information</param>
         /// <returns>The directory browser result</returns>
-        protected abstract DirectoryBrowserResult BrowseDirectoryImplementation(DirectoryBrowserViewModel directoryBrowserModel);
+        protected abstract Task<DirectoryBrowserResult> BrowseDirectoryImplementationAsync(DirectoryBrowserViewModel directoryBrowserModel);
 
         /// <summary>
         /// Allows the user to browse for a directory
         /// </summary>
         /// <param name="directoryBrowserModel">The directory browser information</param>
         /// <returns>The directory browser result</returns>
-        public virtual DirectoryBrowserResult BrowseDirectory(DirectoryBrowserViewModel directoryBrowserModel, [CallerMemberName] string origin = "", [CallerFilePath] string filePath = "", [CallerLineNumber] int lineNumber = 0)
+        public virtual async Task<DirectoryBrowserResult> BrowseDirectoryAsync(DirectoryBrowserViewModel directoryBrowserModel, [CallerMemberName] string origin = "", [CallerFilePath] string filePath = "", [CallerLineNumber] int lineNumber = 0)
         {
             if (LogRequests)
                 RCF.Logger.LogTraceSource($"A browse directory dialog was opened with the title of: {directoryBrowserModel.Title}", origin: origin, filePath: filePath, lineNumber: lineNumber);
 
-            return BrowseDirectoryImplementation(directoryBrowserModel);
+            var result = await BrowseDirectoryImplementationAsync(directoryBrowserModel);
+
+            if (result.CanceledByUser)
+                RCF.Logger.LogTraceSource($"The browse directory dialog was canceled by the user");
+            else
+                RCF.Logger.LogTraceSource($"The browse directory dialog returned the selected directory paths {result.SelectedDirectories.JoinItems(", ")}");
+
+            return result;
         }
 
         /// <summary>
@@ -41,7 +49,7 @@ namespace RayCarrot.WPF
         /// </summary>
         /// <param name="fileBrowserModel">The file browser information</param>
         /// <returns>The file browser result</returns>
-        public virtual FileBrowserResult BrowseFile(FileBrowserViewModel fileBrowserModel, [CallerMemberName] string origin = "", [CallerFilePath] string filePath = "", [CallerLineNumber] int lineNumber = 0)
+        public virtual Task<FileBrowserResult> BrowseFileAsync(FileBrowserViewModel fileBrowserModel, [CallerMemberName] string origin = "", [CallerFilePath] string filePath = "", [CallerLineNumber] int lineNumber = 0)
         {
             if (LogRequests)
                 RCF.Logger.LogTraceSource($"A browse file dialog was opened with the title of: {fileBrowserModel.Title}", origin: origin, filePath: filePath, lineNumber: lineNumber);
@@ -66,12 +74,12 @@ namespace RayCarrot.WPF
                 RCF.Logger.LogTraceSource($"The browse file dialog returned the selected file paths {filedialog.FileNames.JoinItems(", ")}");
 
             // Return the result
-            return new FileBrowserResult()
+            return Task.FromResult(new FileBrowserResult()
             {
                 CanceledByUser = canceled,
                 SelectedFile = filedialog.FileName,
                 SelectedFiles = new List<string>(filedialog.FileNames)
-            };
+            });
         }
 
         /// <summary>
@@ -79,7 +87,7 @@ namespace RayCarrot.WPF
         /// </summary>
         /// <param name="saveFileModel">The save file browser information</param>
         /// <returns>The save file result</returns>
-        public virtual SaveFileResult SaveFile(SaveFileViewModel saveFileModel, [CallerMemberName] string origin = "", [CallerFilePath] string filePath = "", [CallerLineNumber] int lineNumber = 0)
+        public virtual Task<SaveFileResult> SaveFileAsync(SaveFileViewModel saveFileModel, [CallerMemberName] string origin = "", [CallerFilePath] string filePath = "", [CallerLineNumber] int lineNumber = 0)
         {
             if (LogRequests)
                 RCF.Logger.LogTraceSource($"A save file dialog was opened with the title of: {saveFileModel.Title}", origin: origin, filePath: filePath, lineNumber: lineNumber);
@@ -102,11 +110,11 @@ namespace RayCarrot.WPF
                 RCF.Logger.LogTraceSource($"The save file dialog returned the selected file path {savedialog.FileName}");
 
             // Return the result
-            return new SaveFileResult()
+            return Task.FromResult(new SaveFileResult()
             {
                 CanceledByUser = canceled,
                 SelectedFileLocation = savedialog.FileName
-            };
+            });
         }
 
         /// <summary>
@@ -114,7 +122,7 @@ namespace RayCarrot.WPF
         /// </summary>
         /// <param name="driveBrowserModel">The drive browser information</param>
         /// <returns>The browse drive result</returns>
-        public virtual DriveBrowserResult BrowseDrive(DriveBrowserViewModel driveBrowserModel, [CallerMemberName] string origin = "", [CallerFilePath] string filePath = "", [CallerLineNumber] int lineNumber = 0)
+        public virtual async Task<DriveBrowserResult> BrowseDriveAsync(DriveBrowserViewModel driveBrowserModel, [CallerMemberName] string origin = "", [CallerFilePath] string filePath = "", [CallerLineNumber] int lineNumber = 0)
         {
             if (LogRequests)
                 RCF.Logger.LogTraceSource($"A browse drive dialog was opened with the title of: {driveBrowserModel.Title}", origin: origin, filePath: filePath, lineNumber: lineNumber);
@@ -123,7 +131,7 @@ namespace RayCarrot.WPF
             var driveSelectionDialog = new DriveSelectionDialog(driveBrowserModel);
 
             // Show the dialog and get the result
-            var result = driveSelectionDialog.ShowDialog();
+            var result = await driveSelectionDialog.ShowDialogAsync();
 
             if (result.CanceledByUser)
                 RCF.Logger.LogTraceSource($"The browse drive dialog was canceled by the user");

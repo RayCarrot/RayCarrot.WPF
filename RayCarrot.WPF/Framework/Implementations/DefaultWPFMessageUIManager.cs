@@ -1,6 +1,7 @@
 ﻿using RayCarrot.CarrotFramework;
 using RayCarrot.CarrotFramework.UI;
 using System.Runtime.CompilerServices;
+using System.Threading.Tasks;
 using System.Windows;
 
 namespace RayCarrot.WPF
@@ -23,7 +24,7 @@ namespace RayCarrot.WPF
         /// <param name="messageType">The type of message, determining its visual appearance</param>
         /// <param name="allowCancel">True if the option to cancel is present</param>
         /// <returns>True if the user accepted the message, otherwise false</returns>
-        public virtual bool DisplayMessage(string message, string header, MessageType messageType, bool allowCancel, [CallerMemberName]string origin = "", [CallerFilePath]string filePath = "", [CallerLineNumber]int lineNumber = 0)
+        public virtual Task<bool> DisplayMessageAsync(string message, string header, MessageType messageType, bool allowCancel, [CallerMemberName]string origin = "", [CallerFilePath]string filePath = "", [CallerLineNumber]int lineNumber = 0)
         {
             if (LogRequests)
                 RCF.Logger.LogTraceSource($"A message was displayed with the content of: {message}", origin: origin, filePath: filePath, lineNumber: lineNumber);
@@ -57,9 +58,10 @@ namespace RayCarrot.WPF
                     break;
             }
 
+            // TODO: Run on UI thread?
             var result = MessageBox.Show(message, header, allowCancel ? MessageBoxButton.OKCancel : MessageBoxButton.OK, image);
 
-            return !allowCancel ? true : result == MessageBoxResult.OK;
+            return Task.FromResult(!allowCancel ? true : result == MessageBoxResult.OK);
         }
     }
 }

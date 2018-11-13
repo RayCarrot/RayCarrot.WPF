@@ -144,8 +144,8 @@
                     <HierarchicalDataTemplate ItemsSource="{Binding}">
                         <StackPanel Orientation="Horizontal">
                             <Image Width="16" Margin="3" Source="{Binding Path=AccessDenied, Converter={local:AccessDeniedToIconConverter}}" MouseLeftButtonDown="TreeViewItem_MouseDown" />
-                            <TextBlock VerticalAlignment="Center" Text="{Binding Path=Name}" Visibility="{Binding Path=IsEditing, Converter={local:InvertedBooleanToVisibilityConverter}}" MouseLeftButtonDown="TreeViewItem_MouseDown"/>
-                            <TextBox Text="{Binding Path=EditName}" Visibility="{Binding Path=IsEditing,Converter={local:BooleanToVisibilityConverter}}"
+                            <TextBlock VerticalAlignment="Center" Text="{Binding Path=Name}" Visibility="{Binding Path=IsEditing, Converter={local:InvertedBooleanToVisibilityConverter}, Mode=OneWay}" MouseLeftButtonDown="TreeViewItem_MouseDown"/>
+                            <TextBox Text="{Binding Path=EditName}" Visibility="{Binding Path=IsEditing, Converter={local:BooleanToVisibilityConverter}, Mode=OneWay}"
                                      KeyDown="TextBox_KeyDown" LostFocus="EditTextBox_LostFocus" IsVisibleChanged="EditTextBox_IsVisibleChanged" Loaded="TextBox_Loaded" />
                         </StackPanel>
                     </HierarchicalDataTemplate>

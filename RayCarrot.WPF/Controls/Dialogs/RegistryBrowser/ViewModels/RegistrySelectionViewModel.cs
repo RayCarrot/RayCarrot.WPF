@@ -63,8 +63,6 @@ namespace RayCarrot.WPF
 
         private bool _showEmptyDefaultValues;
 
-        private RegistryKeyViewModel _editingKey;
-
         #endregion
 
         #region Public Properties
@@ -141,7 +139,7 @@ namespace RayCarrot.WPF
 
                 _showEmptyDefaultValues = value;
 
-                RefreshValues();
+                _ = RefreshValuesAsync();
             }
         }
 
@@ -168,7 +166,7 @@ namespace RayCarrot.WPF
                 OpenInRegeditCommand.CanExecuteCommand = SelectedKey != null;
 
                 // Update the values
-                RefreshValues();
+                _ = RefreshValuesAsync();
             }
         }
 
@@ -189,23 +187,7 @@ namespace RayCarrot.WPF
         /// <summary>
         /// The key currently being edited
         /// </summary>
-        public RegistryKeyViewModel EditingKey
-        {
-            get => _editingKey;
-            set
-            {
-                if (value == _editingKey)
-                    return;
-
-                if (_editingKey != null)
-                    _editingKey.IsEditing = false;
-
-                _editingKey = value;
-
-                if (EditingKey != null)
-                    EditingKey.IsEditing = true;
-            }
-        }
+        public virtual RegistryKeyViewModel EditingKey { get; private set; }
 
         /// <summary>
         /// True if nodes should be automatically selected when expanded
@@ -239,6 +221,25 @@ namespace RayCarrot.WPF
         #endregion
 
         #region Public Method
+
+        /// <summary>
+        /// Sets the key currently being edited
+        /// </summary>
+        /// <param name="key">The new key to edit, or null if no keys should be editing</param>
+        /// <returns>The task</returns>
+        public async Task SetEditingKeyAsync(RegistryKeyViewModel key)
+        {
+            if (key == EditingKey)
+                return;
+
+            if (EditingKey != null)
+                await EditingKey.SetIsEditingAsync(false);
+
+            EditingKey = key;
+
+            if (EditingKey != null)
+                await EditingKey.SetIsEditingAsync(true);
+        }
 
         /// <summary>
         /// Retrieves the saved values
@@ -312,7 +313,7 @@ namespace RayCarrot.WPF
                 SelectedKey = Keys[0];
 
                 // Reset the favorites
-                ResetFavorites();
+                await ResetFavoritesAsync();
             }
             finally
             {
@@ -323,7 +324,7 @@ namespace RayCarrot.WPF
         /// <summary>
         /// Resets the favorites
         /// </summary>
-        public virtual void ResetFavorites()
+        public virtual async Task ResetFavoritesAsync()
         {
             Favorites.Clear();
 
@@ -344,7 +345,7 @@ namespace RayCarrot.WPF
             catch (Exception ex)
             {
                 ex.HandleError("Getting Registry favorites");
-                RCFUI.MessageUI.DisplayMessage("Could not get the saved favorites", "Unknown error", MessageType.Error);
+                await RCFUI.MessageUI.DisplayMessageAsync("Could not get the saved favorites", "Unknown error", MessageType.Error);
             }
         }
 
@@ -355,12 +356,12 @@ namespace RayCarrot.WPF
         public virtual async Task ExpandToKeyAsync()
         {
             // Get the key
-            var result = new StringInputDialog(new StringInputViewModel()
+            var result = await new StringInputDialog(new StringInputViewModel()
             {
                 Title = "Expand to Key",
                 HeaderText = "Enter the key path:",
                 StringInput = SelectedKey?.FullPath
-            }).ShowDialog();
+            }).ShowDialogAsync();
 
             // Make sure it was not canceled
             if (result.CanceledByUser)
@@ -474,21 +475,21 @@ namespace RayCarrot.WPF
         /// <summary>
         /// Opens the currently selected key in RegEdit
         /// </summary>
-        public virtual void OpenInRegedit()
+        public virtual async Task OpenInRegeditAsync()
         {
             if (SelectedKey == null)
             {
-                RCFUI.MessageUI.DisplayMessage("No key has been selected", "Error Opening Key", MessageType.Information);
+                await RCFUI.MessageUI.DisplayMessageAsync("No key has been selected", "Error Opening Key", MessageType.Information);
                 return;
             }
 
-            SelectedKey.OpenInRegedit();
+            await SelectedKey.OpenInRegeditAsync();
         }
 
         /// <summary>
         /// Refreshes the list of values
         /// </summary>
-        public virtual void RefreshValues()
+        public virtual async Task RefreshValuesAsync()
         {
             // Clear the values
             Values.Clear();
@@ -523,34 +524,34 @@ namespace RayCarrot.WPF
             catch (Exception ex)
             {
                 ex.HandleExpected("Getting Registry key values");
-                RCFUI.MessageUI.DisplayMessage("The Registry key values could not be obtained for the selected key", "Error retrieving values", MessageType.Error);
+                await RCFUI.MessageUI.DisplayMessageAsync("The Registry key values could not be obtained for the selected key", "Error retrieving values", MessageType.Error);
             }
         }
 
         /// <summary>
         /// Begins editing of the currently selected key
         /// </summary>
-        public virtual void BeginEdit()
+        public virtual async Task BeginEditAsync()
         {
             // Make sure a key is selected and the selected key has a parent key in the list and it does not have access denied
             if (SelectedKey != null && SelectedKey.Parent != null && !SelectedKey.AccessDenied && SelectedKey.CanEditKey)
-                EditingKey = SelectedKey;
+                await SetEditingKeyAsync(SelectedKey);
         }
 
         /// <summary>
         /// End editing of key in edit state
         /// </summary>
-        public virtual void EndEdit()
+        public virtual async Task EndEditAsync()
         {
-            EditingKey = null;
+            await SetEditingKeyAsync(null);
         }
 
         /// <summary>
         /// Deletes the selected key
         /// </summary>
-        public virtual void DeleteKey()
+        public virtual async Task DeleteKeyAsync()
         {
-            SelectedKey?.DeleteKey();
+            await SelectedKey?.DeleteKeyAsync();
         }
 
         #endregion
@@ -590,12 +591,12 @@ namespace RayCarrot.WPF
         /// </summary>
         public AsyncRelayCommand ExpandToKeyCommand => _ExpandToKeyCommand ?? (_ExpandToKeyCommand = new AsyncRelayCommand(ExpandToKeyAsync));
 
-        private RelayCommand _OpenInRegeditCommand;
+        private AsyncRelayCommand _OpenInRegeditCommand;
 
         /// <summary>
         /// Command for opening the selected key in RegEdit
         /// </summary>
-        public RelayCommand OpenInRegeditCommand => _OpenInRegeditCommand ?? (_OpenInRegeditCommand = new RelayCommand(OpenInRegedit, SelectedKey != null));
+        public AsyncRelayCommand OpenInRegeditCommand => _OpenInRegeditCommand ?? (_OpenInRegeditCommand = new AsyncRelayCommand(OpenInRegeditAsync, SelectedKey != null));
 
         private AsyncRelayCommand _RefreshCommand;
 
@@ -604,26 +605,26 @@ namespace RayCarrot.WPF
         /// </summary>
         public AsyncRelayCommand RefreshCommand => _RefreshCommand ?? (_RefreshCommand = new AsyncRelayCommand(RefreshAsync));
 
-        private RelayCommand _BeginEditCommand;
+        private AsyncRelayCommand _BeginEditCommand;
 
         /// <summary>
         /// Command for beginning editing of the selected key
         /// </summary>
-        public RelayCommand BeginEditCommand => _BeginEditCommand ?? (_BeginEditCommand = new RelayCommand(BeginEdit, !BrowseVM.DisableEditing));
+        public AsyncRelayCommand BeginEditCommand => _BeginEditCommand ?? (_BeginEditCommand = new AsyncRelayCommand(BeginEditAsync, !BrowseVM.DisableEditing));
 
-        private RelayCommand _EndEditCommand;
+        private AsyncRelayCommand _EndEditCommand;
 
         /// <summary>
         /// Command for ending editing of key in edit state
         /// </summary>
-        public RelayCommand EndEditCommand => _EndEditCommand ?? (_EndEditCommand = new RelayCommand(EndEdit));
+        public AsyncRelayCommand EndEditCommand => _EndEditCommand ?? (_EndEditCommand = new AsyncRelayCommand(EndEditAsync));
 
-        private RelayCommand _DeleteKeyCommand;
+        private AsyncRelayCommand _DeleteKeyCommand;
 
         /// <summary>
         /// Command for deleting the selected key
         /// </summary>
-        public RelayCommand DeleteKeyCommand => _DeleteKeyCommand ?? (_DeleteKeyCommand = new RelayCommand(DeleteKey, !BrowseVM.DisableEditing));
+        public AsyncRelayCommand DeleteKeyCommand => _DeleteKeyCommand ?? (_DeleteKeyCommand = new AsyncRelayCommand(DeleteKeyAsync, !BrowseVM.DisableEditing));
 
         #endregion
     }

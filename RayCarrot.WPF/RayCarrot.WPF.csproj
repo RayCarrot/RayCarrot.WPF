@@ -96,8 +96,8 @@
     <Reference Include="Microsoft.Extensions.Options.ConfigurationExtensions, Version=2.1.1.0, Culture=neutral, PublicKeyToken=adb9793829ddae60, processorArchitecture=MSIL">
       <HintPath>..\..\packages\Microsoft.Extensions.Options.ConfigurationExtensions.2.1.1\lib\netstandard2.0\Microsoft.Extensions.Options.ConfigurationExtensions.dll</HintPath>
     </Reference>
-    <Reference Include="Microsoft.Extensions.Primitives, Version=2.1.1.0, Culture=neutral, PublicKeyToken=adb9793829ddae60, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\Microsoft.Extensions.Primitives.2.1.1\lib\netstandard2.0\Microsoft.Extensions.Primitives.dll</HintPath>
+    <Reference Include="Microsoft.Extensions.Primitives, Version=2.1.6.0, Culture=neutral, PublicKeyToken=adb9793829ddae60, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\Microsoft.Extensions.Primitives.2.1.6\lib\netstandard2.0\Microsoft.Extensions.Primitives.dll</HintPath>
     </Reference>
     <Reference Include="Newtonsoft.Json, Version=11.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
       <HintPath>..\..\packages\Newtonsoft.Json.11.0.2\lib\net45\Newtonsoft.Json.dll</HintPath>
@@ -105,14 +105,14 @@
     <Reference Include="PropertyChanged, Version=2.5.13.0, Culture=neutral, PublicKeyToken=ee3ee20bcf148ddd, processorArchitecture=MSIL">
       <HintPath>..\..\packages\PropertyChanged.Fody.2.5.13\lib\net452\PropertyChanged.dll</HintPath>
     </Reference>
-    <Reference Include="RayCarrot.CarrotFramework, Version=1.0.30.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\RayCarrot.CarrotFramework.1.0.30\lib\netstandard2.0\RayCarrot.CarrotFramework.dll</HintPath>
+    <Reference Include="RayCarrot.CarrotFramework, Version=1.1.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\RayCarrot.CarrotFramework.1.1.0\lib\netstandard2.0\RayCarrot.CarrotFramework.dll</HintPath>
     </Reference>
-    <Reference Include="RayCarrot.CarrotFramework.IO, Version=1.0.29.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\RayCarrot.CarrotFramework.IO.1.0.29\lib\netstandard2.0\RayCarrot.CarrotFramework.IO.dll</HintPath>
+    <Reference Include="RayCarrot.CarrotFramework.IO, Version=1.1.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\RayCarrot.CarrotFramework.IO.1.1.0\lib\netstandard2.0\RayCarrot.CarrotFramework.IO.dll</HintPath>
     </Reference>
-    <Reference Include="RayCarrot.CarrotFramework.UI, Version=1.0.25.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\RayCarrot.CarrotFramework.UI.1.0.25\lib\netstandard2.0\RayCarrot.CarrotFramework.UI.dll</HintPath>
+    <Reference Include="RayCarrot.CarrotFramework.UI, Version=1.1.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\RayCarrot.CarrotFramework.UI.1.1.0\lib\netstandard2.0\RayCarrot.CarrotFramework.UI.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Buffers, Version=4.0.3.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
@@ -169,6 +169,7 @@
     <Compile Include="Controls\BrowseBox\BrowseTypes.cs" />
     <Compile Include="Controls\BrowseBox\BrowseValidationRules.cs" />
     <Compile Include="Controls\BrowseControl.cs" />
+    <Compile Include="Controls\Dialogs\DialogBaseSize.cs" />
     <Compile Include="Controls\Dialogs\IDialogBaseControl.cs" />
     <Compile Include="Framework\Implementations\WindowDialogBaseManager.cs" />
     <Compile Include="Framework\Interfaces\IDialogBaseManager.cs" />
@@ -291,4 +292,11 @@
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="..\..\packages\Fody.3.2.12\build\Fody.targets" Condition="Exists('..\..\packages\Fody.3.2.12\build\Fody.targets')" />
+  <Import Project="..\..\packages\Fody.3.2.17\build\Fody.targets" Condition="Exists('..\..\packages\Fody.3.2.17\build\Fody.targets')" />
+  <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
+    <PropertyGroup>
+      <ErrorText>This project references NuGet package(s) that are missing on this computer. Use NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
+    </PropertyGroup>
+    <Error Condition="!Exists('..\..\packages\Fody.3.2.17\build\Fody.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\..\packages\Fody.3.2.17\build\Fody.targets'))" />
+  </Target>
 </Project>

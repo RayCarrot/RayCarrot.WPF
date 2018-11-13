@@ -1,6 +1,7 @@
 ﻿using RayCarrot.CarrotFramework.UI;
 using RayCarrot.Windows;
 using System;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -45,17 +46,17 @@ namespace RayCarrot.WPF
 
         #region Private Methods
 
-        private void AttemptConfirm()
+        private async Task AttemptConfirmAsync()
         {
             if (!RCFWin.RegistryManager.KeyExists(RegistrySelectionVM.SelectedKeyFullPath, RegistrySelectionVM.CurrentRegistryView))
             {
-                RCFUI.MessageUI.DisplayMessage("The selected key could not be found", "Invalid selection", MessageType.Information);
+                await RCFUI.MessageUI.DisplayMessageAsync("The selected key could not be found", "Invalid selection", MessageType.Information);
                 return;
             }
 
             if (RegistrySelectionVM.BrowseVM.BrowseValue && RegistrySelectionVM.SelectedValue == null)
             {
-                RCFUI.MessageUI.DisplayMessage("A value has to be selected", "Invalid selection", MessageType.Information);
+                await RCFUI.MessageUI.DisplayMessageAsync("A value has to be selected", "Invalid selection", MessageType.Information);
                 return;
             }
 
@@ -107,6 +108,11 @@ namespace RayCarrot.WPF
         public bool Resizable => true;
 
         /// <summary>
+        /// The base size for the dialog
+        /// </summary>
+        public DialogBaseSize BaseSize => DialogBaseSize.Large;
+
+        /// <summary>
         /// Indicates if the dialog was canceled by the user, default is true
         /// </summary>
         public bool CanceledByUser { get; set; }
@@ -145,9 +151,9 @@ namespace RayCarrot.WPF
             RegistrySelectionVM.SelectedKey = e.NewValue as RegistryKeyViewModel;
         }
 
-        private void Continue_Click(object sender, RoutedEventArgs e)
+        private async void Continue_Click(object sender, RoutedEventArgs e)
         {
-            AttemptConfirm();
+            await AttemptConfirmAsync();
         }
 
         private void Cancel_Click(object sender, RoutedEventArgs e)
@@ -156,9 +162,9 @@ namespace RayCarrot.WPF
             CloseDialog?.Invoke(this, new EventArgs());
         }
 
-        private void EditTextBox_LostFocus(object sender, RoutedEventArgs e)
+        private async void EditTextBox_LostFocus(object sender, RoutedEventArgs e)
         {
-            RegistrySelectionVM.EndEdit();
+            await RegistrySelectionVM.EndEditAsync();
         }
 
         private void EditTextBox_IsVisibleChanged(object sender, DependencyPropertyChangedEventArgs e)
@@ -179,7 +185,7 @@ namespace RayCarrot.WPF
             }
         }
 
-        private void TreeViewItem_MouseDown(object sender, MouseButtonEventArgs e)
+        private async void TreeViewItem_MouseDown(object sender, MouseButtonEventArgs e)
         {
             if (RegistrySelectionVM.DoubleClickToExpand)
                 return;
@@ -189,7 +195,7 @@ namespace RayCarrot.WPF
 
             if (sender is FrameworkElement fe && fe.DataContext is RegistryKeyViewModel vm && vm.IsSelected)
             {
-                vm.Rename();
+                await vm.RenameAsync();
                 e.Handled = true;
             }
         }

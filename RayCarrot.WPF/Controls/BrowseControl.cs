@@ -6,6 +6,7 @@ using RayCarrot.Windows;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 
@@ -45,12 +46,12 @@ namespace RayCarrot.WPF
             return BrowseType == BrowseTypes.Directory || BrowseType == BrowseTypes.File || BrowseType == BrowseTypes.Drive;
         }
 
-        protected virtual void Browse()
+        protected virtual async Task BrowseAsync()
         {
             switch (BrowseType)
             {
                 case BrowseTypes.File:
-                    var fileResult = RCFUI.BrowseUI.BrowseFile(new FileBrowserViewModel()
+                    var fileResult = await RCFUI.BrowseUI.BrowseFileAsync(new FileBrowserViewModel()
                     {
                         Title = "Select a file",
                         DefaultDirectory = IsPathValid() ? new FileSystemPath(FilePath).Parent.FullPath : InitialDirectory,
@@ -65,7 +66,7 @@ namespace RayCarrot.WPF
                     break;
 
                 case BrowseTypes.Directory:
-                    var dirResult = RCFUI.BrowseUI.BrowseDirectory(new DirectoryBrowserViewModel()
+                    var dirResult = await RCFUI.BrowseUI.BrowseDirectoryAsync(new DirectoryBrowserViewModel()
                     {
                         Title = "Select a file",
                         DefaultDirectory = UseCurrentPathAsDefaultDirectoryIfValid && IsPathValid() ? new FileSystemPath(FilePath).FullPath : InitialDirectory,
@@ -80,7 +81,7 @@ namespace RayCarrot.WPF
                     break;
 
                 case BrowseTypes.RegistryKey:
-                    var keyResult = RCFWin.RegistryBrowseUIManager.BrowseRegistryKey(new RegistryBrowserViewModel()
+                    var keyResult = await RCFWin.RegistryBrowseUIManager.BrowseRegistryKeyAsync(new RegistryBrowserViewModel()
                     {
                         Title = "Select a Registry key",
                         AllowCustomRegistryView = AllowCustomRegistryView,
@@ -97,7 +98,7 @@ namespace RayCarrot.WPF
                     break;
 
                 case BrowseTypes.Drive:
-                    var driveResult = RCFUI.BrowseUI.BrowseDrive(new DriveBrowserViewModel()
+                    var driveResult = await RCFUI.BrowseUI.BrowseDriveAsync(new DriveBrowserViewModel()
                     {
                         Title = "Select a drive",
                         DefaultDirectory = UseCurrentPathAsDefaultDirectoryIfValid && IsPathValid() ? new FileSystemPath(FilePath).FullPath : InitialDirectory,
@@ -117,11 +118,11 @@ namespace RayCarrot.WPF
             }
         }
 
-        protected virtual void OpenLocation()
+        protected virtual async Task OpenLocationAsync()
         {
             if (!IsPathValid())
             {
-                RCFUI.MessageUI.DisplayMessage($"The path {FilePath} does not exist", "Path not found", MessageType.Error);
+                await RCFUI.MessageUI.DisplayMessageAsync($"The path {FilePath} does not exist", "Path not found", MessageType.Error);
                 return;
             }
 
