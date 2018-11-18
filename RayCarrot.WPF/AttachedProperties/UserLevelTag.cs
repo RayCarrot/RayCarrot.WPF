@@ -1,4 +1,5 @@
 ﻿using RayCarrot.CarrotFramework;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Windows;
@@ -17,18 +18,18 @@ namespace RayCarrot.WPF
         /// </summary>
         /// <param name="obj">The object to get the property from</param>
         /// <returns>The property</returns>
-        public static UserLevel GetMinUserLevel(DependencyObject obj) => (UserLevel)obj.GetValue(GetMinUserLevelProperty);
+        public static UserLevel GetMinUserLevel(DependencyObject obj) => (UserLevel)obj.GetValue(MinUserLevelProperty);
 
         /// <summary>
         /// Sets the minimum <see cref="UserLevel"/> for a <see cref="DependencyObject"/>
         /// </summary>
         /// <param name="obj">The object to set the property on</param>
-        public static void SetMinUserLevel(DependencyObject obj, UserLevel value) => obj.SetValue(GetMinUserLevelProperty, value);
+        public static void SetMinUserLevel(DependencyObject obj, UserLevel value) => obj.SetValue(MinUserLevelProperty, value);
 
         /// <summary>
         /// The property for the minimum <see cref="UserLevel"/>
         /// </summary>
-        public static readonly DependencyProperty GetMinUserLevelProperty = DependencyProperty.RegisterAttached("MinUserLevel", typeof(UserLevel), typeof(UserLevelTag), new PropertyMetadata(UserLevel.Normal, MinUserLevelChanged));
+        public static readonly DependencyProperty MinUserLevelProperty = DependencyProperty.RegisterAttached("MinUserLevel", typeof(UserLevel), typeof(UserLevelTag), new PropertyMetadata(UserLevel.Normal, MinUserLevelChanged));
 
         #endregion
 
@@ -51,15 +52,6 @@ namespace RayCarrot.WPF
         /// The property for the requested behavior
         /// </summary>
         public static readonly DependencyProperty BehaviorProperty = DependencyProperty.RegisterAttached("Behavior", typeof(UserLevelTagBehavior), typeof(UserLevelTag), new PropertyMetadata(UserLevelTagBehavior.Collapse, BehaviorChanged));
-
-        #endregion
-
-        #region Private Properties
-
-        /// <summary>
-        /// The saved elements to modify when the <see cref="UserLevel"/> changes
-        /// </summary>
-        private static HashSet<FrameworkElement> Items { get; } = new HashSet<FrameworkElement>();
 
         #endregion
 
@@ -93,56 +85,27 @@ namespace RayCarrot.WPF
             if (!(d is FrameworkElement uIElement))
                 return;
 
-            // Add the UI Element to the list
-            if (!Items.Contains(uIElement))
-                Items.Add(uIElement);
+            // Create a weak reference
+            var element = new WeakReference<FrameworkElement>(uIElement);
 
             // Subscribe to when the current user level changes
-            RCF.Data.UserLevelChanged -= RCF_UserLevelChanged;
-            RCF.Data.UserLevelChanged += RCF_UserLevelChanged;
-
-            //// Subscribe to when the element is unloaded
-            //uIElement.Unloaded -= UIElement_Unloaded;
-            //uIElement.Unloaded += UIElement_Unloaded;
+            RCF.Data.UserLevelChanged += RefreshItem;
 
             // Refresh the element
             RefreshElement(uIElement);
-        }
 
-        // TODO: Find way to remove unused references - such as when a window has closed
-        //private static void UIElement_Unloaded(object sender, RoutedEventArgs e)
-        //{
-        //    if (!(sender is FrameworkElement element))
-        //        return;
-
-        //    // Remove the item
-        //    Items.Remove(element);
-
-        //    // Unsubscribe the event for the item
-        //    element.Unloaded -= UIElement_Unloaded;
-        //}
-
-        private static void RCF_UserLevelChanged(object sender, PropertyChangedEventArgs<UserLevel> e)
-        {
-            // Refresh all elements
-            RefreshAllElements();
+            void RefreshItem(object ss, EventArgs ee)
+            {
+                if (element.TryGetTarget(out FrameworkElement ue))
+                    RefreshElement(ue);
+                else
+                    RCF.Data.UserLevelChanged -= RefreshItem;
+            }
         }
 
         #endregion
 
         #region Public Methods
-
-        /// <summary>
-        /// Refreshes all elements
-        /// </summary>
-        public static void RefreshAllElements()
-        {
-            // Update all the elements in the list
-            foreach (var element in Items)
-                RefreshElement(element);
-
-            RCF.Logger.LogTraceSource($"All elements in the attached property {nameof(UserLevelTag)} had their visibility refreshed based on their user level tags");
-        }
 
         /// <summary>
         /// Refreshes a element

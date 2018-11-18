@@ -79,7 +79,7 @@ namespace RayCarrot.WPF
         {
             if (!(value is TValue1 converterValue))
             {
-                RCF.Logger.LogWarningSource($"The converter {typeof(TConverter).Name} returned null due to the value not being of the expected type");
+                RCF.Logger.LogWarningSource($"The converter {typeof(TConverter).Name} returned null due to the value not being of the expected type {typeof(TValue1).FullName}");
                 return null;
             }
 
@@ -90,7 +90,7 @@ namespace RayCarrot.WPF
         {
             if (!(value is TValue2 converterValue))
             {
-                RCF.Logger.LogWarningSource($"The converter {typeof(TConverter).Name} returned null due to the value not being of the expected type");
+                RCF.Logger.LogWarningSource($"The converter {typeof(TConverter).Name} returned null due to the value not being of the expected type {typeof(TValue2).FullName}");
                 return null;
             }
 
@@ -127,13 +127,13 @@ namespace RayCarrot.WPF
         {
             if (!(value is TValue1 converterValue))
             {
-                RCF.Logger.LogWarningSource($"The converter {typeof(TConverter).Name} returned null due to the value not being of the expected type");
+                RCF.Logger.LogWarningSource($"The converter {typeof(TConverter).Name} returned null due to the value not being of the expected type {typeof(TValue1).FullName}");
                 return null;
             }
 
             if (!(parameter is TParamater parameterValue))
             {
-                RCF.Logger.LogWarningSource($"The converter {typeof(TConverter).Name} returned null due to the parameter value not being of the expected type");
+                RCF.Logger.LogWarningSource($"The converter {typeof(TConverter).Name} returned null due to the parameter value not being of the expected type {typeof(TParamater).FullName}");
                 return null;
             }
 
@@ -144,13 +144,13 @@ namespace RayCarrot.WPF
         {
             if (!(value is TValue2 converterValue))
             {
-                RCF.Logger.LogWarningSource($"The converter {typeof(TConverter).Name} returned null due to the value not being of the expected type");
+                RCF.Logger.LogWarningSource($"The converter {typeof(TConverter).Name} returned null due to the value not being of the expected type {typeof(TValue2).FullName}");
                 return null;
             }
 
             if (!(parameter is TParamater parameterValue))
             {
-                RCF.Logger.LogWarningSource($"The converter {typeof(TConverter).Name} returned null due to the parameter value not being of the expected type");
+                RCF.Logger.LogWarningSource($"The converter {typeof(TConverter).Name} returned null due to the parameter value not being of the expected type {typeof(TParamater).FullName}");
                 return null;
             }
 

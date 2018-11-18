@@ -38,7 +38,7 @@
                         <DataTrigger Binding="{Binding PathValidation}" Value="NotEmpty">
                             <Setter Property="Text">
                                 <Setter.Value>
-                                    <Binding Path="FilePath" UpdateSourceTrigger="PropertyChanged">
+                                    <Binding Path="FilePath" UpdateSourceTrigger="PropertyChanged" Mode="TwoWay">
                                         <Binding.ValidationRules>
                                             <local:NotEmptyValidationRule ValidatesOnTargetUpdated="True"/>
                                         </Binding.ValidationRules>
@@ -49,7 +49,7 @@
                         <DataTrigger Binding="{Binding PathValidation}" Value="FileExists">
                             <Setter Property="Text">
                                 <Setter.Value>
-                                    <Binding Path="FilePath" UpdateSourceTrigger="PropertyChanged">
+                                    <Binding Path="FilePath" UpdateSourceTrigger="PropertyChanged" Mode="TwoWay">
                                         <Binding.ValidationRules>
                                             <local:FileExistsValidationRule ValidatesOnTargetUpdated="True"/>
                                         </Binding.ValidationRules>
@@ -60,7 +60,7 @@
                         <DataTrigger Binding="{Binding PathValidation}" Value="FileExistsAndNotEmpty">
                             <Setter Property="Text">
                                 <Setter.Value>
-                                    <Binding Path="FilePath" UpdateSourceTrigger="PropertyChanged">
+                                    <Binding Path="FilePath" UpdateSourceTrigger="PropertyChanged" Mode="TwoWay">
                                         <Binding.ValidationRules>
                                             <local:FileExistsAndNotEmptyValidationRule ValidatesOnTargetUpdated="True"/>
                                         </Binding.ValidationRules>
@@ -71,7 +71,7 @@
                         <DataTrigger Binding="{Binding PathValidation}" Value="DirectoryExists">
                             <Setter Property="Text">
                                 <Setter.Value>
-                                    <Binding Path="FilePath" UpdateSourceTrigger="PropertyChanged">
+                                    <Binding Path="FilePath" UpdateSourceTrigger="PropertyChanged" Mode="TwoWay">
                                         <Binding.ValidationRules>
                                             <local:DirectoryExistsValidationRule ValidatesOnTargetUpdated="True"/>
                                         </Binding.ValidationRules>
@@ -82,7 +82,7 @@
                         <DataTrigger Binding="{Binding PathValidation}" Value="DirectoryExistsAndNotEmpty">
                             <Setter Property="Text">
                                 <Setter.Value>
-                                    <Binding Path="FilePath" UpdateSourceTrigger="PropertyChanged">
+                                    <Binding Path="FilePath" UpdateSourceTrigger="PropertyChanged" Mode="TwoWay">
                                         <Binding.ValidationRules>
                                             <local:DirectoryExistsAndNotEmptyValidationRule ValidatesOnTargetUpdated="True"/>
                                         </Binding.ValidationRules>

@@ -55,7 +55,8 @@ namespace RayCarrot.WPF
                     {
                         Title = "Select a file",
                         DefaultDirectory = IsPathValid() ? new FileSystemPath(FilePath).Parent.FullPath : InitialDirectory,
-                        DefaultName = UseCurrentPathAsDefaultDirectoryIfValid && IsPathValid() ? new FileSystemPath(FilePath).Name : String.Empty
+                        DefaultName = UseCurrentPathAsDefaultDirectoryIfValid && IsPathValid() ? new FileSystemPath(FilePath).Name : String.Empty,
+                        ExtensionFilter = FileFilter
                     });
 
                     if (fileResult.CanceledByUser)

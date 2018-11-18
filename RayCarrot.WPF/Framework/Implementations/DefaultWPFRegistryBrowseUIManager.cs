@@ -25,7 +25,14 @@ namespace RayCarrot.WPF
             if (LogRequests)
                 RCF.Logger.LogTraceSource($"A browse Registry key dialog was opened with the title of: {registryBrowserViewModel.Title}", origin: origin, filePath: filePath, lineNumber: lineNumber);
 
-            return await new RegistrySelectionDialog(registryBrowserViewModel).ShowDialogAsync();
+            var result = await new RegistrySelectionDialog(registryBrowserViewModel).ShowDialogAsync();
+
+            if (result.CanceledByUser)
+                RCF.Logger.LogTraceSource($"The browse Registry key dialog was canceled by the user");
+            else
+                RCF.Logger.LogTraceSource($"The browse Registry key dialog returned the selected key path '{result.KeyPath}' and selected value '{result.ValueName}'");
+
+            return result;
         }
     }
 }
