@@ -1,6 +1,5 @@
 ﻿using RayCarrot.CarrotFramework;
 using System;
-using System.Collections.Generic;
 using System.ComponentModel;
 using System.Windows;
 
@@ -24,6 +23,7 @@ namespace RayCarrot.WPF
         /// Sets the minimum <see cref="UserLevel"/> for a <see cref="DependencyObject"/>
         /// </summary>
         /// <param name="obj">The object to set the property on</param>
+        /// <param name="value">The property to set</param>
         public static void SetMinUserLevel(DependencyObject obj, UserLevel value) => obj.SetValue(MinUserLevelProperty, value);
 
         /// <summary>
@@ -46,6 +46,7 @@ namespace RayCarrot.WPF
         /// Sets the requested behavior for a <see cref="DependencyObject"/>
         /// </summary>
         /// <param name="obj">The object to set the property on</param>
+        /// <param name="value">The property to set</param>
         public static void SetBehavior(DependencyObject obj, UserLevelTagBehavior value) => obj.SetValue(BehaviorProperty, value);
 
         /// <summary>

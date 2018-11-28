@@ -1,7 +1,7 @@
 ﻿using RayCarrot.CarrotFramework;
-using RayCarrot.Windows;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
+using RayCarrot.Windows.Registry;
 
 namespace RayCarrot.WPF
 {
@@ -27,10 +27,9 @@ namespace RayCarrot.WPF
 
             var result = await new RegistrySelectionDialog(registryBrowserViewModel).ShowDialogAsync();
 
-            if (result.CanceledByUser)
-                RCF.Logger.LogTraceSource($"The browse Registry key dialog was canceled by the user");
-            else
-                RCF.Logger.LogTraceSource($"The browse Registry key dialog returned the selected key path '{result.KeyPath}' and selected value '{result.ValueName}'");
+            RCF.Logger.LogTraceSource(result.CanceledByUser
+                ? "The browse Registry key dialog was canceled by the user"
+                : $"The browse Registry key dialog returned the selected key path '{result.KeyPath}' and selected value '{result.ValueName}'");
 
             return result;
         }

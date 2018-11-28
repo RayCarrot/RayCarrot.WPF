@@ -36,10 +36,9 @@ namespace RayCarrot.WPF
 
             var result = await BrowseDirectoryImplementationAsync(directoryBrowserModel);
 
-            if (result.CanceledByUser)
-                RCF.Logger.LogTraceSource($"The browse directory dialog was canceled by the user");
-            else
-                RCF.Logger.LogTraceSource($"The browse directory dialog returned the selected directory paths {result.SelectedDirectories.JoinItems(", ")}");
+            RCF.Logger.LogTraceSource(result.CanceledByUser
+                ? "The browse directory dialog was canceled by the user"
+                : $"The browse directory dialog returned the selected directory paths {result.SelectedDirectories.JoinItems(", ")}");
 
             return result;
         }
@@ -55,7 +54,7 @@ namespace RayCarrot.WPF
                 RCF.Logger.LogTraceSource($"A browse file dialog was opened with the title of: {fileBrowserModel.Title}", origin: origin, filePath: filePath, lineNumber: lineNumber);
 
             // Create the dialog
-            OpenFileDialog filedialog = new OpenFileDialog()
+            OpenFileDialog openFileDialog = new OpenFileDialog()
             {
                 CheckFileExists = true,
                 FileName = fileBrowserModel.DefaultName,
@@ -66,19 +65,18 @@ namespace RayCarrot.WPF
             };
 
             // Show the dialog and get the result
-            bool canceled = !filedialog.ShowDialog().Value;
+            bool canceled = openFileDialog.ShowDialog() != true;
 
-            if (canceled)
-                RCF.Logger.LogTraceSource($"The browse file dialog was canceled by the user");
-            else
-                RCF.Logger.LogTraceSource($"The browse file dialog returned the selected file paths {filedialog.FileNames.JoinItems(", ")}");
+            RCF.Logger.LogTraceSource(canceled
+                ? "The browse file dialog was canceled by the user"
+                : $"The browse file dialog returned the selected file paths {openFileDialog.FileNames.JoinItems(", ")}");
 
             // Return the result
             return Task.FromResult(new FileBrowserResult()
             {
                 CanceledByUser = canceled,
-                SelectedFile = filedialog.FileName,
-                SelectedFiles = new List<string>(filedialog.FileNames)
+                SelectedFile = openFileDialog.FileName,
+                SelectedFiles = new List<string>(openFileDialog.FileNames)
             });
         }
 
@@ -93,7 +91,7 @@ namespace RayCarrot.WPF
                 RCF.Logger.LogTraceSource($"A save file dialog was opened with the title of: {saveFileModel.Title}", origin: origin, filePath: filePath, lineNumber: lineNumber);
 
             // Create the dialog
-            SaveFileDialog savedialog = new SaveFileDialog()
+            SaveFileDialog saveFileDialog = new SaveFileDialog()
             {
                 FileName = saveFileModel.DefaultName,
                 Filter = saveFileModel.Extensions,
@@ -102,18 +100,17 @@ namespace RayCarrot.WPF
             };
 
             // Show the dialog and get the result
-            bool canceled = !savedialog.ShowDialog().Value;
+            bool canceled = saveFileDialog.ShowDialog() != true;
 
-            if (canceled)
-                RCF.Logger.LogTraceSource($"The save file dialog was canceled by the user");
-            else
-                RCF.Logger.LogTraceSource($"The save file dialog returned the selected file path {savedialog.FileName}");
+            RCF.Logger.LogTraceSource(canceled
+                ? "The save file dialog was canceled by the user"
+                : $"The save file dialog returned the selected file path {saveFileDialog.FileName}");
 
             // Return the result
             return Task.FromResult(new SaveFileResult()
             {
                 CanceledByUser = canceled,
-                SelectedFileLocation = savedialog.FileName
+                SelectedFileLocation = saveFileDialog.FileName
             });
         }
 
@@ -133,10 +130,9 @@ namespace RayCarrot.WPF
             // Show the dialog and get the result
             var result = await driveSelectionDialog.ShowDialogAsync();
 
-            if (result.CanceledByUser)
-                RCF.Logger.LogTraceSource($"The browse drive dialog was canceled by the user");
-            else
-                RCF.Logger.LogTraceSource($"The browse drive dialog returned the selected drive paths {result.SelectedDrives.JoinItems(", ")}");
+            RCF.Logger.LogTraceSource(result.CanceledByUser
+                ? "The browse drive dialog was canceled by the user"
+                : $"The browse drive dialog returned the selected drive paths {result.SelectedDrives.JoinItems(", ")}");
 
             // Return the result
             return result;

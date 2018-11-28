@@ -1,12 +1,13 @@
 ﻿using Microsoft.Win32;
 using RayCarrot.CarrotFramework;
 using RayCarrot.CarrotFramework.UI;
-using RayCarrot.Windows;
 using System;
 using System.ComponentModel;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Data;
+using RayCarrot.Windows.Registry;
+using RayCarrot.Windows.Shell;
 
 namespace RayCarrot.WPF
 {
@@ -22,13 +23,12 @@ namespace RayCarrot.WPF
         /// </summary>
         /// <param name="fullPath">The full path of the key</param>
         /// <param name="vm">The Registry selection view model</param>
-        /// <param name="uifactory">The task factory for the UI</param>
-        public RegistryKeyViewModel(string fullPath, RegistrySelectionViewModel vm) : base(RCFWin.RegistryManager.GetSubKeyName(fullPath))
+        public RegistryKeyViewModel(string fullPath, RegistrySelectionViewModel vm) : base(RCFWinReg.RegistryManager.GetSubKeyName(fullPath))
         {
             // Set properties
             FullPath = fullPath;
             VM = vm;
-            Name = RCFWin.RegistryManager.GetSubKeyName(fullPath);
+            Name = RCFWinReg.RegistryManager.GetSubKeyName(fullPath);
         }
 
         #endregion
@@ -41,8 +41,6 @@ namespace RayCarrot.WPF
 
         private bool _accessDenied;
 
-        private bool _isEditing;
-
         #endregion
 
         #region Public Properties
@@ -50,7 +48,7 @@ namespace RayCarrot.WPF
         /// <summary>
         /// Indicates if sub keys should be cached when the key is not expanded
         /// </summary>
-        public virtual bool CacheSubKeys
+        public bool CacheSubKeys
         {
             get => _cacheSubKeys;
             set
@@ -58,34 +56,34 @@ namespace RayCarrot.WPF
                 _cacheSubKeys = value;
 
                 if (!CacheSubKeys && !IsExpanded)
-                    ResetCommand.Execute(null);
+                    ResetCommand.Execute();
             }
         }
 
         /// <summary>
         /// The full path of the key
         /// </summary>
-        public virtual string FullPath { get; set; }
+        public string FullPath { get; set; }
 
         /// <summary>
         /// The name of the key
         /// </summary>
-        public virtual string Name { get; set; }
+        public string Name { get; set; }
 
         /// <summary>
         /// The Registry selection view model
         /// </summary>
-        public virtual RegistrySelectionViewModel VM { get; }
+        public RegistrySelectionViewModel VM { get; }
 
         /// <summary>
         /// Indicates if the sub keys have been loaded
         /// </summary>
-        public virtual bool LoadedSubKeys { get; set; }
+        public bool LoadedSubKeys { get; set; }
 
         /// <summary>
         /// Indicates if the key is expanded
         /// </summary>
-        public virtual bool IsExpanded
+        public bool IsExpanded
         {
             get => _IsExpanded;
             set => _ = ExpandAsync(value);
@@ -94,7 +92,7 @@ namespace RayCarrot.WPF
         /// <summary>
         /// Indicates if access is denied to the key
         /// </summary>
-        public virtual bool AccessDenied
+        public bool AccessDenied
         {
             get => _accessDenied;
             set
@@ -109,27 +107,27 @@ namespace RayCarrot.WPF
         /// <summary>
         /// Indicates if the key is selected
         /// </summary>
-        public virtual bool IsSelected { get; set; }
+        public bool IsSelected { get; set; }
 
         /// <summary>
         /// Indicates if the key name is currently being edited
         /// </summary>
-        public virtual bool IsEditing => _isEditing;
+        public bool IsEditing { get; private set; }
 
         /// <summary>
         /// The edited name
         /// </summary>
-        public virtual string EditName { get; set; }
+        public string EditName { get; set; }
 
         /// <summary>
         /// Indicates if the key can be edited
         /// </summary>
-        public virtual bool CanEditKey => CanAddSubKey && Parent != null;
+        public bool CanEditKey => CanAddSubKey && Parent != null;
 
         /// <summary>
         /// Indicates if sub keys can be added
         /// </summary>
-        public virtual bool CanAddSubKey => !VM.BrowseVM.DisableEditing && !AccessDenied;
+        public bool CanAddSubKey => !VM.BrowseVM.DisableEditing && !AccessDenied;
 
         #endregion
 
@@ -139,7 +137,7 @@ namespace RayCarrot.WPF
         /// Enables synchronization for this collection
         /// </summary>
         /// <returns>The task</returns>
-        public virtual async Task EnableSynchronizationAsync()
+        public async Task EnableSynchronizationAsync()
         {
             // Enable collection synchronization on the UI thread so we can update sub items on another thread
             await VM.UIFactory.StartNew(() => BindingOperations.EnableCollectionSynchronization(this, FullID));
@@ -149,7 +147,7 @@ namespace RayCarrot.WPF
         /// Adds a sub key to the collection
         /// </summary>
         /// <param name="vm">The view model</param>
-        public new virtual void Add(RegistryKeyViewModel vm)
+        public new void Add(RegistryKeyViewModel vm)
         {
             lock (FullID)
                 base.Add(vm);
@@ -160,7 +158,7 @@ namespace RayCarrot.WPF
         /// </summary>
         /// <param name="expand">True to expand, false to collapse</param>
         /// <returns>The task</returns>
-        public virtual async Task ExpandAsync(bool expand = true)
+        public async Task ExpandAsync(bool expand = true)
         {
             // Update backing field
             _IsExpanded = expand;
@@ -187,11 +185,11 @@ namespace RayCarrot.WPF
         /// <summary>
         /// Opens the key in RegEdit
         /// </summary>
-        public virtual async Task OpenInRegeditAsync()
+        public async Task OpenInRegeditAsync()
         {
             try
             {
-                RCFWin.WindowsManager.OpenRegistryPath(FullPath);
+                RCFWinShell.WindowsManager.OpenRegistryPath(FullPath);
             }
             catch (Exception ex)
             {
@@ -203,7 +201,7 @@ namespace RayCarrot.WPF
         /// <summary>
         /// Adds the key to the favorites
         /// </summary>
-        public virtual async Task AddFavoritesAsync()
+        public async Task AddFavoritesAsync()
         {
             // Get the name
             var result = await new StringInputDialog(new StringInputViewModel()
@@ -225,7 +223,7 @@ namespace RayCarrot.WPF
             }
 
             // Make sure the name doesn't already exist
-            if (RCFWin.RegistryManager.ValueExists(CommonRegistryPaths.RegeditFavoritesPath, result.StringInput, RegistryView.Default))
+            if (RCFWinReg.RegistryManager.ValueExists(CommonRegistryPaths.RegeditFavoritesPath, result.StringInput, RegistryView.Default))
             {
                 await RCFUI.MessageUI.DisplayMessageAsync("The name already exists", "Name is not valid", MessageType.Warning);
                 return;
@@ -269,13 +267,13 @@ namespace RayCarrot.WPF
         /// <returns>The task</returns>
         public async Task SetIsEditingAsync(bool isEditing)
         {
-            if (isEditing == _isEditing)
+            if (isEditing == IsEditing)
                 return;
 
             if (isEditing)
                 EditName = Name;
 
-            _isEditing = isEditing;
+            IsEditing = isEditing;
             OnPropertyChanged(new PropertyChangedEventArgs(nameof(IsEditing)));
 
             if (!IsEditing)
@@ -285,7 +283,7 @@ namespace RayCarrot.WPF
         /// <summary>
         /// Processes the current edit name
         /// </summary>
-        public virtual async Task ProcessEditAsync()
+        public async Task ProcessEditAsync()
         {
             // Make sure the key can be edited
             if (!CanEditKey)
@@ -331,7 +329,7 @@ namespace RayCarrot.WPF
                 Name = EditName;
 
                 // Update full path
-                FullPath = RCFWin.RegistryManager.CombinePaths(Parent.FullPath, EditName);
+                FullPath = RCFWinReg.RegistryManager.CombinePaths(Parent.FullPath, EditName);
 
                 // Reset sub keys
                 Reset();
@@ -372,7 +370,7 @@ namespace RayCarrot.WPF
 
             try
             {
-                while (RCFWin.RegistryManager.KeyExists(RCFWin.RegistryManager.CombinePaths(FullPath, name + keyNum)))
+                while (RCFWinReg.RegistryManager.KeyExists(RCFWinReg.RegistryManager.CombinePaths(FullPath, name + keyNum)))
                     keyNum++;
             }
             catch (Exception ex)
@@ -387,7 +385,7 @@ namespace RayCarrot.WPF
                 // Get this key
                 using (var key = GetKey(true))
                     // Create the sub key
-                    key.CreateSubKey(name + keyNum).Dispose();
+                    key.CreateSubKey(name + keyNum)?.Dispose();
             }
             catch (Exception ex)
             {
@@ -401,7 +399,7 @@ namespace RayCarrot.WPF
                 if (!IsExpanded)
                     await ExpandAsync();
 
-                var vm = new RegistryKeyViewModel(RCFWin.RegistryManager.CombinePaths(FullPath, name + keyNum), VM);
+                var vm = new RegistryKeyViewModel(RCFWinReg.RegistryManager.CombinePaths(FullPath, name + keyNum), VM);
                 await vm.EnableSynchronizationAsync();
                 Add(vm);
                 vm.IsSelected = true;
@@ -411,7 +409,6 @@ namespace RayCarrot.WPF
             {
                 ex.HandleError("Handling new sub key creation");
                 VM.RefreshCommand.Execute();
-                return;
             }
         }
 
@@ -420,12 +417,12 @@ namespace RayCarrot.WPF
         /// </summary>
         /// <param name="writable">True if the key should be writable, otherwise false</param>
         /// <returns>The key</returns>
-        public virtual RegistryKey GetKey(bool writable = false) => RCFWin.RegistryManager.GetKeyFromFullPath(FullPath, VM.CurrentRegistryView, writable);
+        public RegistryKey GetKey(bool writable = false) => RCFWinReg.RegistryManager.GetKeyFromFullPath(FullPath, VM.CurrentRegistryView, writable);
 
         /// <summary>
         /// Deletes the key
         /// </summary>
-        public virtual async Task DeleteKeyAsync()
+        public async Task DeleteKeyAsync()
         {
             // Make sure the key can be edited
             if (!CanEditKey)
@@ -466,7 +463,7 @@ namespace RayCarrot.WPF
         /// <summary>
         /// Copies the full key name to the clipboard
         /// </summary>
-        public virtual void CopyKeyName()
+        public void CopyKeyName()
         {
             Clipboard.SetText(FullPath);
         }
@@ -478,7 +475,7 @@ namespace RayCarrot.WPF
         /// <summary>
         /// Resets the collection of sub keys
         /// </summary>
-        protected virtual void Reset()
+        protected void Reset()
         {
             // Clear the collection
             Clear();
@@ -509,7 +506,7 @@ namespace RayCarrot.WPF
         /// Resets the collection of sub keys async
         /// </summary>
         /// <returns>The task</returns>
-        protected virtual async Task ResetAsync()
+        protected async Task ResetAsync()
         {
             await Task.Run(() => Reset());
         }
@@ -518,7 +515,7 @@ namespace RayCarrot.WPF
         /// Loads all sub items
         /// </summary>
         /// <returns>The task</returns>
-        protected virtual async Task LoadSubItemsAsync()
+        protected async Task LoadSubItemsAsync()
         {
             await Task.Run(async () =>
             {
@@ -532,7 +529,7 @@ namespace RayCarrot.WPF
                     {
                         foreach (var subKey in key.GetSubKeyNames())
                         {
-                            var vm = new RegistryKeyViewModel(RCFWin.RegistryManager.CombinePaths(FullPath, subKey), VM);
+                            var vm = new RegistryKeyViewModel(RCFWinReg.RegistryManager.CombinePaths(FullPath, subKey), VM);
                             await vm.EnableSynchronizationAsync();
                             Add(vm);
                             await vm.ResetCommand.ExecuteAsync();

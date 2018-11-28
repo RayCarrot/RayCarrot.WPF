@@ -1,7 +1,6 @@
 ﻿using ByteSizeLib;
 using RayCarrot.CarrotFramework;
 using RayCarrot.CarrotFramework.UI;
-using RayCarrot.Windows;
 using System;
 using System.Collections;
 using System.Collections.ObjectModel;
@@ -10,6 +9,7 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Input;
+using RayCarrot.Windows.Shell;
 
 namespace RayCarrot.WPF
 {
@@ -126,7 +126,7 @@ namespace RayCarrot.WPF
 
                     Bitmap icon = null;
                     string label = null;
-                    string path = null;
+                    string path;
                     string format = null;
                     ByteSize? freeSpace = null;
                     ByteSize? totalSize = null;
@@ -148,7 +148,7 @@ namespace RayCarrot.WPF
 
                         try
                         {
-                            icon = RCFWin.WindowsFileInfoManager.GetIcon(path, IconSize.SmallIcon_16);
+                            icon = RCFWinShell.WindowsFileInfoManager.GetIcon(path, IconSize.SmallIcon_16);
                         }
                         catch (Exception ex)
                         {
@@ -240,7 +240,7 @@ namespace RayCarrot.WPF
         private ICommand _RefreshCommand;
 
         /// <summary>
-        /// A command for <see cref="Refresh"/>
+        /// A command for <see cref="RefreshAsync"/>
         /// </summary>
         public ICommand RefreshCommand => _RefreshCommand ?? (_RefreshCommand = new AsyncRelayCommand(RefreshAsync));
 

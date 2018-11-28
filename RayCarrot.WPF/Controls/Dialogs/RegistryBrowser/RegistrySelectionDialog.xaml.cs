@@ -1,10 +1,10 @@
 ﻿using RayCarrot.CarrotFramework.UI;
-using RayCarrot.Windows;
 using System;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using RayCarrot.Windows.Registry;
 
 namespace RayCarrot.WPF
 {
@@ -18,7 +18,6 @@ namespace RayCarrot.WPF
         /// <summary>
         /// Creates a new instance of <see cref="RegistrySelectionDialog"/> with default values
         /// </summary>
-        /// <param name="vm">The view model</param>
         public RegistrySelectionDialog() : this(new RegistryBrowserViewModel()
         {
             Title = "Select a Registry Key"
@@ -48,7 +47,7 @@ namespace RayCarrot.WPF
 
         private async Task AttemptConfirmAsync()
         {
-            if (!RCFWin.RegistryManager.KeyExists(RegistrySelectionVM.SelectedKeyFullPath, RegistrySelectionVM.CurrentRegistryView))
+            if (!RCFWinReg.RegistryManager.KeyExists(RegistrySelectionVM.SelectedKeyFullPath, RegistrySelectionVM.CurrentRegistryView))
             {
                 await RCFUI.MessageUI.DisplayMessageAsync("The selected key could not be found", "Invalid selection", MessageType.Information);
                 return;

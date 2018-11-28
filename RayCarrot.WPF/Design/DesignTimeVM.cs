@@ -1,6 +1,6 @@
 ﻿using RayCarrot.CarrotFramework;
 using RayCarrot.CarrotFramework.UI;
-using RayCarrot.Windows;
+using RayCarrot.Windows.Registry;
 using System.Collections.Generic;
 
 namespace RayCarrot.WPF
@@ -16,8 +16,8 @@ namespace RayCarrot.WPF
             {
                 RCF.Build(x =>
                 {
-                    x.AddWindowsFileInfoManager<DefaultWindowsFileInfoManager>();
-                    x.AddWindowsManager<DefaultWindowsManager>();
+                    //x.AddWindowsFileInfoManager<DefaultWindowsFileInfoManager>();
+                    //x.AddWindowsManager<DefaultWindowsManager>();
                     x.AddExceptionHandler<DefaultExceptionHandler>();
                     x.AddRegistryManager<DefaultRegistryManager>();
                 });

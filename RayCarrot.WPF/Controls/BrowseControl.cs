@@ -2,13 +2,14 @@
 using RayCarrot.CarrotFramework;
 using RayCarrot.CarrotFramework.IO;
 using RayCarrot.CarrotFramework.UI;
-using RayCarrot.Windows;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
+using RayCarrot.Windows.Registry;
+using RayCarrot.Windows.Shell;
 
 namespace RayCarrot.WPF
 {
@@ -34,7 +35,7 @@ namespace RayCarrot.WPF
                     return path.DirectoryExists && path.IsDirectoryRoot();
 
                 case BrowseTypes.RegistryKey:
-                    return RCFWin.RegistryManager.KeyExists(FilePath, SelectedRegistryView);
+                    return RCFWinReg.RegistryManager.KeyExists(FilePath, SelectedRegistryView);
 
                 default:
                     return false;
@@ -82,7 +83,7 @@ namespace RayCarrot.WPF
                     break;
 
                 case BrowseTypes.RegistryKey:
-                    var keyResult = await RCFWin.RegistryBrowseUIManager.BrowseRegistryKeyAsync(new RegistryBrowserViewModel()
+                    var keyResult = await RCFWinReg.RegistryBrowseUIManager.BrowseRegistryKeyAsync(new RegistryBrowserViewModel()
                     {
                         Title = "Select a Registry key",
                         AllowCustomRegistryView = AllowCustomRegistryView,
@@ -134,11 +135,11 @@ namespace RayCarrot.WPF
                     case BrowseTypes.File:
                     case BrowseTypes.Directory:
                     case BrowseTypes.Drive:
-                        RCFWin.WindowsManager.OpenExplorerPath(FilePath);
+                        RCFWinShell.WindowsManager.OpenExplorerPath(FilePath);
                         break;
 
                     case BrowseTypes.RegistryKey:
-                        RCFWin.WindowsManager.OpenRegistryPath(FilePath);
+                        RCFWinShell.WindowsManager.OpenRegistryPath(FilePath);
                         break;
                 }
             }
@@ -154,11 +155,11 @@ namespace RayCarrot.WPF
                 return;
 
             // Get the path
-            FileSystemPath filePath = ((string[])(e.Data.GetData(DataFormats.FileDrop)))[0];
+            FileSystemPath filePath = ((string[])e.Data.GetData(DataFormats.FileDrop))[0];
 
             // Get the the target if it's a shortcut
             if (filePath.FullPath.EndsWith(".lnk"))
-                filePath = RCFWin.WindowsManager.GetShortCutTarget(filePath);
+                filePath = RCFWinShell.WindowsManager.GetShortCutTarget(filePath);
 
             // Set the path
             FilePath = filePath;

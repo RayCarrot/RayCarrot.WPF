@@ -83,8 +83,8 @@
         <Grid Grid.Row="1" Margin="5">
             <Button Content="Refresh" HorizontalAlignment="Left" Command="{Binding Path=RefreshCommand}"/>
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
-                <Button Content="Continue" Margin="10 0" Click="Continue_Click" IsDefault="True"/>
                 <Button Content="Cancel" Click="Cancel_Click" IsCancel="True"/>
+                <Button Content="Continue" Margin="10 0" Click="Continue_Click" IsDefault="True"/>
             </StackPanel>
         </Grid>
         

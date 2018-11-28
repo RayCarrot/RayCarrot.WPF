@@ -18,7 +18,7 @@ namespace RayCarrot.WPF
         /// <summary>
         /// A single static instance of this value converter
         /// </summary>
-        private static T _converter = null;
+        private static T _converter;
 
         #endregion
 

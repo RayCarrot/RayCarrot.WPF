@@ -61,7 +61,7 @@ namespace RayCarrot.WPF
             // TODO: Run on UI thread?
             var result = MessageBox.Show(message, header, allowCancel ? MessageBoxButton.OKCancel : MessageBoxButton.OK, image);
 
-            return Task.FromResult(!allowCancel ? true : result == MessageBoxResult.OK);
+            return Task.FromResult(!allowCancel || result == MessageBoxResult.OK);
         }
     }
 }

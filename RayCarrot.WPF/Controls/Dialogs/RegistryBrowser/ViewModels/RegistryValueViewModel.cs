@@ -53,30 +53,34 @@ namespace RayCarrot.WPF
         /// <returns>A string representing the data</returns>
         public virtual string GetDisplayData()
         {
-            // Return if a string
-            if (Data is string s)
+            switch (Data)
             {
-                // Remove invalid characters if not correctly null-terminated
-                if (s.Contains(Convert.ToChar(0x0).ToString()))
-                    s = s.Substring(0, s.IndexOf(Convert.ToChar(0x0).ToString()));
+                case string s:
+                {
+                    // Remove invalid characters if not correctly null-terminated
+                    if (s.Contains(Convert.ToChar(0x0).ToString()))
+                        s = s.Substring(0, s.IndexOf(Convert.ToChar(0x0).ToString(), StringComparison.Ordinal));
 
-                return s;
+                    // Return if a string
+                    return s;
+                }
+
+                case null:
+                    // Check if there is any data
+                    return "(Value is not set)";
+
+                case byte[] bytes:
+                    // Convert to a hex string if a byte array
+                    return BitConverter.ToString(bytes).Replace("-", " ");
+
+                case Array array:
+                    // Show blank space separated if an array
+                    return array.Cast<object>().JoinItems(" ");
+
+                default:
+                    // Return as string
+                    return Data.ToString();
             }
-
-            // Check if there is any data
-            if (Data == null)
-                return "(Value is not set)";
-
-            // Convert to a hex string if a byte array
-            if (Data is byte[] bytes)
-                return BitConverter.ToString(bytes).Replace("-", " ");
-
-            // Show blank space separated if an array
-            else if (Data is Array array)
-                return array.Cast<object>().JoinItems(" ");
-
-            // Return as string
-            return Data.ToString();
         }
 
         #endregion

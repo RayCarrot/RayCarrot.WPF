@@ -1,4 +1,4 @@
-﻿using RayCarrot.Windows;
+﻿using RayCarrot.Windows.Registry;
 
 namespace RayCarrot.WPF
 {

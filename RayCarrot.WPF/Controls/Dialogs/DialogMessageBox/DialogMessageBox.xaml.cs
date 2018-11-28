@@ -1,6 +1,5 @@
 ﻿using RayCarrot.CarrotFramework;
 using System;
-using System.Windows;
 using System.Windows.Controls;
 
 namespace RayCarrot.WPF
@@ -16,16 +15,7 @@ namespace RayCarrot.WPF
         /// Creates a new instance of <see cref="DialogMessageBox"/>
         /// </summary>
         /// <param name="dialogVM">The dialog view model</param>
-        public DialogMessageBox(DialogMessageViewModel dialogVM) : this(dialogVM, null)
-        {
-        }
-
-        /// <summary>
-        /// Creates a new instance of <see cref="DialogMessageBox"/>
-        /// </summary>
-        /// <param name="dialogVM">The dialog view model</param>
-        /// <param name="owner">The owner window</param>
-        public DialogMessageBox(DialogMessageViewModel dialogVM, Window owner)
+        public DialogMessageBox(DialogMessageViewModel dialogVM)
         {
             InitializeComponent();
 

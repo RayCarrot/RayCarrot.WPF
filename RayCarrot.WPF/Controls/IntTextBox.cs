@@ -13,6 +13,7 @@ namespace RayCarrot.WPF
         public IntTextBox()
         {
             TextChanged += IntTextBox_TextChanged;
+            MaxLength = 9;
         }
 
         #endregion

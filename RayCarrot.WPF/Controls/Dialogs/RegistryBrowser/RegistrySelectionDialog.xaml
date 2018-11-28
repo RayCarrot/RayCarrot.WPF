@@ -214,8 +214,8 @@
                          Visibility="{Binding Path=BrowseVM.BrowseValue, Converter={local:BooleanToVisibilityConverter}}"/>
 
                 <StackPanel Grid.Column="2" Orientation="Horizontal">
-                    <Button Content="Continue" Margin="10 0" Click="Continue_Click" IsDefault="True"/>
                     <Button Content="Cancel" Click="Cancel_Click" IsCancel="True"/>
+                    <Button Content="Continue" Margin="10 0" Click="Continue_Click" IsDefault="True"/>
                 </StackPanel>
 
             </Grid>

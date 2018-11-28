@@ -17,7 +17,7 @@ namespace RayCarrot.WPF
         /// <returns>The validation result</returns>
         public override ValidationResult Validate(object value, CultureInfo cultureInfo)
         {
-            return String.IsNullOrWhiteSpace((value ?? String.Empty).ToString()) ? new ValidationResult(false, "Field is required.") : ValidationResult.ValidResult;
+            return String.IsNullOrWhiteSpace(value?.ToString()) ? new ValidationResult(false, "Field is required") : ValidationResult.ValidResult;
         }
     }
 }

@@ -1,7 +1,6 @@
 ﻿using Microsoft.Win32;
 using RayCarrot.CarrotFramework;
 using RayCarrot.CarrotFramework.UI;
-using RayCarrot.Windows;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -9,6 +8,8 @@ using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using RayCarrot.Windows.Registry;
+using RayCarrot.Windows.Shell;
 
 namespace RayCarrot.WPF
 {
@@ -22,10 +23,7 @@ namespace RayCarrot.WPF
         /// <summary>
         /// Creates a new instance of <see cref="RegistrySelectionViewModel"/> with default values
         /// </summary>
-        public RegistrySelectionViewModel() : this(new RegistryBrowserViewModel()
-        {
-
-        })
+        public RegistrySelectionViewModel() : this(new RegistryBrowserViewModel())
         {
         }
 
@@ -46,8 +44,8 @@ namespace RayCarrot.WPF
             ShowEmptyDefaultValues = BrowseVM.AllowEmptyDefaultValues;
 
             // Reset the view with the default path
-            string[] pathID = BrowseVM.DefaultKeyPath?.Split(RCFWin.RegistryManager.KeySeparatorCharacter);
-            _ = UpdateViewAsync(pathID ?? new string[] { RCFWin.RegistryManager.GetSubKeyName(browseVM.AvailableBaseKeys[0]) }, pathID ?? new string[] { });
+            string[] pathID = BrowseVM.DefaultKeyPath?.Split(RCFWinReg.RegistryManager.KeySeparatorCharacter);
+            _ = UpdateViewAsync(pathID ?? new string[] { RCFWinReg.RegistryManager.GetSubKeyName(browseVM.AvailableBaseKeys[0]) }, pathID ?? new string[] { });
 
             // Retrieve saved values
             RetrieveSavedValues();
@@ -70,38 +68,38 @@ namespace RayCarrot.WPF
         /// <summary>
         /// The task factory for the UI
         /// </summary>
-        public virtual TaskFactory UIFactory { get; }
+        public TaskFactory UIFactory { get; }
 
         /// <summary>
         /// The browse view model
         /// </summary>
-        public virtual RegistryBrowserViewModel BrowseVM { get; }
+        public RegistryBrowserViewModel BrowseVM { get; }
 
         /// <summary>
         /// The available keys to select
         /// </summary>
-        public virtual ObservableCollection<RegistryKeyViewModel> Keys { get; }
+        public ObservableCollection<RegistryKeyViewModel> Keys { get; }
 
         /// <summary>
         /// The favorites items
         /// </summary>
-        public virtual ObservableCollection<FavoritesItemViewModel> Favorites { get; }
+        public ObservableCollection<FavoritesItemViewModel> Favorites { get; }
 
         /// <summary>
         /// The available values for the selected key
         /// </summary>
-        public virtual ObservableCollection<RegistryValueViewModel> Values { get; }
+        public ObservableCollection<RegistryValueViewModel> Values { get; }
 
         /// <summary>
         /// The icon for RegEdit
         /// </summary>
-        public virtual Bitmap RegeditIcon
+        public Bitmap RegeditIcon
         {
             get
             {
                 try
                 {
-                    return RCFWin.WindowsFileInfoManager.GetIcon(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Windows), "regedit.exe"), IconSize.SmallIcon_16);
+                    return RCFWinShell.WindowsFileInfoManager.GetIcon(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Windows), "regedit.exe"), IconSize.SmallIcon_16);
                 }
                 catch (Exception ex)
                 {
@@ -114,7 +112,7 @@ namespace RayCarrot.WPF
         /// <summary>
         /// The currently selected <see cref="RegistryView"/>
         /// </summary>
-        public virtual RegistryView CurrentRegistryView
+        public RegistryView CurrentRegistryView
         {
             get => _currentRegistryView;
             set
@@ -129,7 +127,7 @@ namespace RayCarrot.WPF
         /// <summary>
         /// True if empty default values should be shown
         /// </summary>
-        public virtual bool ShowEmptyDefaultValues
+        public bool ShowEmptyDefaultValues
         {
             get => _showEmptyDefaultValues;
             set
@@ -146,7 +144,7 @@ namespace RayCarrot.WPF
         /// <summary>
         /// The currently selected key
         /// </summary>
-        public virtual RegistryKeyViewModel SelectedKey
+        public RegistryKeyViewModel SelectedKey
         {
             get => _selectedItem;
             set
@@ -173,7 +171,7 @@ namespace RayCarrot.WPF
         /// <summary>
         /// The full key path of the currently selected item
         /// </summary>
-        public virtual string SelectedKeyFullPath
+        public string SelectedKeyFullPath
         {
             get => SelectedKey?.FullPath;
             set => _ = ExpandToPathAsync(value);
@@ -182,22 +180,22 @@ namespace RayCarrot.WPF
         /// <summary>
         /// The currently selected value
         /// </summary>
-        public virtual RegistryValueViewModel SelectedValue { get; set; }
+        public RegistryValueViewModel SelectedValue { get; set; }
 
         /// <summary>
         /// The key currently being edited
         /// </summary>
-        public virtual RegistryKeyViewModel EditingKey { get; private set; }
+        public RegistryKeyViewModel EditingKey { get; private set; }
 
         /// <summary>
         /// True if nodes should be automatically selected when expanded
         /// </summary>
-        public virtual bool AutoSelectOnExpand { get; set; }
+        public bool AutoSelectOnExpand { get; set; }
 
         /// <summary>
         /// Indicates if nodes should expand on double click or enter rename state
         /// </summary>
-        public virtual bool DoubleClickToExpand { get; set; } = true;
+        public bool DoubleClickToExpand { get; set; } = true;
 
         #endregion
 
@@ -244,7 +242,7 @@ namespace RayCarrot.WPF
         /// <summary>
         /// Retrieves the saved values
         /// </summary>
-        public virtual void RetrieveSavedValues()
+        public void RetrieveSavedValues()
         {
             try
             {
@@ -264,7 +262,7 @@ namespace RayCarrot.WPF
         /// <summary>
         /// Saves the saved values
         /// </summary>
-        public virtual void SaveSavedValues()
+        public void SaveSavedValues()
         {
             try
             {
@@ -285,7 +283,7 @@ namespace RayCarrot.WPF
         /// Resets the keys to the default keys and the favorites
         /// </summary>
         /// <returns>The task</returns>
-        public virtual async Task ResetAsync()
+        public async Task ResetAsync()
         {
             if (Resetting)
                 return;
@@ -324,20 +322,20 @@ namespace RayCarrot.WPF
         /// <summary>
         /// Resets the favorites
         /// </summary>
-        public virtual async Task ResetFavoritesAsync()
+        public async Task ResetFavoritesAsync()
         {
             Favorites.Clear();
 
             try
             {
-                using (var key = RCFWin.RegistryManager.GetKeyFromFullPath(CommonRegistryPaths.RegeditFavoritesPath, RegistryView.Default))
+                using (var key = RCFWinReg.RegistryManager.GetKeyFromFullPath(CommonRegistryPaths.RegeditFavoritesPath, RegistryView.Default))
                 {
                     foreach (var value in key.GetValues())
                     {
                         Favorites.Add(new FavoritesItemViewModel(this)
                         {
                             Name = value.Name,
-                            KeyPath = RCFWin.RegistryManager.NormalizePath(value.Value.ToString())
+                            KeyPath = RCFWinReg.RegistryManager.NormalizePath(value.Value.ToString())
                         });
                     }
                 }
@@ -353,7 +351,7 @@ namespace RayCarrot.WPF
         /// Allows the user to expand to a given key path
         /// </summary>
         /// <returns>The task</returns>
-        public virtual async Task ExpandToKeyAsync()
+        public async Task ExpandToKeyAsync()
         {
             // Get the key
             var result = await new StringInputDialog(new StringInputViewModel()
@@ -376,7 +374,7 @@ namespace RayCarrot.WPF
         /// </summary>
         /// <param name="keyPath">The path of the key to expand to</param>
         /// <returns>The task</returns>
-        public virtual async Task ExpandToPathAsync(string keyPath)
+        public async Task ExpandToPathAsync(string keyPath)
         {
             if (ExpandingToPath)
                 return;
@@ -385,10 +383,10 @@ namespace RayCarrot.WPF
             {
                 ExpandingToPath = true;
 
-                if (!RCFWin.RegistryManager.KeyExists(keyPath, CurrentRegistryView))
+                if (!RCFWinReg.RegistryManager.KeyExists(keyPath, CurrentRegistryView))
                     return;
 
-                string[] pathID = keyPath.Split(RCFWin.RegistryManager.KeySeparatorCharacter);
+                string[] pathID = keyPath.Split(RCFWinReg.RegistryManager.KeySeparatorCharacter);
                 await UpdateViewAsync(pathID, pathID);
             }
             finally
@@ -403,7 +401,7 @@ namespace RayCarrot.WPF
         /// <param name="selectedFullID">The full ID of the key to select</param>
         /// <param name="expandedFullIDs">The full IDs of the keys to expand</param>
         /// <returns>The task</returns>
-        public virtual async Task UpdateViewAsync(string[] selectedFullID, params string[][] expandedFullIDs)
+        public async Task UpdateViewAsync(string[] selectedFullID, params string[][] expandedFullIDs)
         {
             if (Resetting || UpdatingView)
                 return;
@@ -422,10 +420,10 @@ namespace RayCarrot.WPF
                     var keys = Keys;
 
                     // Expand all keys and sub keys
-                    for (int i = 0; i < path.Length; i++)
+                    foreach (var item in path)
                     {
                         // Get the index
-                        int index = keys.FindItemIndex(x => x.ID == path[i]);
+                        int index = keys.FindItemIndex(x => x.ID == item);
 
                         // Make sure we got an index
                         if (index == -1)
@@ -475,7 +473,7 @@ namespace RayCarrot.WPF
         /// <summary>
         /// Opens the currently selected key in RegEdit
         /// </summary>
-        public virtual async Task OpenInRegeditAsync()
+        public async Task OpenInRegeditAsync()
         {
             if (SelectedKey == null)
             {
@@ -489,7 +487,7 @@ namespace RayCarrot.WPF
         /// <summary>
         /// Refreshes the list of values
         /// </summary>
-        public virtual async Task RefreshValuesAsync()
+        public async Task RefreshValuesAsync()
         {
             // Clear the values
             Values.Clear();
@@ -500,7 +498,7 @@ namespace RayCarrot.WPF
 
             try
             {
-                using (RegistryKey key = RCFWin.RegistryManager.GetKeyFromFullPath(SelectedKeyFullPath, CurrentRegistryView))
+                using (RegistryKey key = RCFWinReg.RegistryManager.GetKeyFromFullPath(SelectedKeyFullPath, CurrentRegistryView))
                 {
                     // Add values
                     Values.AddRange(key.GetValues().Select(x => new RegistryValueViewModel()
@@ -531,17 +529,17 @@ namespace RayCarrot.WPF
         /// <summary>
         /// Begins editing of the currently selected key
         /// </summary>
-        public virtual async Task BeginEditAsync()
+        public async Task BeginEditAsync()
         {
             // Make sure a key is selected and the selected key has a parent key in the list and it does not have access denied
-            if (SelectedKey != null && SelectedKey.Parent != null && !SelectedKey.AccessDenied && SelectedKey.CanEditKey)
+            if (SelectedKey?.Parent != null && !SelectedKey.AccessDenied && SelectedKey.CanEditKey)
                 await SetEditingKeyAsync(SelectedKey);
         }
 
         /// <summary>
         /// End editing of key in edit state
         /// </summary>
-        public virtual async Task EndEditAsync()
+        public async Task EndEditAsync()
         {
             await SetEditingKeyAsync(null);
         }
@@ -549,9 +547,10 @@ namespace RayCarrot.WPF
         /// <summary>
         /// Deletes the selected key
         /// </summary>
-        public virtual async Task DeleteKeyAsync()
+        public async Task DeleteKeyAsync()
         {
-            await SelectedKey?.DeleteKeyAsync();
+            if (SelectedKey != null)
+                await SelectedKey.DeleteKeyAsync();
         }
 
         #endregion
@@ -561,7 +560,7 @@ namespace RayCarrot.WPF
         /// <summary>
         /// Refreshes the key view models
         /// </summary>
-        protected virtual async Task RefreshAsync()
+        protected async Task RefreshAsync()
         {
             // Save all paths which are expanded
             var expanded = new List<string[]>();
