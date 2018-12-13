@@ -1,9 +1,9 @@
-﻿using RayCarrot.CarrotFramework.UI;
-using System;
+﻿using System;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using RayCarrot.CarrotFramework;
 using RayCarrot.Windows.Registry;
 
 namespace RayCarrot.WPF
@@ -49,13 +49,13 @@ namespace RayCarrot.WPF
         {
             if (!RCFWinReg.RegistryManager.KeyExists(RegistrySelectionVM.SelectedKeyFullPath, RegistrySelectionVM.CurrentRegistryView))
             {
-                await RCFUI.MessageUI.DisplayMessageAsync("The selected key could not be found", "Invalid selection", MessageType.Information);
+                await RCF.MessageUI.DisplayMessageAsync("The selected key could not be found", "Invalid selection", MessageType.Information);
                 return;
             }
 
             if (RegistrySelectionVM.BrowseVM.BrowseValue && RegistrySelectionVM.SelectedValue == null)
             {
-                await RCFUI.MessageUI.DisplayMessageAsync("A value has to be selected", "Invalid selection", MessageType.Information);
+                await RCF.MessageUI.DisplayMessageAsync("A value has to be selected", "Invalid selection", MessageType.Information);
                 return;
             }
 
@@ -109,7 +109,7 @@ namespace RayCarrot.WPF
         /// <summary>
         /// The base size for the dialog
         /// </summary>
-        public DialogBaseSize BaseSize => DialogBaseSize.Large;
+        public DialogBaseSize BaseSize => DialogBaseSize.Largest;
 
         /// <summary>
         /// Indicates if the dialog was canceled by the user, default is true

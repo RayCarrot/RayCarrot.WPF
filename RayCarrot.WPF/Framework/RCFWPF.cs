@@ -1,4 +1,10 @@
 ﻿using RayCarrot.CarrotFramework;
+using RayCarrot.Windows.Registry;
+using RayCarrot.WPF;
+
+[assembly: RCFDefaultService(typeof(IDialogBaseManager), typeof(WindowDialogBaseManager), true)]
+[assembly: RCFDefaultService(typeof(IMessageUIManager), typeof(DefaultWPFMessageUIManager), true)]
+[assembly: RCFDefaultService(typeof(IRegistryBrowseUIManager), typeof(DefaultWPFRegistryBrowseUIManager), true)]
 
 namespace RayCarrot.WPF
 {
@@ -15,6 +21,6 @@ namespace RayCarrot.WPF
         /// <summary>
         /// Gets the dialog base manager, or the default one
         /// </summary>
-        public static IDialogBaseManager DialogBaseManager => RCF.GetService<IDialogBaseManager>(false) ?? new WindowDialogBaseManager();
+        public static IDialogBaseManager DialogBaseManager => RCF.GetService<IDialogBaseManager>(false);
     }
 }

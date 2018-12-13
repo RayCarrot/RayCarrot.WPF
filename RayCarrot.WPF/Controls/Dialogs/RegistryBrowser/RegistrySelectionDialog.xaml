@@ -30,7 +30,7 @@
         <Menu Grid.Row="0">
             
             <!-- File -->
-            
+
             <MenuItem Header="File">
                 <MenuItem Header="Open in RegEdit" Command="{Binding Path=OpenInRegeditCommand}" ToolTip="Opens the currently selected key in RegEdit">
                     <MenuItem.Icon>

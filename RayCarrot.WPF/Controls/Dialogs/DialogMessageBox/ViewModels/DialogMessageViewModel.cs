@@ -1,5 +1,5 @@
-﻿using RayCarrot.CarrotFramework.UI;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
+using RayCarrot.CarrotFramework;
 
 namespace RayCarrot.WPF
 {

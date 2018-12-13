@@ -1,7 +1,7 @@
 ﻿using RayCarrot.CarrotFramework;
-using RayCarrot.CarrotFramework.UI;
 using RayCarrot.Windows.Registry;
 using System.Collections.Generic;
+// ReSharper disable StringLiteralTypo
 
 namespace RayCarrot.WPF
 {
@@ -68,10 +68,7 @@ namespace RayCarrot.WPF
             {
                 BuildFramework();
 
-                return new RegistrySelectionViewModel()
-                {
-
-                };
+                return new RegistrySelectionViewModel();
             }
         }
     }

@@ -1,6 +1,5 @@
 ﻿using Microsoft.Win32;
 using RayCarrot.CarrotFramework;
-using RayCarrot.CarrotFramework.UI;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -8,6 +7,7 @@ using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.WindowsAPICodePack.Shell;
 using RayCarrot.Windows.Registry;
 using RayCarrot.Windows.Shell;
 
@@ -99,7 +99,7 @@ namespace RayCarrot.WPF
             {
                 try
                 {
-                    return RCFWinShell.WindowsFileInfoManager.GetIcon(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Windows), "regedit.exe"), IconSize.SmallIcon_16);
+                    return ShellObject.FromParsingName(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Windows), "regedit.exe")).Thumbnail.GetTransparentBitmap(ShellThumbnailExtensions.ThumbnailSize.Small);
                 }
                 catch (Exception ex)
                 {
@@ -343,7 +343,7 @@ namespace RayCarrot.WPF
             catch (Exception ex)
             {
                 ex.HandleError("Getting Registry favorites");
-                await RCFUI.MessageUI.DisplayMessageAsync("Could not get the saved favorites", "Unknown error", MessageType.Error);
+                await RCF.MessageUI.DisplayMessageAsync("Could not get the saved favorites", "Unknown error", MessageType.Error);
             }
         }
 
@@ -477,7 +477,7 @@ namespace RayCarrot.WPF
         {
             if (SelectedKey == null)
             {
-                await RCFUI.MessageUI.DisplayMessageAsync("No key has been selected", "Error Opening Key", MessageType.Information);
+                await RCF.MessageUI.DisplayMessageAsync("No key has been selected", "Error Opening Key", MessageType.Information);
                 return;
             }
 
@@ -522,7 +522,7 @@ namespace RayCarrot.WPF
             catch (Exception ex)
             {
                 ex.HandleExpected("Getting Registry key values");
-                await RCFUI.MessageUI.DisplayMessageAsync("The Registry key values could not be obtained for the selected key", "Error retrieving values", MessageType.Error);
+                await RCF.MessageUI.DisplayMessageAsync("The Registry key values could not be obtained for the selected key", "Error retrieving values", MessageType.Error);
             }
         }
 

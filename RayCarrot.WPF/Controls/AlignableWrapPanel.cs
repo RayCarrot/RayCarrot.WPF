@@ -26,11 +26,11 @@ namespace RayCarrot.WPF
             Size curLineSize = new Size();
             Size panelSize = new Size();
 
-            UIElementCollection children = base.InternalChildren;
+            UIElementCollection children = InternalChildren;
 
             for (int i = 0; i < children.Count; i++)
             {
-                UIElement child = children[i] as UIElement;
+                UIElement child = children[i];
 
                 // Flow passes its own constraint to children
                 child.Measure(constraint);

@@ -1,5 +1,4 @@
 ﻿using RayCarrot.CarrotFramework;
-using RayCarrot.CarrotFramework.UI;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using System.Windows;

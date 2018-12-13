@@ -1,7 +1,5 @@
 ﻿using Microsoft.Win32;
 using RayCarrot.CarrotFramework;
-using RayCarrot.CarrotFramework.IO;
-using RayCarrot.CarrotFramework.UI;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -52,7 +50,7 @@ namespace RayCarrot.WPF
             switch (BrowseType)
             {
                 case BrowseTypes.File:
-                    var fileResult = await RCFUI.BrowseUI.BrowseFileAsync(new FileBrowserViewModel()
+                    var fileResult = await RCF.BrowseUI.BrowseFileAsync(new FileBrowserViewModel()
                     {
                         Title = "Select a file",
                         DefaultDirectory = IsPathValid() ? new FileSystemPath(FilePath).Parent.FullPath : InitialDirectory,
@@ -68,7 +66,7 @@ namespace RayCarrot.WPF
                     break;
 
                 case BrowseTypes.Directory:
-                    var dirResult = await RCFUI.BrowseUI.BrowseDirectoryAsync(new DirectoryBrowserViewModel()
+                    var dirResult = await RCF.BrowseUI.BrowseDirectoryAsync(new DirectoryBrowserViewModel()
                     {
                         Title = "Select a file",
                         DefaultDirectory = UseCurrentPathAsDefaultDirectoryIfValid && IsPathValid() ? new FileSystemPath(FilePath).FullPath : InitialDirectory,
@@ -100,7 +98,7 @@ namespace RayCarrot.WPF
                     break;
 
                 case BrowseTypes.Drive:
-                    var driveResult = await RCFUI.BrowseUI.BrowseDriveAsync(new DriveBrowserViewModel()
+                    var driveResult = await RCF.BrowseUI.BrowseDriveAsync(new DriveBrowserViewModel()
                     {
                         Title = "Select a drive",
                         DefaultDirectory = UseCurrentPathAsDefaultDirectoryIfValid && IsPathValid() ? new FileSystemPath(FilePath).FullPath : InitialDirectory,
@@ -124,7 +122,7 @@ namespace RayCarrot.WPF
         {
             if (!IsPathValid())
             {
-                await RCFUI.MessageUI.DisplayMessageAsync($"The path {FilePath} does not exist", "Path not found", MessageType.Error);
+                await RCF.MessageUI.DisplayMessageAsync($"The path {FilePath} does not exist", "Path not found", MessageType.Error);
                 return;
             }
 
@@ -135,11 +133,11 @@ namespace RayCarrot.WPF
                     case BrowseTypes.File:
                     case BrowseTypes.Directory:
                     case BrowseTypes.Drive:
-                        RCFWinShell.WindowsManager.OpenExplorerPath(FilePath);
+                        WindowsHelpers.OpenExplorerPath(FilePath);
                         break;
 
                     case BrowseTypes.RegistryKey:
-                        RCFWinShell.WindowsManager.OpenRegistryPath(FilePath);
+                        WindowsHelpers.OpenRegistryPath(FilePath);
                         break;
                 }
             }
@@ -159,7 +157,7 @@ namespace RayCarrot.WPF
 
             // Get the the target if it's a shortcut
             if (filePath.FullPath.EndsWith(".lnk"))
-                filePath = RCFWinShell.WindowsManager.GetShortCutTarget(filePath);
+                filePath = WindowsHelpers.GetShortCutTarget(filePath);
 
             // Set the path
             FilePath = filePath;

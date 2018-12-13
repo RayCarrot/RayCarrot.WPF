@@ -1,6 +1,6 @@
-﻿using RayCarrot.CarrotFramework.IO;
-using System;
+﻿using System;
 using System.Globalization;
+using RayCarrot.CarrotFramework;
 
 namespace RayCarrot.WPF
 {

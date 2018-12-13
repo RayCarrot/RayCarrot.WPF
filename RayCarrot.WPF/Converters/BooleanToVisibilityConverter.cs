@@ -13,6 +13,6 @@ namespace RayCarrot.WPF
             value ? Visibility.Visible : Visibility.Collapsed;
 
         public override bool ConvertValueBack(Visibility value, Type targetType, object parameter, CultureInfo culture) =>
-            value == Visibility.Visible ? true : false;
+            value == Visibility.Visible;
     }
 }

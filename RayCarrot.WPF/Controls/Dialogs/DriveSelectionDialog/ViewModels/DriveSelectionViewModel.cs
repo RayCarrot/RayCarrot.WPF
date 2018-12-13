@@ -1,6 +1,5 @@
 ﻿using ByteSizeLib;
 using RayCarrot.CarrotFramework;
-using RayCarrot.CarrotFramework.UI;
 using System;
 using System.Collections;
 using System.Collections.ObjectModel;
@@ -9,6 +8,7 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Input;
+using Microsoft.WindowsAPICodePack.Shell;
 using RayCarrot.Windows.Shell;
 
 namespace RayCarrot.WPF
@@ -105,8 +105,8 @@ namespace RayCarrot.WPF
         /// </summary>
         public void UpdateReturnValue()
         {
-            Result.SelectedDrive = SelectedItem?.Path;
-            Result.SelectedDrives = SelectedItems?.Cast<DriveViewModel>().Select(x => x?.Path.FullPath).ToList();
+            Result.SelectedDrive = SelectedItem?.Path ?? new FileSystemPath(String.Empty);
+            Result.SelectedDrives = SelectedItems?.Cast<DriveViewModel>().Select(x => x?.Path ?? new FileSystemPath(String.Empty)) ?? new FileSystemPath[]{};
         }
 
         /// <summary>
@@ -148,7 +148,9 @@ namespace RayCarrot.WPF
 
                         try
                         {
-                            icon = RCFWinShell.WindowsFileInfoManager.GetIcon(path, IconSize.SmallIcon_16);
+                            var thumb = ShellObject.FromParsingName(path).Thumbnail;
+                            thumb.CurrentSize = new System.Windows.Size(16, 16);
+                            icon = thumb.GetTransparentBitmap();
                         }
                         catch (Exception ex)
                         {
@@ -229,7 +231,7 @@ namespace RayCarrot.WPF
             catch (Exception ex)
             {
                 ex.HandleUnexpected("Getting drives");
-                await RCFUI.MessageUI.DisplayMessageAsync("An error occurred getting the drives", "Error", MessageType.Error);
+                await RCF.MessageUI.DisplayMessageAsync("An error occurred getting the drives", "Error", MessageType.Error);
             }
         }
 

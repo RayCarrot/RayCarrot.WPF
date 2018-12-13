@@ -1,8 +1,7 @@
 ﻿using ByteSizeLib;
-using RayCarrot.CarrotFramework.IO;
-using RayCarrot.CarrotFramework.UI;
 using System.Drawing;
 using System.IO;
+using RayCarrot.CarrotFramework;
 
 namespace RayCarrot.WPF
 {

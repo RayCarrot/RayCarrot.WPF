@@ -1,7 +1,7 @@
 ﻿using Microsoft.Win32;
 using RayCarrot.CarrotFramework;
-using RayCarrot.CarrotFramework.UI;
 using System.Collections.Generic;
+using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 
@@ -76,7 +76,7 @@ namespace RayCarrot.WPF
             {
                 CanceledByUser = canceled,
                 SelectedFile = openFileDialog.FileName,
-                SelectedFiles = new List<string>(openFileDialog.FileNames)
+                SelectedFiles = openFileDialog.FileNames.Select(x => new FileSystemPath(x))
             });
         }
 

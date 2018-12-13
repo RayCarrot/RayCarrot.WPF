@@ -1,4 +1,4 @@
-﻿using RayCarrot.CarrotFramework.UI;
+﻿using RayCarrot.CarrotFramework;
 
 namespace RayCarrot.WPF
 {

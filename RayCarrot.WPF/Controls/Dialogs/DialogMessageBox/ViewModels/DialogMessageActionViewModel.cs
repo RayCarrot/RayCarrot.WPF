@@ -1,6 +1,6 @@
-﻿using RayCarrot.CarrotFramework.UI;
-using System;
+﻿using System;
 using System.Windows.Input;
+using RayCarrot.CarrotFramework;
 
 namespace RayCarrot.WPF
 {

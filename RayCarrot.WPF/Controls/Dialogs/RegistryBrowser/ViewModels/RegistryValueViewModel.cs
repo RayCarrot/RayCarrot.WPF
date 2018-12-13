@@ -2,7 +2,6 @@
 using System.Linq;
 using Microsoft.Win32;
 using RayCarrot.CarrotFramework;
-using RayCarrot.CarrotFramework.UI;
 
 namespace RayCarrot.WPF
 {
