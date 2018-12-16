@@ -148,9 +148,12 @@ namespace RayCarrot.WPF
 
                         try
                         {
-                            var thumb = ShellObject.FromParsingName(path).Thumbnail;
-                            thumb.CurrentSize = new System.Windows.Size(16, 16);
-                            icon = thumb.GetTransparentBitmap();
+                            using (var shellObj = ShellObject.FromParsingName(path))
+                            {
+                                var thumb = shellObj.Thumbnail;
+                                thumb.CurrentSize = new System.Windows.Size(16, 16);
+                                icon = thumb.GetTransparentBitmap();
+                            }
                         }
                         catch (Exception ex)
                         {

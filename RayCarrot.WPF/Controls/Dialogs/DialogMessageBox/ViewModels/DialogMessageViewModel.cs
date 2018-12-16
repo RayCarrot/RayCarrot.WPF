@@ -1,5 +1,6 @@
-﻿using System.Collections.Generic;
-using RayCarrot.CarrotFramework;
+﻿using RayCarrot.CarrotFramework;
+using System.Collections.Generic;
+using System.Windows.Media;
 
 namespace RayCarrot.WPF
 {
@@ -31,6 +32,6 @@ namespace RayCarrot.WPF
         /// <summary>
         /// The dialog image source
         /// </summary>
-        public string DialogImageSource { get; set; }
+        public ImageSource DialogImageSource { get; set; }
     }
 }

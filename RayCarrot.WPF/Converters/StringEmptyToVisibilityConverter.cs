@@ -7,11 +7,11 @@ namespace RayCarrot.WPF
     /// <summary>
     /// Converts a <see cref="String"/> to a <see cref="Visibility"/> which is set to <see cref="Visibility.Visible"/> when the value is not empty
     /// </summary>
-    public class StringEmptyToVisibilityConverter : BaseValueConverter<StringEmptyToVisibilityConverter, string, Visibility>
+    public class StringEmptyToVisibilityConverter : BaseValueConverter<StringEmptyToVisibilityConverter>
     {
-        public override Visibility ConvertValue(string value, Type targetType, object parameter, CultureInfo culture)
+        public override object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            return String.IsNullOrEmpty(value) ? Visibility.Collapsed : Visibility.Visible;
+            return String.IsNullOrEmpty(value?.ToString()) ? Visibility.Collapsed : Visibility.Visible;
         }
     }
 }

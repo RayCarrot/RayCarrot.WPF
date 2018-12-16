@@ -8,7 +8,7 @@ namespace RayCarrot.WPF
     /// </summary>
     /// <typeparam name="V">The view model type</typeparam>
     /// <typeparam name="R">The result type</typeparam>
-    public interface IDialogBaseControl<V, R>
+    public interface IDialogBaseControl<out V, out R> : IDisposable
         where V : UserInputViewModel
     {
         #region Properties

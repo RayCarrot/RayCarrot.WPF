@@ -99,7 +99,7 @@ namespace RayCarrot.WPF
             {
                 try
                 {
-                    return ShellObject.FromParsingName(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Windows), "regedit.exe")).Thumbnail.GetTransparentBitmap(ShellThumbnailExtensions.ThumbnailSize.Small);
+                    return new FileSystemPath(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Windows), "regedit.exe")).GetIconOrThumbnail(ShellThumbnailSize.Small);
                 }
                 catch (Exception ex)
                 {

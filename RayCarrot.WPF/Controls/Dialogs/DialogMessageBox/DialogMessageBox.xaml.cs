@@ -72,6 +72,14 @@ namespace RayCarrot.WPF
         /// <returns>The result</returns>
         public object GetResult() => DialogResult;
 
+        /// <summary>
+        /// Performs application-defined tasks associated with freeing, releasing, or resetting unmanaged resources.
+        /// </summary>
+        public void Dispose()
+        {
+
+        }
+
         #endregion
 
         #region Events

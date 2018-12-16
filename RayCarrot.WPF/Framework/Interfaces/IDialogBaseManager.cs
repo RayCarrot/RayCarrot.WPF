@@ -1,6 +1,5 @@
-﻿using System.Threading.Tasks;
-using System.Windows;
-using RayCarrot.CarrotFramework;
+﻿using RayCarrot.CarrotFramework;
+using System.Threading.Tasks;
 
 namespace RayCarrot.WPF
 {
@@ -17,7 +16,7 @@ namespace RayCarrot.WPF
         /// <param name="dialog">The dialog to show</param>
         /// <param name="owner">The owner window</param>
         /// <returns>The result</returns>
-        Task<R> ShowDialogAsync<V, R>(IDialogBaseControl<V, R> dialog, Window owner)
+        Task<R> ShowDialogAsync<V, R>(IDialogBaseControl<V, R> dialog, object owner)
             where V : UserInputViewModel;
     }
 }

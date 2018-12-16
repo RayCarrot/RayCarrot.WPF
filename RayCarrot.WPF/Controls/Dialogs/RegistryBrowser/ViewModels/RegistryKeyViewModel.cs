@@ -360,11 +360,11 @@ namespace RayCarrot.WPF
         /// <returns>The task</returns>
         public async Task AddSubKeyAsync()
         {
-            // Make sure the key can be edited
-            if (!CanEditKey)
+            // Make sure a sub key can be added
+            if (!CanAddSubKey)
                 return;
 
-            string name = "New Key #";
+            const string name = "New Key #";
             int keyNum = 1;
 
             try
