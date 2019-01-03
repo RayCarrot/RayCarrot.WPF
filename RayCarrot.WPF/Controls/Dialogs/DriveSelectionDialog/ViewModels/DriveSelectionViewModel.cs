@@ -9,6 +9,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Input;
 using Microsoft.WindowsAPICodePack.Shell;
+using Nito.AsyncEx;
 using RayCarrot.Windows.Shell;
 
 namespace RayCarrot.WPF
@@ -25,6 +26,8 @@ namespace RayCarrot.WPF
         /// </summary>
         public DriveSelectionViewModel()
         {
+            RefreshAsyncLock = new AsyncLock();
+
             BrowseVM = new DriveBrowserViewModel()
             {
                 AllowedTypes = new DriveType[]
@@ -51,6 +54,12 @@ namespace RayCarrot.WPF
             Setup();
             Drives = new ObservableCollection<DriveViewModel>();
         }
+
+        #endregion
+
+        #region Private Properties
+
+        private AsyncLock RefreshAsyncLock { get; }
 
         #endregion
 
@@ -105,8 +114,8 @@ namespace RayCarrot.WPF
         /// </summary>
         public void UpdateReturnValue()
         {
-            Result.SelectedDrive = SelectedItem?.Path ?? new FileSystemPath(String.Empty);
-            Result.SelectedDrives = SelectedItems?.Cast<DriveViewModel>().Select(x => x?.Path ?? new FileSystemPath(String.Empty)) ?? new FileSystemPath[]{};
+            Result.SelectedDrive = SelectedItem?.Path ?? FileSystemPath.EmptyPath;
+            Result.SelectedDrives = SelectedItems?.Cast<DriveViewModel>().Select(x => x?.Path ?? FileSystemPath.EmptyPath) ?? new FileSystemPath[]{};
         }
 
         /// <summary>
@@ -114,127 +123,130 @@ namespace RayCarrot.WPF
         /// </summary>
         public async Task RefreshAsync()
         {
-            Drives.Clear();
-
-            try
+            using (await RefreshAsyncLock.LockAsync())
             {
-                var drives = DriveInfo.GetDrives();
-                foreach (var drive in drives)
+                Drives.Clear();
+
+                try
                 {
-                    if (BrowseVM.AllowedTypes != null && !BrowseVM.AllowedTypes.Contains(drive.DriveType))
-                        continue;
-
-                    Bitmap icon = null;
-                    string label = null;
-                    string path;
-                    string format = null;
-                    ByteSize? freeSpace = null;
-                    ByteSize? totalSize = null;
-                    DriveType? type = null;
-                    bool? ready = null;
-
-                    try
+                    var drives = DriveInfo.GetDrives();
+                    foreach (var drive in drives)
                     {
-                        label = drive.VolumeLabel;
-                    }
-                    catch (Exception ex)
-                    {
-                        ex.HandleExpected("Getting drive label");
-                    }
+                        if (BrowseVM.AllowedTypes != null && !BrowseVM.AllowedTypes.Contains(drive.DriveType))
+                            continue;
 
-                    try
-                    {
-                        path = drive.Name;
+                        Bitmap icon = null;
+                        string label = null;
+                        string path;
+                        string format = null;
+                        ByteSize? freeSpace = null;
+                        ByteSize? totalSize = null;
+                        DriveType? type = null;
+                        bool? ready = null;
 
                         try
                         {
-                            using (var shellObj = ShellObject.FromParsingName(path))
+                            label = drive.VolumeLabel;
+                        }
+                        catch (Exception ex)
+                        {
+                            ex.HandleExpected("Getting drive label");
+                        }
+
+                        try
+                        {
+                            path = drive.Name;
+
+                            try
                             {
-                                var thumb = shellObj.Thumbnail;
-                                thumb.CurrentSize = new System.Windows.Size(16, 16);
-                                icon = thumb.GetTransparentBitmap();
+                                using (var shellObj = ShellObject.FromParsingName(path))
+                                {
+                                    var thumb = shellObj.Thumbnail;
+                                    thumb.CurrentSize = new System.Windows.Size(16, 16);
+                                    icon = thumb.GetTransparentBitmap();
+                                }
+                            }
+                            catch (Exception ex)
+                            {
+                                ex.HandleExpected("Getting drive icon");
                             }
                         }
                         catch (Exception ex)
                         {
-                            ex.HandleExpected("Getting drive icon");
+                            ex.HandleExpected("Getting drive name");
+                            continue;
                         }
-                    }
-                    catch (Exception ex)
-                    {
-                        ex.HandleExpected("Getting drive name");
-                        continue;
-                    }
 
-                    try
-                    {
-                        format = drive.DriveFormat;
-                    }
-                    catch (Exception ex)
-                    {
-                        ex.HandleExpected("Getting drive format");
-                    }
+                        try
+                        {
+                            format = drive.DriveFormat;
+                        }
+                        catch (Exception ex)
+                        {
+                            ex.HandleExpected("Getting drive format");
+                        }
 
-                    try
-                    {
-                        freeSpace = new ByteSize(drive.TotalFreeSpace);
-                    }
-                    catch (Exception ex)
-                    {
-                        ex.HandleExpected("Getting drive freeSpace");
-                    }
+                        try
+                        {
+                            freeSpace = new ByteSize(drive.TotalFreeSpace);
+                        }
+                        catch (Exception ex)
+                        {
+                            ex.HandleExpected("Getting drive freeSpace");
+                        }
 
-                    try
-                    {
-                        totalSize = new ByteSize(drive.TotalSize);
-                    }
-                    catch (Exception ex)
-                    {
-                        ex.HandleExpected("Getting drive totalSize");
-                    }
+                        try
+                        {
+                            totalSize = new ByteSize(drive.TotalSize);
+                        }
+                        catch (Exception ex)
+                        {
+                            ex.HandleExpected("Getting drive totalSize");
+                        }
 
-                    try
-                    {
-                        type = drive.DriveType;
-                    }
-                    catch (Exception ex)
-                    {
-                        ex.HandleExpected("Getting drive type");
-                    }
+                        try
+                        {
+                            type = drive.DriveType;
+                        }
+                        catch (Exception ex)
+                        {
+                            ex.HandleExpected("Getting drive type");
+                        }
 
-                    try
-                    {
-                        ready = drive.IsReady;
-                        if (!drive.IsReady && !BrowseVM.AllowNonReadyDrives)
-                            continue;
-                    }
-                    catch (Exception ex)
-                    {
-                        ex.HandleExpected("Getting drive ready");
-                        if (!BrowseVM.AllowNonReadyDrives)
-                            continue;
-                    }
+                        try
+                        {
+                            ready = drive.IsReady;
+                            if (!drive.IsReady && !BrowseVM.AllowNonReadyDrives)
+                                continue;
+                        }
+                        catch (Exception ex)
+                        {
+                            ex.HandleExpected("Getting drive ready");
+                            if (!BrowseVM.AllowNonReadyDrives)
+                                continue;
+                        }
 
-                    // Create the view model
-                    var vm = new DriveViewModel()
-                    {
-                        Path = path,
-                        Icon = icon,
-                        Format = format,
-                        Label = label,
-                        Type = type,
-                        FreeSpace = freeSpace,
-                        TotalSize = totalSize,
-                        IsReady = ready
-                    };
+                        // Create the view model
+                        var vm = new DriveViewModel()
+                        {
+                            Path = path,
+                            Icon = icon,
+                            Format = format,
+                            Label = label,
+                            Type = type,
+                            FreeSpace = freeSpace,
+                            TotalSize = totalSize,
+                            IsReady = ready
+                        };
 
-                    Drives.Add(vm);
+                        Drives.Add(vm);
+                    }
                 }
-            }
-            catch (Exception ex)
-            {
-                ex.HandleUnexpected("Getting drives");
-                await RCF.MessageUI.DisplayMessageAsync("An error occurred getting the drives", "Error", MessageType.Error);
+                catch (Exception ex)
+                {
+                    ex.HandleUnexpected("Getting drives");
+                    await RCF.MessageUI.DisplayMessageAsync("An error occurred getting the drives", "Error", MessageType.Error);
+                }
             }
         }
 

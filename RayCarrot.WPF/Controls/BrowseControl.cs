@@ -6,6 +6,7 @@ using System.IO;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
+using Nito.AsyncEx;
 using RayCarrot.Windows.Registry;
 using RayCarrot.Windows.Shell;
 
@@ -16,6 +17,15 @@ namespace RayCarrot.WPF
     /// </summary>
     public class BrowseControl : UserControl
     {
+        #region Constructor
+
+        public BrowseControl()
+        {
+            BrowseAsyncLock = new AsyncLock();
+        }
+
+        #endregion
+
         #region Methods
 
         protected virtual bool IsPathValid()
@@ -47,74 +57,77 @@ namespace RayCarrot.WPF
 
         protected virtual async Task BrowseAsync()
         {
-            switch (BrowseType)
+            using (await BrowseAsyncLock.LockAsync())
             {
-                case BrowseTypes.File:
-                    var fileResult = await RCF.BrowseUI.BrowseFileAsync(new FileBrowserViewModel()
-                    {
-                        Title = "Select a file",
-                        DefaultDirectory = IsPathValid() ? new FileSystemPath(FilePath).Parent.FullPath : InitialDirectory,
-                        DefaultName = UseCurrentPathAsDefaultDirectoryIfValid && IsPathValid() ? new FileSystemPath(FilePath).Name : String.Empty,
-                        ExtensionFilter = FileFilter
-                    });
+                switch (BrowseType)
+                {
+                    case BrowseTypes.File:
+                        var fileResult = await RCF.BrowseUI.BrowseFileAsync(new FileBrowserViewModel()
+                        {
+                            Title = "Select a file",
+                            DefaultDirectory = IsPathValid() ? new FileSystemPath(FilePath).Parent.FullPath : InitialDirectory,
+                            DefaultName = UseCurrentPathAsDefaultDirectoryIfValid && IsPathValid() ? new FileSystemPath(FilePath).Name : String.Empty,
+                            ExtensionFilter = FileFilter
+                        });
 
-                    if (fileResult.CanceledByUser)
-                        return;
+                        if (fileResult.CanceledByUser)
+                            return;
 
-                    FilePath = fileResult.SelectedFile;
+                        FilePath = fileResult.SelectedFile;
 
-                    break;
+                        break;
 
-                case BrowseTypes.Directory:
-                    var dirResult = await RCF.BrowseUI.BrowseDirectoryAsync(new DirectoryBrowserViewModel()
-                    {
-                        Title = "Select a file",
-                        DefaultDirectory = UseCurrentPathAsDefaultDirectoryIfValid && IsPathValid() ? new FileSystemPath(FilePath).FullPath : InitialDirectory,
-                        DefaultName = IsPathValid() ? new FileSystemPath(FilePath).Name : String.Empty
-                    });
+                    case BrowseTypes.Directory:
+                        var dirResult = await RCF.BrowseUI.BrowseDirectoryAsync(new DirectoryBrowserViewModel()
+                        {
+                            Title = "Select a file",
+                            DefaultDirectory = UseCurrentPathAsDefaultDirectoryIfValid && IsPathValid() ? new FileSystemPath(FilePath).FullPath : InitialDirectory,
+                            DefaultName = IsPathValid() ? new FileSystemPath(FilePath).Name : String.Empty
+                        });
 
-                    if (dirResult.CanceledByUser)
-                        return;
+                        if (dirResult.CanceledByUser)
+                            return;
 
-                    FilePath = dirResult.SelectedDirectory;
+                        FilePath = dirResult.SelectedDirectory;
 
-                    break;
+                        break;
 
-                case BrowseTypes.RegistryKey:
-                    var keyResult = await RCFWinReg.RegistryBrowseUIManager.BrowseRegistryKeyAsync(new RegistryBrowserViewModel()
-                    {
-                        Title = "Select a Registry key",
-                        AllowCustomRegistryView = AllowCustomRegistryView,
-                        DefaultRegistryView = SelectedRegistryView,
-                        BrowseValue = false,
-                        DefaultKeyPath = UseCurrentPathAsDefaultDirectoryIfValid && IsPathValid() ? FilePath : InitialDirectory,
-                    });
+                    case BrowseTypes.RegistryKey:
+                        var keyResult = await RCFWinReg.RegistryBrowseUIManager.BrowseRegistryKeyAsync(new RegistryBrowserViewModel()
+                        {
+                            Title = "Select a Registry key",
+                            AllowCustomRegistryView = AllowCustomRegistryView,
+                            DefaultRegistryView = SelectedRegistryView,
+                            BrowseValue = false,
+                            DefaultKeyPath = UseCurrentPathAsDefaultDirectoryIfValid && IsPathValid() ? FilePath : InitialDirectory,
+                        });
 
-                    if (keyResult.CanceledByUser)
-                        return;
+                        if (keyResult.CanceledByUser)
+                            return;
 
-                    FilePath = keyResult.KeyPath;
-                    SelectedRegistryView = keyResult.SelectedRegistryView;
-                    break;
+                        FilePath = keyResult.KeyPath;
+                        SelectedRegistryView = keyResult.SelectedRegistryView;
+                        break;
 
-                case BrowseTypes.Drive:
-                    var driveResult = await RCF.BrowseUI.BrowseDriveAsync(new DriveBrowserViewModel()
-                    {
-                        Title = "Select a drive",
-                        DefaultDirectory = UseCurrentPathAsDefaultDirectoryIfValid && IsPathValid() ? new FileSystemPath(FilePath).FullPath : InitialDirectory,
-                        MultiSelection = false,
-                        AllowedTypes = AllowedDriveTypes,
-                        AllowNonReadyDrives = AllowNonReadyDrives
-                    });
+                    case BrowseTypes.Drive:
+                        var driveResult = await RCF.BrowseUI.BrowseDriveAsync(new DriveBrowserViewModel()
+                        {
+                            Title = "Select a drive",
+                            DefaultDirectory = UseCurrentPathAsDefaultDirectoryIfValid && IsPathValid() ? new FileSystemPath(FilePath).FullPath : InitialDirectory,
+                            MultiSelection = false,
+                            AllowedTypes = AllowedDriveTypes,
+                            AllowNonReadyDrives = AllowNonReadyDrives
+                        });
 
-                    if (driveResult.CanceledByUser)
-                        return;
+                        if (driveResult.CanceledByUser)
+                            return;
 
-                    FilePath = driveResult.SelectedDrive;
-                    break;
+                        FilePath = driveResult.SelectedDrive;
+                        break;
 
-                default:
-                    throw new ArgumentException("The specified browse type is not valid");
+                    default:
+                        throw new ArgumentException("The specified browse type is not valid");
+                }
             }
         }
 
@@ -162,6 +175,12 @@ namespace RayCarrot.WPF
             // Set the path
             FilePath = filePath;
         }
+
+        #endregion
+
+        #region Private Properties
+
+        private AsyncLock BrowseAsyncLock { get; }
 
         #endregion
 

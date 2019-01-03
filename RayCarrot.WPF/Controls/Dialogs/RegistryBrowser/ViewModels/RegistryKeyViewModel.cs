@@ -5,6 +5,7 @@ using System.ComponentModel;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Data;
+using Nito.AsyncEx;
 using RayCarrot.Windows.Registry;
 using RayCarrot.Windows.Shell;
 
@@ -25,6 +26,11 @@ namespace RayCarrot.WPF
         public RegistryKeyViewModel(string fullPath, RegistrySelectionViewModel vm) : base(RCFWinReg.RegistryManager.GetSubKeyName(fullPath))
         {
             // Set properties
+            ExpandAsyncLock = new AsyncLock();
+            AddFavoriteAsyncLock = new AsyncLock();
+            ProcessEditAsyncLock = new AsyncLock();
+            AddSubKeyAsyncLock = new AsyncLock();
+            DeleteKeyAsyncLock = new AsyncLock();
             FullPath = fullPath;
             VM = vm;
             Name = RCFWinReg.RegistryManager.GetSubKeyName(fullPath);
@@ -39,6 +45,20 @@ namespace RayCarrot.WPF
         private bool _IsExpanded;
 
         private bool _accessDenied;
+
+        #endregion
+
+        #region Private Properties
+
+        private AsyncLock ExpandAsyncLock { get; }
+
+        private AsyncLock AddFavoriteAsyncLock { get; }
+
+        private AsyncLock ProcessEditAsyncLock { get; }
+
+        private AsyncLock AddSubKeyAsyncLock { get; }
+
+        private AsyncLock DeleteKeyAsyncLock { get; }
 
         #endregion
 
@@ -159,26 +179,29 @@ namespace RayCarrot.WPF
         /// <returns>The task</returns>
         public async Task ExpandAsync(bool expand = true)
         {
-            // Update backing field
-            _IsExpanded = expand;
+            using (await ExpandAsyncLock.LockAsync())
+            {
+                // Update backing field
+                _IsExpanded = expand;
 
-            // Notify UI
-            OnPropertyChanged(new PropertyChangedEventArgs(nameof(IsExpanded)));
+                // Notify UI
+                OnPropertyChanged(new PropertyChangedEventArgs(nameof(IsExpanded)));
 
-            // Make sure access is not denied
-            if (AccessDenied)
-                return;
+                // Make sure access is not denied
+                if (AccessDenied)
+                    return;
 
-            // Load items if expanded
-            if (IsExpanded && !LoadedSubKeys)
-                await LoadSubItemsCommand.ExecuteAsync();
+                // Load items if expanded
+                if (IsExpanded && !LoadedSubKeys)
+                    await LoadSubItemsCommand.ExecuteAsync();
 
-            // Reset items if collapsed and set not to cache
-            else if (!IsExpanded && !CacheSubKeys)
-                await ResetCommand.ExecuteAsync();
+                // Reset items if collapsed and set not to cache
+                else if (!IsExpanded && !CacheSubKeys)
+                    await ResetCommand.ExecuteAsync();
 
-            if (VM.AutoSelectOnExpand)
-                IsSelected = true;
+                if (VM.AutoSelectOnExpand)
+                    IsSelected = true;
+            }
         }
 
         /// <summary>
@@ -202,44 +225,47 @@ namespace RayCarrot.WPF
         /// </summary>
         public async Task AddFavoritesAsync()
         {
-            // Get the name
-            var result = await new StringInputDialog(new StringInputViewModel()
+            using (await AddFavoriteAsyncLock.LockAsync())
             {
-                Title = "Add to Favorites",
-                HeaderText = "Favorite name:",
-                StringInput = Name
-            }).ShowDialogAsync();
+                // Get the name
+                var result = await new StringInputDialog(new StringInputViewModel()
+                {
+                    Title = "Add to Favorites",
+                    HeaderText = "Favorite name:",
+                    StringInput = Name
+                }).ShowDialogAsync();
 
-            // Make sure it was not canceled by the user
-            if (result.CanceledByUser)
-                return;
+                // Make sure it was not canceled by the user
+                if (result.CanceledByUser)
+                    return;
 
-            // Make sure the name is not empty
-            if (result.StringInput.IsNullOrWhiteSpace())
-            {
-                await RCF.MessageUI.DisplayMessageAsync("The name cannot be empty", "Name is not valid", MessageType.Warning);
-                return;
-            }
+                // Make sure the name is not empty
+                if (result.StringInput.IsNullOrWhiteSpace())
+                {
+                    await RCF.MessageUI.DisplayMessageAsync("The name cannot be empty", "Name is not valid", MessageType.Warning);
+                    return;
+                }
 
-            // Make sure the name doesn't already exist
-            if (RCFWinReg.RegistryManager.ValueExists(CommonRegistryPaths.RegeditFavoritesPath, result.StringInput, RegistryView.Default))
-            {
-                await RCF.MessageUI.DisplayMessageAsync("The name already exists", "Name is not valid", MessageType.Warning);
-                return;
-            }
+                // Make sure the name doesn't already exist
+                if (RCFWinReg.RegistryManager.ValueExists(CommonRegistryPaths.RegeditFavoritesPath, result.StringInput, RegistryView.Default))
+                {
+                    await RCF.MessageUI.DisplayMessageAsync("The name already exists", "Name is not valid", MessageType.Warning);
+                    return;
+                }
 
-            try
-            {
-                // Add the value
-                Registry.SetValue(CommonRegistryPaths.RegeditFavoritesPath, result.StringInput, FullPath);
+                try
+                {
+                    // Add the value
+                    Registry.SetValue(CommonRegistryPaths.RegeditFavoritesPath, result.StringInput, FullPath);
 
-                // Reset the favorites
-                await VM.ResetFavoritesAsync();
-            }
-            catch (Exception ex)
-            {
-                ex.HandleError("Add registry favorites path");
-                await RCF.MessageUI.DisplayMessageAsync($"An error occurred saving the name{Environment.NewLine}{ex.Message}", MessageType.Error);
+                    // Reset the favorites
+                    await VM.ResetFavoritesAsync();
+                }
+                catch (Exception ex)
+                {
+                    ex.HandleError("Add registry favorites path");
+                    await RCF.MessageUI.DisplayMessageAsync($"An error occurred saving the name{Environment.NewLine}{ex.Message}", MessageType.Error);
+                }
             }
         }
 
@@ -284,73 +310,76 @@ namespace RayCarrot.WPF
         /// </summary>
         public async Task ProcessEditAsync()
         {
-            // Make sure the key can be edited
-            if (!CanEditKey)
-                return;
-
-            // Make sure the name has changed
-            if (EditName.Equals(Name, StringComparison.CurrentCultureIgnoreCase))
-                return;
-
-            // Make sure the name is not empty
-            if (EditName.IsNullOrWhiteSpace())
+            using (await ProcessEditAsyncLock.LockAsync())
             {
-                await RCF.MessageUI.DisplayMessageAsync("The key name can not be blank", "Invalid name", MessageType.Error);
-                return;
-            }
+                // Make sure the key can be edited
+                if (!CanEditKey)
+                    return;
 
-            // Make sure the name does not contain invalid characters
-            if (EditName.Contains("\\"))
-            {
-                await RCF.MessageUI.DisplayMessageAsync(@"The key name can not contain backslashes ('\')", "Invalid name", MessageType.Error);
-                return;
-            }
+                // Make sure the name has changed
+                if (EditName.Equals(Name, StringComparison.CurrentCultureIgnoreCase))
+                    return;
 
-            try
-            {
-                // Check all sub keys for write permission
-                if (!GetKey().RunAndDispose(x => x.HasSubKeyTreeWritePermissions()))
+                // Make sure the name is not empty
+                if (EditName.IsNullOrWhiteSpace())
                 {
-                    await RCF.MessageUI.DisplayMessageAsync(@"You do not have the required permissions to rename this key", "Error", MessageType.Error);
+                    await RCF.MessageUI.DisplayMessageAsync("The key name can not be blank", "Invalid name", MessageType.Error);
                     return;
                 }
 
-                // Get the parent key
-                using (var parent = Parent.GetKey(true))
+                // Make sure the name does not contain invalid characters
+                if (EditName.Contains("\\"))
                 {
-                    // Move the sub key to new name
-                    parent.MoveSubKey(Name, EditName);
+                    await RCF.MessageUI.DisplayMessageAsync(@"The key name can not contain backslashes ('\')", "Invalid name", MessageType.Error);
+                    return;
                 }
 
-                // TODO: Possibly just refresh and expand to this key?
+                try
+                {
+                    // Check all sub keys for write permission
+                    if (!GetKey().RunAndDispose(x => x.HasSubKeyTreeWritePermissions()))
+                    {
+                        await RCF.MessageUI.DisplayMessageAsync(@"You do not have the required permissions to rename this key", "Error", MessageType.Error);
+                        return;
+                    }
 
-                // Update name
-                Name = EditName;
+                    // Get the parent key
+                    using (var parent = Parent.GetKey(true))
+                    {
+                        // Move the sub key to new name
+                        parent.MoveSubKey(Name, EditName);
+                    }
 
-                // Update full path
-                FullPath = RCFWinReg.RegistryManager.CombinePaths(Parent.FullPath, EditName);
+                    // TODO: Possibly just refresh and expand to this key?
 
-                // Reset sub keys
-                Reset();
+                    // Update name
+                    Name = EditName;
 
-                // Set expanded to false
-                IsExpanded = false;
+                    // Update full path
+                    FullPath = RCFWinReg.RegistryManager.CombinePaths(Parent.FullPath, EditName);
 
-                // Make sure it is selected
-                IsSelected = true;
+                    // Reset sub keys
+                    Reset();
 
-                // Notify UI that the key has changed
-                VM.OnPropertyChanged(nameof(VM.SelectedKey));
-                VM.OnPropertyChanged(nameof(VM.SelectedKeyFullPath));
+                    // Set expanded to false
+                    IsExpanded = false;
 
-                // Refresh the values
-                await VM.RefreshValuesAsync();
-            }
-            catch (Exception ex)
-            {
-                ex.HandleError("Renaming Registry key", this);
-                await RCF.MessageUI.DisplayMessageAsync($"Renaming the key failed with the following error message:{Environment.NewLine}{ex.Message}", "Operation Failed", MessageType.Error);
-                VM.RefreshCommand.Execute();
+                    // Make sure it is selected
+                    IsSelected = true;
+
+                    // Notify UI that the key has changed
+                    VM.OnPropertyChanged(nameof(VM.SelectedKey));
+                    VM.OnPropertyChanged(nameof(VM.SelectedKeyFullPath));
+
+                    // Refresh the values
+                    await VM.RefreshValuesAsync();
+                }
+                catch (Exception ex)
+                {
+                    ex.HandleError("Renaming Registry key", this);
+                    await RCF.MessageUI.DisplayMessageAsync($"Renaming the key failed with the following error message:{Environment.NewLine}{ex.Message}", "Operation Failed", MessageType.Error);
+                    VM.RefreshCommand.Execute();
+                }
             }
         }
 
@@ -360,54 +389,57 @@ namespace RayCarrot.WPF
         /// <returns>The task</returns>
         public async Task AddSubKeyAsync()
         {
-            // Make sure a sub key can be added
-            if (!CanAddSubKey)
-                return;
+            using (await AddSubKeyAsyncLock.LockAsync())
+            {
+                // Make sure a sub key can be added
+                if (!CanAddSubKey)
+                    return;
 
-            const string name = "New Key #";
-            int keyNum = 1;
+                const string name = "New Key #";
+                int keyNum = 1;
 
-            try
-            {
-                while (RCFWinReg.RegistryManager.KeyExists(RCFWinReg.RegistryManager.CombinePaths(FullPath, name + keyNum)))
-                    keyNum++;
-            }
-            catch (Exception ex)
-            {
-                ex.HandleError("Getting new sub key name");
-                await RCF.MessageUI.DisplayMessageAsync("An unknown error occurred", "Error", MessageType.Error);
-                return;
-            }
+                try
+                {
+                    while (RCFWinReg.RegistryManager.KeyExists(RCFWinReg.RegistryManager.CombinePaths(FullPath, name + keyNum)))
+                        keyNum++;
+                }
+                catch (Exception ex)
+                {
+                    ex.HandleError("Getting new sub key name");
+                    await RCF.MessageUI.DisplayMessageAsync("An unknown error occurred", "Error", MessageType.Error);
+                    return;
+                }
 
-            try
-            {
-                // Get this key
-                using (var key = GetKey(true))
-                    // Create the sub key
-                    key.CreateSubKey(name + keyNum)?.Dispose();
-            }
-            catch (Exception ex)
-            {
-                ex.HandleError("Creating sub key");
-                await RCF.MessageUI.DisplayMessageAsync($"The sub key could not be created with the error message of: {Environment.NewLine}{ex.Message}", "Error", MessageType.Error);
-                return;
-            }
+                try
+                {
+                    if (!IsExpanded)
+                        await ExpandAsync();
 
-            try
-            {
-                if (!IsExpanded)
-                    await ExpandAsync();
+                    // Get this key
+                    using (var key = GetKey(true))
+                        // Create the sub key
+                        key.CreateSubKey(name + keyNum)?.Dispose();
+                }
+                catch (Exception ex)
+                {
+                    ex.HandleError("Creating sub key");
+                    await RCF.MessageUI.DisplayMessageAsync($"The sub key could not be created with the error message of: {Environment.NewLine}{ex.Message}", "Error", MessageType.Error);
+                    return;
+                }
 
-                var vm = new RegistryKeyViewModel(RCFWinReg.RegistryManager.CombinePaths(FullPath, name + keyNum), VM);
-                await vm.EnableSynchronizationAsync();
-                Add(vm);
-                vm.IsSelected = true;
-                await VM.BeginEditAsync();
-            }
-            catch (Exception ex)
-            {
-                ex.HandleError("Handling new sub key creation");
-                VM.RefreshCommand.Execute();
+                try
+                {
+                    var vm = new RegistryKeyViewModel(RCFWinReg.RegistryManager.CombinePaths(FullPath, name + keyNum), VM);
+                    await vm.EnableSynchronizationAsync();
+                    Add(vm);
+                    vm.IsSelected = true;
+                    await VM.BeginEditAsync();
+                }
+                catch (Exception ex)
+                {
+                    ex.HandleError("Handling new sub key creation");
+                    VM.RefreshCommand.Execute();
+                }
             }
         }
 
@@ -423,40 +455,43 @@ namespace RayCarrot.WPF
         /// </summary>
         public async Task DeleteKeyAsync()
         {
-            // Make sure the key can be edited
-            if (!CanEditKey)
-                return;
-
-            // Have user confirm deleting key
-            if (!await RCF.MessageUI.DisplayMessageAsync("Are you sure you want to permanently delete this key and all of its subkeys? This operation can not be undone and may cause system instability.", "Confirm Delete", MessageType.Warning, true))
-                return;
-
-            // Check all sub keys for write permission
-            if (!GetKey().RunAndDispose(x => x.HasSubKeyTreeWritePermissions()))
+            using (await DeleteKeyAsyncLock.LockAsync())
             {
-                await RCF.MessageUI.DisplayMessageAsync(@"You do not have the required permissions to delete this key", "Error", MessageType.Error);
-                return;
+                // Make sure the key can be edited
+                if (!CanEditKey)
+                    return;
+
+                // Have user confirm deleting key
+                if (!await RCF.MessageUI.DisplayMessageAsync("Are you sure you want to permanently delete this key and all of its subkeys? This operation can not be undone and may cause system instability.", "Confirm Delete", MessageType.Warning, true))
+                    return;
+
+                // Check all sub keys for write permission
+                if (!GetKey().RunAndDispose(x => x.HasSubKeyTreeWritePermissions()))
+                {
+                    await RCF.MessageUI.DisplayMessageAsync(@"You do not have the required permissions to delete this key", "Error", MessageType.Error);
+                    return;
+                }
+
+                try
+                {
+                    // Delete the key
+                    Parent.GetKey(true).DeleteSubKeyTree(Name);
+                }
+                catch (Exception ex)
+                {
+                    ex.HandleError("Deleting key");
+                    await RCF.MessageUI.DisplayMessageAsync("The key could not be deleted. Some of its subkeys may have been deleted.", "Operation Failed", MessageType.Error);
+
+                    VM.RefreshCommand.Execute();
+                    return;
+                }
+
+                // Remove item from parent
+                Parent.Remove(this);
+
+                // Select parent
+                VM.SelectedKey = Parent;
             }
-
-            try
-            {
-                // Delete the key
-                Parent.GetKey(true).DeleteSubKeyTree(Name);
-            }
-            catch (Exception ex)
-            {
-                ex.HandleError("Deleting key");
-                await RCF.MessageUI.DisplayMessageAsync("The key could not be deleted. Some of its subkeys may have been deleted.", "Operation Failed", MessageType.Error);
-
-                VM.RefreshCommand.Execute();
-                return;
-            }
-
-            // Remove item from parent
-            Parent.Remove(this);
-
-            // Select parent
-            VM.SelectedKey = Parent;
         }
 
         /// <summary>
@@ -476,29 +511,32 @@ namespace RayCarrot.WPF
         /// </summary>
         protected void Reset()
         {
-            // Clear the collection
-            Clear();
-
-            try
+            lock (this)
             {
-                // Check if there are any sub keys
-                if (GetKey().SubKeyCount > 0)
-                    // Add dummy item
-                    Add(null);
+                // Clear the collection
+                Clear();
 
-                // Indicate that access is not denied
-                AccessDenied = false;
+                try
+                {
+                    // Check if there are any sub keys
+                    if (GetKey().SubKeyCount > 0)
+                        // Add dummy item
+                        Add(null);
+
+                    // Indicate that access is not denied
+                    AccessDenied = false;
+                }
+                catch (Exception ex)
+                {
+                    ex.HandleExpected("Getting sub key count");
+
+                    // Indicate that access is denied
+                    AccessDenied = true;
+                }
+
+                // Indicate that the sub keys are no longer loaded
+                LoadedSubKeys = false;
             }
-            catch (Exception ex)
-            {
-                ex.HandleExpected("Getting sub key count");
-
-                // Indicate that access is denied
-                AccessDenied = true;
-            }
-
-            // Indicate that the sub keys are no longer loaded
-            LoadedSubKeys = false;
         }
 
         /// <summary>

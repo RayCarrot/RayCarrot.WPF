@@ -7,7 +7,6 @@ using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.WindowsAPICodePack.Shell;
 using RayCarrot.Windows.Registry;
 using RayCarrot.Windows.Shell;
 
@@ -324,19 +323,22 @@ namespace RayCarrot.WPF
         /// </summary>
         public async Task ResetFavoritesAsync()
         {
-            Favorites.Clear();
-
             try
             {
-                using (var key = RCFWinReg.RegistryManager.GetKeyFromFullPath(CommonRegistryPaths.RegeditFavoritesPath, RegistryView.Default))
+                lock (this)
                 {
-                    foreach (var value in key.GetValues())
+                    Favorites.Clear();
+
+                    using (var key = RCFWinReg.RegistryManager.GetKeyFromFullPath(CommonRegistryPaths.RegeditFavoritesPath, RegistryView.Default))
                     {
-                        Favorites.Add(new FavoritesItemViewModel(this)
+                        foreach (var value in key.GetValues())
                         {
-                            Name = value.Name,
-                            KeyPath = RCFWinReg.RegistryManager.NormalizePath(value.Value.ToString())
-                        });
+                            Favorites.Add(new FavoritesItemViewModel(this)
+                            {
+                                Name = value.Name,
+                                KeyPath = RCFWinReg.RegistryManager.NormalizePath(value.Value.ToString())
+                            });
+                        }
                     }
                 }
             }
@@ -498,24 +500,27 @@ namespace RayCarrot.WPF
 
             try
             {
-                using (RegistryKey key = RCFWinReg.RegistryManager.GetKeyFromFullPath(SelectedKeyFullPath, CurrentRegistryView))
+                lock (this)
                 {
-                    // Add values
-                    Values.AddRange(key.GetValues().Select(x => new RegistryValueViewModel()
+                    using (RegistryKey key = RCFWinReg.RegistryManager.GetKeyFromFullPath(SelectedKeyFullPath, CurrentRegistryView))
                     {
-                        Name = x.Name,
-                        Data = x.Value,
-                        Type = x.ValueKind
-                    }));
-
-                    // Add empty default if non has been added and if set to do so
-                    if (ShowEmptyDefaultValues && !Values.Any(x => x.IsDefault))
-                    {
-                        Values.Add(new RegistryValueViewModel()
+                        // Add values
+                        Values.AddRange(key.GetValues().Select(x => new RegistryValueViewModel()
                         {
-                            Name = String.Empty,
-                            Type = RegistryValueKind.String
-                        });
+                            Name = x.Name,
+                            Data = x.Value,
+                            Type = x.ValueKind
+                        }));
+
+                        // Add empty default if non has been added and if set to do so
+                        if (ShowEmptyDefaultValues && !Values.Any(x => x.IsDefault))
+                        {
+                            Values.Add(new RegistryValueViewModel()
+                            {
+                                Name = String.Empty,
+                                Type = RegistryValueKind.String
+                            });
+                        }
                     }
                 }
             }
