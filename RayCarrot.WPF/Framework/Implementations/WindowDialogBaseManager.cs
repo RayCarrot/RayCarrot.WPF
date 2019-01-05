@@ -107,7 +107,7 @@ namespace RayCarrot.WPF
                     window.Owner = Application.Current?.Windows.Cast<Window>().FindItem(x => x.IsActive);
 
                 // Set startup location
-                window.WindowStartupLocation = WindowStartupLocation.CenterOwner;
+                window.WindowStartupLocation = window.Owner == null ? WindowStartupLocation.CenterScreen : WindowStartupLocation.CenterOwner;
 
                 // Attempt to get default Window style from Framework
                 window.Style = RCF.GetService<IWPFStyle>(false)?.WindowStyle ?? window.Style;
