@@ -50,6 +50,8 @@ namespace RayCarrot.WPF
         /// </summary>
         public DriveSelectionViewModel(DriveBrowserViewModel browseVM)
         {
+            RefreshAsyncLock = new AsyncLock();
+
             BrowseVM = browseVM;
             Setup();
             Drives = new ObservableCollection<DriveViewModel>();

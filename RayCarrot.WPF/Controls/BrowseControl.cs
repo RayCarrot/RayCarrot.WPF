@@ -197,7 +197,9 @@ namespace RayCarrot.WPF
             set => SetValue(FileFilterProperty, value);
         }
 
-        public static readonly DependencyProperty FileFilterProperty = DependencyProperty.Register(nameof(FileFilter), typeof(string), typeof(BrowseControl));
+        public static readonly DependencyProperty FileFilterProperty =
+            DependencyProperty.Register(nameof(FileFilter), typeof(string), typeof(BrowseControl),
+                new FrameworkPropertyMetadata(null, FrameworkPropertyMetadataOptions.BindsTwoWayByDefault));
 
         #endregion
 
@@ -213,19 +215,25 @@ namespace RayCarrot.WPF
         }
 
         public static readonly DependencyProperty InitialFileDirectoryProperty =
-            DependencyProperty.Register(nameof(InitialDirectory), typeof(string), typeof(BrowseControl), new PropertyMetadata(Environment.GetFolderPath(Environment.SpecialFolder.MyComputer)));
+            DependencyProperty.Register(nameof(InitialDirectory), typeof(string), typeof(BrowseControl), 
+                new FrameworkPropertyMetadata(Environment.GetFolderPath(Environment.SpecialFolder.MyComputer), FrameworkPropertyMetadataOptions.BindsTwoWayByDefault));
 
         #endregion
 
         #region PathValidation
 
+        /// <summary>
+        /// The validation rule to use for the path
+        /// </summary>
         public BrowseValidationRules PathValidation
         {
             get => (BrowseValidationRules)GetValue(RequireTextProperty);
             set => SetValue(RequireTextProperty, value);
         }
 
-        public static readonly DependencyProperty RequireTextProperty = DependencyProperty.Register(nameof(PathValidation), typeof(BrowseValidationRules), typeof(BrowseControl), new PropertyMetadata(BrowseValidationRules.None));
+        public static readonly DependencyProperty RequireTextProperty = 
+            DependencyProperty.Register(nameof(PathValidation), typeof(BrowseValidationRules), typeof(BrowseControl), 
+                new FrameworkPropertyMetadata(BrowseValidationRules.None, FrameworkPropertyMetadataOptions.BindsTwoWayByDefault));
 
         #endregion
 
@@ -240,19 +248,26 @@ namespace RayCarrot.WPF
             set => SetValue(FilePathProperty, value);
         }
 
-        public static readonly DependencyProperty FilePathProperty = DependencyProperty.Register(nameof(FilePath), typeof(string), typeof(BrowseControl), new PropertyMetadata());
+        public static readonly DependencyProperty FilePathProperty =
+            DependencyProperty.Register(nameof(FilePath), typeof(string), typeof(BrowseControl), 
+                new FrameworkPropertyMetadata(null, FrameworkPropertyMetadataOptions.BindsTwoWayByDefault));
 
         #endregion
 
         #region FilePathToolTip
 
+        /// <summary>
+        /// The tool tip to use for the file path text box
+        /// </summary>
         public string FilePathToolTip
         {
             get => (string)GetValue(FilePathToolTipProperty);
             set => SetValue(FilePathToolTipProperty, value);
         }
 
-        public static readonly DependencyProperty FilePathToolTipProperty = DependencyProperty.Register(nameof(FilePathToolTip), typeof(string), typeof(BrowseControl));
+        public static readonly DependencyProperty FilePathToolTipProperty = 
+            DependencyProperty.Register(nameof(FilePathToolTip), typeof(string), typeof(BrowseControl),
+                new FrameworkPropertyMetadata(null, FrameworkPropertyMetadataOptions.BindsTwoWayByDefault));
 
         #endregion
 
@@ -267,7 +282,9 @@ namespace RayCarrot.WPF
             set => SetValue(BrowseTypeProperty, value);
         }
 
-        public static readonly DependencyProperty BrowseTypeProperty = DependencyProperty.Register(nameof(BrowseType), typeof(BrowseTypes), typeof(BrowseControl), new PropertyMetadata(BrowseTypes.File));
+        public static readonly DependencyProperty BrowseTypeProperty =
+            DependencyProperty.Register(nameof(BrowseType), typeof(BrowseTypes), typeof(BrowseControl),
+                new FrameworkPropertyMetadata(BrowseTypes.File, FrameworkPropertyMetadataOptions.BindsTwoWayByDefault));
 
         #endregion
 
@@ -282,7 +299,9 @@ namespace RayCarrot.WPF
             set => SetValue(AllowedDriveTypesProperty, value);
         }
 
-        public static readonly DependencyProperty AllowedDriveTypesProperty = DependencyProperty.Register(nameof(AllowedDriveTypes), typeof(IEnumerable<DriveType>), typeof(BrowseControl));
+        public static readonly DependencyProperty AllowedDriveTypesProperty = 
+            DependencyProperty.Register(nameof(AllowedDriveTypes), typeof(IEnumerable<DriveType>), typeof(BrowseControl),
+                new FrameworkPropertyMetadata(null, FrameworkPropertyMetadataOptions.BindsTwoWayByDefault));
 
         #endregion
 
@@ -297,7 +316,9 @@ namespace RayCarrot.WPF
             set => SetValue(SelectedRegistryViewProperty, value);
         }
 
-        public static readonly DependencyProperty SelectedRegistryViewProperty = DependencyProperty.Register(nameof(SelectedRegistryView), typeof(RegistryView), typeof(BrowseBox));
+        public static readonly DependencyProperty SelectedRegistryViewProperty =
+            DependencyProperty.Register(nameof(SelectedRegistryView), typeof(RegistryView), typeof(BrowseBox),
+                new FrameworkPropertyMetadata(RegistryView.Default, FrameworkPropertyMetadataOptions.BindsTwoWayByDefault));
 
         #endregion
 
@@ -312,7 +333,9 @@ namespace RayCarrot.WPF
             set => SetValue(UseCurrentPathAsDefaultDirectoryIfValidProperty, value);
         }
 
-        public static readonly DependencyProperty UseCurrentPathAsDefaultDirectoryIfValidProperty = DependencyProperty.Register(nameof(UseCurrentPathAsDefaultDirectoryIfValid), typeof(bool), typeof(BrowseControl), new PropertyMetadata(true));
+        public static readonly DependencyProperty UseCurrentPathAsDefaultDirectoryIfValidProperty = 
+            DependencyProperty.Register(nameof(UseCurrentPathAsDefaultDirectoryIfValid), typeof(bool), typeof(BrowseControl),
+                new FrameworkPropertyMetadata(true, FrameworkPropertyMetadataOptions.BindsTwoWayByDefault));
 
         #endregion
 
@@ -327,7 +350,9 @@ namespace RayCarrot.WPF
             set => SetValue(CanBrowseProperty, value);
         }
 
-        public static readonly DependencyProperty CanBrowseProperty = DependencyProperty.Register(nameof(CanBrowse), typeof(bool), typeof(BrowseControl), new PropertyMetadata(true));
+        public static readonly DependencyProperty CanBrowseProperty = 
+            DependencyProperty.Register(nameof(CanBrowse), typeof(bool), typeof(BrowseControl),
+                new FrameworkPropertyMetadata(true, FrameworkPropertyMetadataOptions.BindsTwoWayByDefault));
 
         #endregion
 
@@ -342,7 +367,9 @@ namespace RayCarrot.WPF
             set => SetValue(AllowNonReadyDrivesProperty, value);
         }
 
-        public static readonly DependencyProperty AllowNonReadyDrivesProperty = DependencyProperty.Register(nameof(AllowNonReadyDrives), typeof(bool), typeof(BrowseControl));
+        public static readonly DependencyProperty AllowNonReadyDrivesProperty = 
+            DependencyProperty.Register(nameof(AllowNonReadyDrives), typeof(bool), typeof(BrowseControl),
+                new FrameworkPropertyMetadata(false, FrameworkPropertyMetadataOptions.BindsTwoWayByDefault));
 
         #endregion
 
@@ -357,7 +384,9 @@ namespace RayCarrot.WPF
             set => SetValue(AllowCustomRegistryViewProperty, value);
         }
 
-        public static readonly DependencyProperty AllowCustomRegistryViewProperty = DependencyProperty.Register(nameof(AllowCustomRegistryView), typeof(bool), typeof(BrowseControl));
+        public static readonly DependencyProperty AllowCustomRegistryViewProperty = 
+            DependencyProperty.Register(nameof(AllowCustomRegistryView), typeof(bool), typeof(BrowseControl),
+                new FrameworkPropertyMetadata(false, FrameworkPropertyMetadataOptions.BindsTwoWayByDefault));
 
         #endregion
 
