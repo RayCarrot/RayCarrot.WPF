@@ -6,6 +6,7 @@ using System.IO;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Input;
 using Nito.AsyncEx;
 using RayCarrot.Windows.Registry;
 using RayCarrot.Windows.Shell;
@@ -128,6 +129,8 @@ namespace RayCarrot.WPF
                     default:
                         throw new ArgumentException("The specified browse type is not valid");
                 }
+
+                MoveFocus(new TraversalRequest(FocusNavigationDirection.Next));
             }
         }
 

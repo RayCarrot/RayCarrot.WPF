@@ -136,8 +136,8 @@
     <Reference Include="PropertyChanged, Version=2.6.0.0, Culture=neutral, PublicKeyToken=ee3ee20bcf148ddd, processorArchitecture=MSIL">
       <HintPath>..\..\packages\PropertyChanged.Fody.2.6.0\lib\net452\PropertyChanged.dll</HintPath>
     </Reference>
-    <Reference Include="RayCarrot.CarrotFramework, Version=2.0.3.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\RayCarrot.CarrotFramework.2.0.3\lib\netstandard2.0\RayCarrot.CarrotFramework.dll</HintPath>
+    <Reference Include="RayCarrot.CarrotFramework, Version=2.0.7.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\RayCarrot.CarrotFramework.2.0.7\lib\netstandard2.0\RayCarrot.CarrotFramework.dll</HintPath>
     </Reference>
     <Reference Include="RayCarrot.Windows.Registry, Version=2.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\..\packages\RayCarrot.Windows.Registry.2.0.0\lib\netstandard2.0\RayCarrot.Windows.Registry.dll</HintPath>
@@ -211,7 +211,10 @@
     <Compile Include="Controls\BrowseControl.cs" />
     <Compile Include="Controls\Dialogs\DialogBaseSize.cs" />
     <Compile Include="Controls\Dialogs\IDialogBaseControl.cs" />
+    <Compile Include="Converters\EnumVisibilityConverter.cs" />
+    <Compile Include="Converters\InvertedObjectNullToVisibilityConverter.cs" />
     <Compile Include="Converters\PathNotExistsConverter.cs" />
+    <Compile Include="Converters\InvertedStringEmptyToVisibilityConverter.cs" />
     <Compile Include="Extensions\BitmapExtensions.cs" />
     <Compile Include="Extensions\VisualExtensions.cs" />
     <Compile Include="Framework\Implementations\WindowDialogBaseManager.cs" />
@@ -258,6 +261,7 @@
     <Compile Include="Framework\WPFRegistryPaths.cs" />
     <Compile Include="Helpers\BaseValueConverter.cs" />
     <Compile Include="Helpers\BindingProxy.cs" />
+    <Compile Include="ViewModels\LogViewerViewModel.cs" />
     <Compile Include="ValidationRules\Files and Directories\DirectoryExistsAndNotEmptyValidationRule.cs" />
     <Compile Include="ValidationRules\Files and Directories\DirectoryExistsValidationRule.cs" />
     <Compile Include="ValidationRules\Files and Directories\FileExistsAndNotEmptyValidationRule.cs" />
@@ -286,15 +290,6 @@
     <Compile Include="Properties\AssemblyInfo.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="Properties\Resources.Designer.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>Resources.resx</DependentUpon>
-    </Compile>
-    <EmbeddedResource Include="Properties\Resources.resx">
-      <Generator>ResXFileCodeGenerator</Generator>
-      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
-    </EmbeddedResource>
     <None Include="app.config" />
     <None Include="packages.config" />
   </ItemGroup>
@@ -340,9 +335,9 @@
       <ErrorText>This project references NuGet package(s) that are missing on this computer. Use NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
     </PropertyGroup>
     <Error Condition="!Exists('..\..\packages\PropertyChanged.Fody.2.6.0\build\PropertyChanged.Fody.props')" Text="$([System.String]::Format('$(ErrorText)', '..\..\packages\PropertyChanged.Fody.2.6.0\build\PropertyChanged.Fody.props'))" />
-    <Error Condition="!Exists('..\..\packages\Fody.3.3.5\build\Fody.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\..\packages\Fody.3.3.5\build\Fody.targets'))" />
     <Error Condition="!Exists('..\..\packages\Microsoft.Bcl.Build.1.0.21\build\Microsoft.Bcl.Build.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\..\packages\Microsoft.Bcl.Build.1.0.21\build\Microsoft.Bcl.Build.targets'))" />
+    <Error Condition="!Exists('..\..\packages\Fody.4.0.2\build\Fody.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\..\packages\Fody.4.0.2\build\Fody.targets'))" />
   </Target>
-  <Import Project="..\..\packages\Fody.3.3.5\build\Fody.targets" Condition="Exists('..\..\packages\Fody.3.3.5\build\Fody.targets')" />
   <Import Project="..\..\packages\Microsoft.Bcl.Build.1.0.21\build\Microsoft.Bcl.Build.targets" Condition="Exists('..\..\packages\Microsoft.Bcl.Build.1.0.21\build\Microsoft.Bcl.Build.targets')" />
+  <Import Project="..\..\packages\Fody.4.0.2\build\Fody.targets" Condition="Exists('..\..\packages\Fody.4.0.2\build\Fody.targets')" />
 </Project>

@@ -3,6 +3,7 @@ using RayCarrot.CarrotFramework;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
+using System.Windows;
 
 namespace RayCarrot.WPF
 {
@@ -124,7 +125,7 @@ namespace RayCarrot.WPF
                 RCF.Logger.LogTraceSource($"A browse drive dialog was opened with the title of: {driveBrowserModel.Title}", origin: origin, filePath: filePath, lineNumber: lineNumber);
 
             // Create the dialog
-            var driveSelectionDialog = new DriveSelectionDialog(driveBrowserModel);
+            var driveSelectionDialog = Application.Current.Dispatcher.Invoke(() => new DriveSelectionDialog(driveBrowserModel));
 
             // Show the dialog and get the result
             var result = await driveSelectionDialog.ShowDialogAsync();

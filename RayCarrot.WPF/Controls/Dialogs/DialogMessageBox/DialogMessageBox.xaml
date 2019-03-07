@@ -28,7 +28,7 @@
                    Grid.Column="1"
                    RenderOptions.BitmapScalingMode="HighQuality"
                    Source="{Binding Path=DialogImageSource}"
-                   Visibility="{Binding Path=DialogImageSource, Converter={local:ObjectNullToVisibilityConverter}}"/>
+                   Visibility="{Binding Path=DialogImageSource, Converter={local:InvertedObjectNullToVisibilityConverter}}"/>
         </Grid>
         <ItemsControl Grid.Row="1" HorizontalAlignment="Right" ItemsSource="{Binding Path=DialogActions}">
             <ItemsControl.ItemTemplate>

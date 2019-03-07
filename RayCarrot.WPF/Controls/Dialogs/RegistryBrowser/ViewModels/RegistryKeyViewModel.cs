@@ -158,6 +158,8 @@ namespace RayCarrot.WPF
         /// <returns>The task</returns>
         public async Task EnableSynchronizationAsync()
         {
+            // TODO: Disable synchronization context!
+
             // Enable collection synchronization on the UI thread so we can update sub items on another thread
             await VM.UIFactory.StartNew(() => BindingOperations.EnableCollectionSynchronization(this, FullID));
         }
