@@ -19,6 +19,9 @@ namespace RayCarrot.WPF
         /// Allows to user to browse for a Registry key and optionally a value
         /// </summary>
         /// <param name="registryBrowserViewModel">The Registry browser information</param>
+        /// <param name="origin">The caller member name (leave at default for compiler-time value)</param>
+        /// <param name="filePath">The caller file path (leave at default for compiler-time value)</param>
+        /// <param name="lineNumber">The caller line number (leave at default for compiler-time value)</param>
         /// <returns>The Registry browser result</returns>
         public async Task<RegistryBrowserResult> BrowseRegistryKeyAsync(RegistryBrowserViewModel registryBrowserViewModel, [CallerMemberName] string origin = "", [CallerFilePath] string filePath = "", [CallerLineNumber] int lineNumber = 0)
         {

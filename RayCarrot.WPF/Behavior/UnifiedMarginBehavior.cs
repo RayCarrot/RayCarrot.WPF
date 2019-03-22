@@ -44,7 +44,7 @@ namespace RayCarrot.WPF
             // Set the margin for all of the children
             foreach (var child in AssociatedObject.Children)
             {
-                if (!(child is FrameworkElement fe))
+                if (!(child is FrameworkElement fe) || UnifiedMargin.GetIgnored(fe))
                     continue;
 
                 // Set the margin
