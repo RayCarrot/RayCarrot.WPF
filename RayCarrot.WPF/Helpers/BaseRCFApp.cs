@@ -243,7 +243,29 @@ namespace RayCarrot.WPF
 
             try
             {
-                await OnCloseAsync(sender as Window ?? MainWindow);
+                // Get the main window
+                var mainWindow = sender as Window ?? MainWindow;
+
+                // Attempt to close all other windows
+                foreach (Window window in Windows)
+                {
+                    if (window == mainWindow)
+                        continue;
+
+                    window.Focus();
+                    window.Close();
+                }
+
+                // Make sure all other windows have been closed
+                if (Windows.Count > 1)
+                {
+                    RCF.Logger.LogInformationSource("The shutdown was cancelled due to one or more windows still being open");
+
+                    IsClosing = false;
+                    return;
+                }
+
+                await OnCloseAsync(mainWindow);
 
                 DoneClosing = true;
 
