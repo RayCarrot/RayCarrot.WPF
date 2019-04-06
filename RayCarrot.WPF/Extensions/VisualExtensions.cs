@@ -1,4 +1,5 @@
-﻿using System.Windows;
+﻿using System;
+using System.Windows;
 using System.Windows.Media;
 
 namespace RayCarrot.WPF
@@ -17,24 +18,37 @@ namespace RayCarrot.WPF
         public static T GetDescendantByType<T>(this Visual element) 
             where T : class
         {
+            return element.GetDescendantByType(typeof(T)) as T;
+        }
+
+        /// <summary>
+        /// Gets the first descendant element by type
+        /// </summary>
+        /// <param name="element">The element to get the type from</param>
+        /// <param name="descendantType">The type of element to get</param>
+        /// <returns>The element</returns>
+        public static object GetDescendantByType(this Visual element, Type descendantType)
+        {
             if (element == null)
                 return default;
 
-            if (element.GetType() == typeof(T))
-                return element as T;
+            if (element.GetType() == descendantType)
+                return element;
 
             if (element is FrameworkElement frameworkElement)
                 frameworkElement.ApplyTemplate();
 
-            T foundElement = null;
+            object foundElement = null;
 
             for (var i = 0; i < VisualTreeHelper.GetChildrenCount(element); i++)
             {
                 var visual = VisualTreeHelper.GetChild(element, i) as Visual;
-                foundElement = visual.GetDescendantByType<T>();
+                foundElement = visual.GetDescendantByType(descendantType);
+
                 if (foundElement != null)
                     break;
             }
+
             return foundElement;
         }
     }
