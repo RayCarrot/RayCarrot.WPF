@@ -61,7 +61,6 @@
                             <Button x:Name="PART_BrowseButton"
                                     Grid.Column="1"
                                     IsEnabled="{TemplateBinding CanBrowse}"
-                                    Padding="2"
                                     Margin="10 0 0 0"
                                     Content="Browse"
                                     AllowDrop="True" />

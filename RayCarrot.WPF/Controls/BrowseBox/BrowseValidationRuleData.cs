@@ -12,13 +12,13 @@ namespace RayCarrot.WPF
         /// </summary>
         public BrowseValidationRules ValidationRule
         {
-            get => (BrowseValidationRules)GetValue(DataProperty);
-            set => SetValue(DataProperty, value);
+            get => (BrowseValidationRules)GetValue(ValidationRuleProperty);
+            set => SetValue(ValidationRuleProperty, value);
         }
 
         /// <summary>
         /// The dependency Validation for <see cref="ValidationRule"/>
         /// </summary>
-        public static readonly DependencyProperty DataProperty = DependencyProperty.Register(nameof(ValidationRule), typeof(BrowseValidationRules), typeof(BrowseValidationRuleData));
+        public static readonly DependencyProperty ValidationRuleProperty = DependencyProperty.Register(nameof(ValidationRule), typeof(BrowseValidationRules), typeof(BrowseValidationRuleData));
     }
 }

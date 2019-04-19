@@ -160,7 +160,7 @@ namespace RayCarrot.WPF
             RegistrySelectionVM.SelectedKey = e.NewValue as RegistryKeyViewModel;
         }
 
-        private async void Continue_Click(object sender, RoutedEventArgs e)
+        private async void Continue_ClickAsync(object sender, RoutedEventArgs e)
         {
             await AttemptConfirmAsync();
         }
@@ -171,7 +171,7 @@ namespace RayCarrot.WPF
             CloseDialog?.Invoke(this, new EventArgs());
         }
 
-        private async void EditTextBox_LostFocus(object sender, RoutedEventArgs e)
+        private async void EditTextBox_LostFocusAsync(object sender, RoutedEventArgs e)
         {
             await RegistrySelectionVM.EndEditAsync();
         }
@@ -194,7 +194,7 @@ namespace RayCarrot.WPF
             }
         }
 
-        private async void TreeViewItem_MouseDown(object sender, MouseButtonEventArgs e)
+        private async void TreeViewItem_MouseDownAsync(object sender, MouseButtonEventArgs e)
         {
             if (RegistrySelectionVM.DoubleClickToExpand)
                 return;
@@ -202,11 +202,11 @@ namespace RayCarrot.WPF
             if (e.LeftButton != MouseButtonState.Pressed)
                 return;
 
-            if (sender is FrameworkElement fe && fe.DataContext is RegistryKeyViewModel vm && vm.IsSelected)
-            {
-                await vm.RenameAsync();
-                e.Handled = true;
-            }
+            if (!(sender is FrameworkElement fe) || !(fe.DataContext is RegistryKeyViewModel vm) || !vm.IsSelected)
+                return;
+
+            await vm.RenameAsync();
+            e.Handled = true;
         }
 
         private void RegistrySelectionDialog_Unloaded(object sender, RoutedEventArgs e)

@@ -6,16 +6,18 @@
              xmlns:local="clr-namespace:RayCarrot.WPF"
              mc:Ignorable="d"
              d:DataContext="{Binding Source={x:Static local:DesignTimeVM.RegistrySelectionViewModel}}"
-             d:DesignHeight="450" d:DesignWidth="800">
+             d:DesignHeight="450" d:DesignWidth="800"
+             Background="{DynamicResource MaterialDesignPaper}">
+
     <!-- Keyboard Shortcuts -->
-    
+
     <UserControl.InputBindings>
         <KeyBinding Key="F5" Command="{Binding Path=RefreshCommand}" />
         <KeyBinding Key="F2" Command="{Binding Path=BeginEditCommand}" />
         <KeyBinding Key="Delete" Command="{Binding Path=DeleteKeyCommand}" />
         <KeyBinding Key="Escape" Command="{Binding Path=EndEditCommand}" />
     </UserControl.InputBindings>
-    
+
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
@@ -23,111 +25,133 @@
             <RowDefinition Height="*" />
             <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
-        
+
         <!-- Menu -->
-        
+
         <Menu Grid.Row="0">
-            
+
             <!-- File -->
 
             <MenuItem Header="File">
-                <MenuItem Header="Open in RegEdit" Command="{Binding Path=OpenInRegeditCommand}" ToolTip="Opens the currently selected key in RegEdit">
+                <MenuItem Header="Open in RegEdit" Command="{Binding Path=OpenInRegeditCommand}"
+                          ToolTip="Opens the currently selected key in RegEdit">
                     <MenuItem.Icon>
                         <Image Source="{Binding Path=RegeditIcon, Converter={local:BitmapToImageSourceConverter}}" />
                     </MenuItem.Icon>
                 </MenuItem>
-                <MenuItem Header="Exit" InputGestureText="Alt + F4" Click="ExitMenuItem_Click" ToolTip="Closes the dialog" />
+                <MenuItem Header="Exit" InputGestureText="Alt + F4" Click="ExitMenuItem_Click"
+                          ToolTip="Closes the dialog" />
             </MenuItem>
 
             <!-- View -->
 
             <MenuItem Header="View">
                 <MenuItem Header="Registry View" ToolTip="The view used to retrieve the Registry keys">
-                    <MenuItem Header="Default" IsCheckable="True" IsEnabled="{Binding Path=BrowseVM.AllowCustomRegistryView}"
+                    <MenuItem Header="Default" IsCheckable="True"
+                              IsEnabled="{Binding Path=BrowseVM.AllowCustomRegistryView}"
                               IsChecked="{Binding Path=CurrentRegistryView, Converter={local:EnumBooleanConverter}, ConverterParameter=Default}" />
-                    <MenuItem Header="32-bit" IsCheckable="True" IsEnabled="{Binding Path=BrowseVM.AllowCustomRegistryView}"
+                    <MenuItem Header="32-bit" IsCheckable="True"
+                              IsEnabled="{Binding Path=BrowseVM.AllowCustomRegistryView}"
                               IsChecked="{Binding Path=CurrentRegistryView, Converter={local:EnumBooleanConverter}, ConverterParameter=Registry32}" />
-                    <MenuItem Header="64-bit" IsCheckable="True" IsEnabled="{Binding Path=BrowseVM.AllowCustomRegistryView}"
+                    <MenuItem Header="64-bit" IsCheckable="True"
+                              IsEnabled="{Binding Path=BrowseVM.AllowCustomRegistryView}"
                               IsChecked="{Binding Path=CurrentRegistryView, Converter={local:EnumBooleanConverter}, ConverterParameter=Registry64}" />
                 </MenuItem>
-                <MenuItem Header="Refresh" InputGestureText="F5" Command="{Binding Path=RefreshCommand}" ToolTip="Refreshes the available keys and values" />
-                <MenuItem Header="Expand to Key" Command="{Binding Path=ExpandToKeyCommand}" ToolTip="Expands to a specific key" />
-                <Separator/>
-                <MenuItem Header="Auto Select on Expand" IsCheckable="True" IsChecked="{Binding Path=AutoSelectOnExpand}" ToolTip="Automatically select the key node when expanding" />
-                <MenuItem Header="Double Click to Expand" IsCheckable="True" IsChecked="{Binding Path=DoubleClickToExpand}" ToolTip="Double click a key node to expand it, otherwise begin renaming it" />
-                <MenuItem Header="Show Empty Default Values" IsEnabled="{Binding Path=BrowseVM.AllowEmptyDefaultValues}" IsCheckable="True" IsChecked="{Binding Path=ShowEmptyDefaultValues}" ToolTip="Show default values even if they are not set" />
+                <MenuItem Header="Refresh" InputGestureText="F5" Command="{Binding Path=RefreshCommand}"
+                          ToolTip="Refreshes the available keys and values" />
+                <MenuItem Header="Expand to Key" Command="{Binding Path=ExpandToKeyCommand}"
+                          ToolTip="Expands to a specific key" />
+                <Separator />
+                <MenuItem Header="Auto Select on Expand" IsCheckable="True"
+                          IsChecked="{Binding Path=AutoSelectOnExpand}"
+                          ToolTip="Automatically select the key node when expanding" />
+                <MenuItem Header="Double Click to Expand" IsCheckable="True"
+                          IsChecked="{Binding Path=DoubleClickToExpand}"
+                          ToolTip="Double click a key node to expand it, otherwise begin renaming it" />
+                <MenuItem Header="Show Empty Default Values"
+                          IsEnabled="{Binding Path=BrowseVM.AllowEmptyDefaultValues}" IsCheckable="True"
+                          IsChecked="{Binding Path=ShowEmptyDefaultValues}"
+                          ToolTip="Show default values even if they are not set" />
             </MenuItem>
-            
+
             <!-- Favorites -->
 
             <MenuItem x:Name="FavoritesMenu" Header="Favorites" ItemsSource="{Binding Path=Favorites}">
                 <MenuItem.ItemContainerStyle>
-                    <Style TargetType="{x:Type MenuItem}" BasedOn="{StaticResource {x:Type MenuItem}}">
+                    <Style TargetType="{x:Type MenuItem}"
+                           BasedOn="{StaticResource {x:Type MenuItem}}"
+                           d:DataContext="{d:DesignInstance local:FavoritesItemViewModel}">
                         <Setter Property="Header" Value="{Binding Path=Name}" />
                         <Setter Property="ToolTip" Value="{Binding Path=KeyPath}" />
                         <Setter Property="Command" Value="{Binding Path=NavigateCommand}" />
                     </Style>
                 </MenuItem.ItemContainerStyle>
             </MenuItem>
+
         </Menu>
-        
+
         <!-- Path Box -->
 
         <TextBox Grid.Row="1" Text="{Binding Path=SelectedKeyFullPath}" KeyDown="TextBox_KeyDown" />
 
         <!-- Registry Selection -->
-        
+
         <Grid Grid.Row="2">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="1*" MinWidth="80" />
-                <ColumnDefinition Width="5"/>
-                <ColumnDefinition Width="2*" MinWidth="80"/>
+                <ColumnDefinition Width="5" />
+                <ColumnDefinition Width="2*" MinWidth="80" />
             </Grid.ColumnDefinitions>
 
             <!-- Key Tree View -->
 
-            <TreeView Grid.Column="0" ItemsSource="{Binding Path=Keys}" SelectedItemChanged="TreeView_SelectedItemChanged">
+            <TreeView Grid.Column="0"
+                      ItemsSource="{Binding Path=Keys}"
+                      SelectedItemChanged="TreeView_SelectedItemChanged">
                 <TreeView.ItemContainerStyle>
-                    <Style TargetType="{x:Type TreeViewItem}" BasedOn="{StaticResource {x:Type TreeViewItem}}">
+                    <Style TargetType="{x:Type TreeViewItem}" BasedOn="{StaticResource {x:Type TreeViewItem}}" d:DataContext="{d:DesignInstance local:RegistryKeyViewModel}">
                         <Setter Property="IsExpanded" Value="{Binding Path=IsExpanded, Mode=TwoWay}" />
                         <Setter Property="IsSelected" Value="{Binding Path=IsSelected, Mode=TwoWay}" />
-                        <EventSetter Event="MouseLeftButtonDown" Handler="TreeViewItem_MouseDown" />
+                        <EventSetter Event="MouseLeftButtonDown" Handler="TreeViewItem_MouseDownAsync" />
 
                         <!-- Context Menu -->
-                        
+
                         <Setter Property="ContextMenu">
                             <Setter.Value>
                                 <ContextMenu>
-                                    
+
                                     <!-- Open in RegEdit -->
-                                    
+
                                     <MenuItem Header="Open in RegEdit" Command="{Binding Path=OpenInRegeditCommand}">
                                         <MenuItem.Icon>
-                                            <Image Source="{Binding Path=VM.RegeditIcon, Converter={local:BitmapToImageSourceConverter}}" />
+                                            <Image
+                                                Source="{Binding Path=VM.RegeditIcon, Converter={local:BitmapToImageSourceConverter}}" />
                                         </MenuItem.Icon>
                                     </MenuItem>
-                                    
+
                                     <!-- Add to Favorites -->
-                                    
+
                                     <MenuItem Header="Add to Favorites" Command="{Binding Path=AddFavoritesCommand}" />
 
-                                    <Separator/>
+                                    <Separator />
 
                                     <!-- Delete Key -->
 
-                                    <MenuItem Header="Delete Key" Command="{Binding Path=DeleteCommand}" InputGestureText="Del" />
+                                    <MenuItem Header="Delete Key" Command="{Binding Path=DeleteCommand}"
+                                              InputGestureText="Del" />
 
                                     <!-- Rename Key -->
 
-                                    <MenuItem Header="Rename Key" Command="{Binding Path=RenameCommand}" InputGestureText="F2" />
+                                    <MenuItem Header="Rename Key" Command="{Binding Path=RenameCommand}"
+                                              InputGestureText="F2" />
 
-                                    <Separator/>
+                                    <Separator />
 
                                     <!-- Add Sub Key -->
 
                                     <MenuItem Header="Add Sub Key" Command="{Binding Path=AddSubKeyCommand}" />
-                                    
-                                    <Separator/>
+
+                                    <Separator />
 
                                     <!-- Copy Key Name -->
 
@@ -138,52 +162,62 @@
                         </Setter>
                     </Style>
                 </TreeView.ItemContainerStyle>
-                
+
                 <TreeView.ItemTemplate>
                     <HierarchicalDataTemplate ItemsSource="{Binding}">
                         <StackPanel Orientation="Horizontal">
-                            <Image Width="16" Margin="3" Source="{Binding Path=AccessDenied, Converter={local:AccessDeniedToIconConverter}}" MouseLeftButtonDown="TreeViewItem_MouseDown" />
-                            <TextBlock VerticalAlignment="Center" Text="{Binding Path=Name}" Visibility="{Binding Path=IsEditing, Converter={local:InvertedBooleanToVisibilityConverter}, Mode=OneWay}" MouseLeftButtonDown="TreeViewItem_MouseDown"/>
-                            <TextBox Text="{Binding Path=EditName}" Visibility="{Binding Path=IsEditing, Converter={local:BooleanToVisibilityConverter}, Mode=OneWay}"
-                                     KeyDown="TextBox_KeyDown" LostFocus="EditTextBox_LostFocus" IsVisibleChanged="EditTextBox_IsVisibleChanged" Loaded="TextBox_Loaded" />
+                            <Image Width="16" Margin="3"
+                                   Source="{Binding Path=AccessDenied, Converter={local:AccessDeniedToIconConverter}}"
+                                   MouseLeftButtonDown="TreeViewItem_MouseDownAsync" />
+                            <TextBlock VerticalAlignment="Center" Text="{Binding Path=Name}"
+                                       Visibility="{Binding Path=IsEditing, Converter={local:InvertedBooleanToVisibilityConverter}, Mode=OneWay}"
+                                       MouseLeftButtonDown="TreeViewItem_MouseDownAsync" />
+                            <TextBox Text="{Binding Path=EditName}"
+                                     Visibility="{Binding Path=IsEditing, Converter={local:BooleanToVisibilityConverter}, Mode=OneWay}"
+                                     KeyDown="TextBox_KeyDown" LostFocus="EditTextBox_LostFocusAsync"
+                                     IsVisibleChanged="EditTextBox_IsVisibleChanged" Loaded="TextBox_Loaded" />
                         </StackPanel>
                     </HierarchicalDataTemplate>
                 </TreeView.ItemTemplate>
             </TreeView>
 
             <!-- Splitter -->
-            
-            <GridSplitter Grid.Column="1" ResizeDirection="Columns" ResizeBehavior="PreviousAndNext" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" />
+
+            <GridSplitter Grid.Column="1" ResizeDirection="Columns" ResizeBehavior="PreviousAndNext"
+                          HorizontalAlignment="Stretch" VerticalAlignment="Stretch" />
 
             <!-- Value Data Grid -->
 
-            <DataGrid Grid.Column="2" BorderThickness="0" AutoGenerateColumns="False" CanUserAddRows="False" CanUserDeleteRows="False" CanUserReorderColumns="True"
-                      CanUserResizeColumns="True" CanUserResizeRows="False" CanUserSortColumns="True" IsReadOnly="True" SelectionMode="Single"
-                      ItemsSource="{Binding Path=Values}" SelectedItem="{Binding Path=SelectedValue}" GridLinesVisibility="Horizontal">
+            <DataGrid Grid.Column="2" BorderThickness="0" AutoGenerateColumns="False" CanUserAddRows="False"
+                      CanUserDeleteRows="False" CanUserReorderColumns="True"
+                      CanUserResizeColumns="True" CanUserResizeRows="False" CanUserSortColumns="True" IsReadOnly="True"
+                      SelectionMode="Single"
+                      ItemsSource="{Binding Path=Values}" SelectedItem="{Binding Path=SelectedValue}"
+                      GridLinesVisibility="Horizontal">
                 <DataGrid.CellStyle>
                     <Style TargetType="DataGridCell" BasedOn="{StaticResource {x:Type DataGridCell}}">
-                        <Setter Property="BorderThickness" Value="0"/>
-                        <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
+                        <Setter Property="BorderThickness" Value="0" />
+                        <Setter Property="FocusVisualStyle" Value="{x:Null}" />
                     </Style>
                 </DataGrid.CellStyle>
                 <DataGrid.Columns>
 
                     <!-- Name -->
 
-                    <DataGridTextColumn Header="Name" Binding="{Binding Path=DisplayName}"/>
+                    <DataGridTextColumn Header="Name" Binding="{Binding Path=DisplayName}" />
 
                     <!-- Type -->
 
-                    <DataGridTextColumn Header="Type" Binding="{Binding Path=Type}"/>
+                    <DataGridTextColumn Header="Type" Binding="{Binding Path=Type}" />
 
                     <!-- Data -->
 
-                    <DataGridTextColumn Header="Data" Binding="{Binding Path=DisplayData}"/>
+                    <DataGridTextColumn Header="Data" Binding="{Binding Path=DisplayData}" />
 
                 </DataGrid.Columns>
             </DataGrid>
         </Grid>
-        
+
         <!-- Dialog Options -->
 
         <StackPanel Grid.Row="3" Margin="10">
@@ -195,7 +229,8 @@
 
                 <TextBlock Grid.Column="0" Text="Selected Key Path:" VerticalAlignment="Center" />
 
-                <TextBox Grid.Column="1" Text="{Binding Path=SelectedKeyFullPath, Mode=OneWay}" Margin="10 0 0 0" IsReadOnly="True"/>
+                <TextBox Grid.Column="1" Text="{Binding Path=SelectedKeyFullPath, Mode=OneWay}" Margin="10 0 0 0"
+                         IsReadOnly="True" />
 
             </Grid>
 
@@ -209,17 +244,18 @@
                 <TextBlock Grid.Column="0" Text="Selected Value:" VerticalAlignment="Center"
                            Visibility="{Binding Path=BrowseVM.BrowseValue, Converter={local:BooleanToVisibilityConverter}}" />
 
-                <TextBox Grid.Column="1" Text="{Binding Path=SelectedValue.DisplayName, Mode=OneWay}" Margin="10 0 0 0" IsReadOnly="True"
-                         Visibility="{Binding Path=BrowseVM.BrowseValue, Converter={local:BooleanToVisibilityConverter}}"/>
+                <TextBox Grid.Column="1" Text="{Binding Path=SelectedValue.DisplayName, Mode=OneWay}" Margin="10 0 0 0"
+                         IsReadOnly="True"
+                         Visibility="{Binding Path=BrowseVM.BrowseValue, Converter={local:BooleanToVisibilityConverter}}" />
 
                 <StackPanel Grid.Column="2" Orientation="Horizontal">
-                    <Button Content="Cancel" Click="Cancel_Click" IsCancel="True"/>
-                    <Button Content="Continue" Margin="10 0" Click="Continue_Click" IsDefault="True"/>
+                    <Button Content="Cancel" Click="Cancel_Click" IsCancel="True" />
+                    <Button Content="Continue" Margin="10 0" Click="Continue_ClickAsync" IsDefault="True" />
                 </StackPanel>
 
             </Grid>
-            
+
         </StackPanel>
-        
+
     </Grid>
 </UserControl>

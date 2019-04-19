@@ -112,7 +112,7 @@ namespace RayCarrot.WPF
                     var instance = createWindowFunc();
 
                     // Save the instance
-                    Windows.Add(new WeakReference<Window>(instance), new WindowFlagModel(flags, groupNames));
+                    Windows.Add(new WeakReference<Window>(instance), new WindowFlagModel(groupNames));
 
                     // Show the window
                     instance.Show();
@@ -169,22 +169,15 @@ namespace RayCarrot.WPF
             /// <summary>
             /// Default constructor
             /// </summary>
-            /// <param name="flags">The flags</param>
             /// <param name="groupNames">The group names for this instance</param>
-            public WindowFlagModel(ShowWindowFlags flags, params string[] groupNames)
+            public WindowFlagModel(params string[] groupNames)
             {
-                Flags = flags;
                 GroupNames = groupNames;
             }
 
             #endregion
 
             #region Public Properties
-
-            /// <summary>
-            /// The flags
-            /// </summary>
-            public ShowWindowFlags Flags { get; }
 
             /// <summary>
             /// The group names for this instance
