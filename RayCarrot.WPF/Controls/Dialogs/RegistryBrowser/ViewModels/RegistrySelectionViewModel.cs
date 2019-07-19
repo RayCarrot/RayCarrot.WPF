@@ -1,5 +1,4 @@
 ﻿using Microsoft.Win32;
-using RayCarrot.CarrotFramework;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -7,6 +6,10 @@ using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using RayCarrot.CarrotFramework.Abstractions;
+using RayCarrot.Extensions;
+using RayCarrot.IO;
+using RayCarrot.UI;
 using RayCarrot.Windows.Registry;
 using RayCarrot.Windows.Shell;
 
@@ -345,7 +348,7 @@ namespace RayCarrot.WPF
             catch (Exception ex)
             {
                 ex.HandleError("Getting Registry favorites");
-                await RCF.MessageUI.DisplayMessageAsync("Could not get the saved favorites", "Unknown error", MessageType.Error);
+                await RCFUI.MessageUI.DisplayMessageAsync("Could not get the saved favorites", "Unknown error", MessageType.Error);
             }
         }
 
@@ -479,7 +482,7 @@ namespace RayCarrot.WPF
         {
             if (SelectedKey == null)
             {
-                await RCF.MessageUI.DisplayMessageAsync("No key has been selected", "Error Opening Key", MessageType.Information);
+                await RCFUI.MessageUI.DisplayMessageAsync("No key has been selected", "Error Opening Key", MessageType.Information);
                 return;
             }
 
@@ -527,7 +530,7 @@ namespace RayCarrot.WPF
             catch (Exception ex)
             {
                 ex.HandleExpected("Getting Registry key values");
-                await RCF.MessageUI.DisplayMessageAsync("The Registry key values could not be obtained for the selected key", "Error retrieving values", MessageType.Error);
+                await RCFUI.MessageUI.DisplayMessageAsync("The Registry key values could not be obtained for the selected key", "Error retrieving values", MessageType.Error);
             }
         }
 

@@ -3,7 +3,7 @@ using System.Globalization;
 using System.Linq;
 using System.Threading;
 using System.Windows.Controls;
-using RayCarrot.CarrotFramework;
+using RayCarrot.Extensions;
 
 namespace RayCarrot.WPF
 {

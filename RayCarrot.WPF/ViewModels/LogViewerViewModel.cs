@@ -3,6 +3,9 @@ using Microsoft.Extensions.Logging;
 using RayCarrot.CarrotFramework;
 using System.Collections.ObjectModel;
 using System.Linq;
+using RayCarrot.CarrotFramework.Abstractions;
+using RayCarrot.Extensions;
+using RayCarrot.UI;
 
 namespace RayCarrot.WPF
 {

@@ -1,9 +1,9 @@
-﻿using RayCarrot.CarrotFramework;
+﻿using RayCarrot.CarrotFramework.Abstractions;
 
 namespace RayCarrot.WPF
 {
     /// <summary>
-    /// Extension methods for <see cref="FrameworkConstruction"/>
+    /// Extension methods for <see cref="IFrameworkConstruction"/>
     /// </summary>
     public static class FrameworkConstructionExtensions
     {
@@ -13,7 +13,7 @@ namespace RayCarrot.WPF
         /// <typeparam name="S">The style to add</typeparam>
         /// <param name="construction">The construction</param>
         /// <returns>The construction</returns>
-        public static FrameworkConstruction AddWPFStyle<S>(this FrameworkConstruction construction)
+        public static IFrameworkConstruction AddWPFStyle<S>(this IFrameworkConstruction construction)
             where S : class, IWPFStyle, new()
         {
             // Add the service
@@ -29,7 +29,7 @@ namespace RayCarrot.WPF
         /// <typeparam name="D">The dialog base manager to add</typeparam>
         /// <param name="construction">The construction</param>
         /// <returns>The construction</returns>
-        public static FrameworkConstruction AddDialogBaseManager<D>(this FrameworkConstruction construction)
+        public static IFrameworkConstruction AddDialogBaseManager<D>(this IFrameworkConstruction construction)
             where D : class, IDialogBaseManager, new()
         {
             // Add the service

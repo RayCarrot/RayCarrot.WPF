@@ -1,4 +1,4 @@
-﻿using RayCarrot.CarrotFramework;
+﻿using RayCarrot.CarrotFramework.Abstractions;
 
 namespace RayCarrot.WPF
 {

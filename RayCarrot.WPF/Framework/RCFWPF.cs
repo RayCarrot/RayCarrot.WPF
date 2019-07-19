@@ -1,4 +1,5 @@
-﻿using RayCarrot.CarrotFramework;
+﻿using RayCarrot.CarrotFramework.Abstractions;
+using RayCarrot.UI;
 using RayCarrot.Windows.Registry;
 using RayCarrot.WPF;
 

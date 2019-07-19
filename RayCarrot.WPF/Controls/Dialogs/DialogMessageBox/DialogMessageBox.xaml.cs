@@ -1,6 +1,6 @@
-﻿using RayCarrot.CarrotFramework;
-using System;
+﻿using System;
 using System.Windows.Controls;
+using RayCarrot.Extensions;
 
 namespace RayCarrot.WPF
 {

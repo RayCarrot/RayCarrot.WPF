@@ -1,11 +1,13 @@
 ﻿using Microsoft.Win32;
-using RayCarrot.CarrotFramework;
 using System;
 using System.ComponentModel;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Data;
 using Nito.AsyncEx;
+using RayCarrot.CarrotFramework.Abstractions;
+using RayCarrot.Extensions;
+using RayCarrot.UI;
 using RayCarrot.Windows.Registry;
 using RayCarrot.Windows.Shell;
 
@@ -218,7 +220,7 @@ namespace RayCarrot.WPF
             catch (Exception ex)
             {
                 ex.HandleError("Opening key in RegEdit");
-                await RCF.MessageUI.DisplayMessageAsync("The selected key could not be opened in RegEdit", "Error Opening Key", MessageType.Error);
+                await RCFUI.MessageUI.DisplayMessageAsync("The selected key could not be opened in RegEdit", "Error Opening Key", MessageType.Error);
             }
         }
 
@@ -244,14 +246,14 @@ namespace RayCarrot.WPF
                 // Make sure the name is not empty
                 if (result.StringInput.IsNullOrWhiteSpace())
                 {
-                    await RCF.MessageUI.DisplayMessageAsync("The name cannot be empty", "Name is not valid", MessageType.Warning);
+                    await RCFUI.MessageUI.DisplayMessageAsync("The name cannot be empty", "Name is not valid", MessageType.Warning);
                     return;
                 }
 
                 // Make sure the name doesn't already exist
                 if (RCFWinReg.RegistryManager.ValueExists(CommonRegistryPaths.RegeditFavoritesPath, result.StringInput, RegistryView.Default))
                 {
-                    await RCF.MessageUI.DisplayMessageAsync("The name already exists", "Name is not valid", MessageType.Warning);
+                    await RCFUI.MessageUI.DisplayMessageAsync("The name already exists", "Name is not valid", MessageType.Warning);
                     return;
                 }
 
@@ -266,7 +268,7 @@ namespace RayCarrot.WPF
                 catch (Exception ex)
                 {
                     ex.HandleError("Add registry favorites path");
-                    await RCF.MessageUI.DisplayMessageAsync($"An error occurred saving the name{Environment.NewLine}{ex.Message}", MessageType.Error);
+                    await RCFUI.MessageUI.DisplayMessageAsync($"An error occurred saving the name{Environment.NewLine}{ex.Message}", MessageType.Error);
                 }
             }
         }
@@ -325,14 +327,14 @@ namespace RayCarrot.WPF
                 // Make sure the name is not empty
                 if (EditName.IsNullOrWhiteSpace())
                 {
-                    await RCF.MessageUI.DisplayMessageAsync("The key name can not be blank", "Invalid name", MessageType.Error);
+                    await RCFUI.MessageUI.DisplayMessageAsync("The key name can not be blank", "Invalid name", MessageType.Error);
                     return;
                 }
 
                 // Make sure the name does not contain invalid characters
                 if (EditName.Contains("\\"))
                 {
-                    await RCF.MessageUI.DisplayMessageAsync(@"The key name can not contain backslashes ('\')", "Invalid name", MessageType.Error);
+                    await RCFUI.MessageUI.DisplayMessageAsync(@"The key name can not contain backslashes ('\')", "Invalid name", MessageType.Error);
                     return;
                 }
 
@@ -341,7 +343,7 @@ namespace RayCarrot.WPF
                     // Check all sub keys for write permission
                     if (!GetKey().RunAndDispose(x => x.HasSubKeyTreeWritePermissions()))
                     {
-                        await RCF.MessageUI.DisplayMessageAsync(@"You do not have the required permissions to rename this key", "Error", MessageType.Error);
+                        await RCFUI.MessageUI.DisplayMessageAsync(@"You do not have the required permissions to rename this key", "Error", MessageType.Error);
                         return;
                     }
 
@@ -379,7 +381,7 @@ namespace RayCarrot.WPF
                 catch (Exception ex)
                 {
                     ex.HandleError("Renaming Registry key", this);
-                    await RCF.MessageUI.DisplayMessageAsync($"Renaming the key failed with the following error message:{Environment.NewLine}{ex.Message}", "Operation Failed", MessageType.Error);
+                    await RCFUI.MessageUI.DisplayMessageAsync($"Renaming the key failed with the following error message:{Environment.NewLine}{ex.Message}", "Operation Failed", MessageType.Error);
                     VM.RefreshCommand.Execute();
                 }
             }
@@ -408,7 +410,7 @@ namespace RayCarrot.WPF
                 catch (Exception ex)
                 {
                     ex.HandleError("Getting new sub key name");
-                    await RCF.MessageUI.DisplayMessageAsync("An unknown error occurred", "Error", MessageType.Error);
+                    await RCFUI.MessageUI.DisplayMessageAsync("An unknown error occurred", "Error", MessageType.Error);
                     return;
                 }
 
@@ -425,7 +427,7 @@ namespace RayCarrot.WPF
                 catch (Exception ex)
                 {
                     ex.HandleError("Creating sub key");
-                    await RCF.MessageUI.DisplayMessageAsync($"The sub key could not be created with the error message of: {Environment.NewLine}{ex.Message}", "Error", MessageType.Error);
+                    await RCFUI.MessageUI.DisplayMessageAsync($"The sub key could not be created with the error message of: {Environment.NewLine}{ex.Message}", "Error", MessageType.Error);
                     return;
                 }
 
@@ -464,13 +466,13 @@ namespace RayCarrot.WPF
                     return;
 
                 // Have user confirm deleting key
-                if (!await RCF.MessageUI.DisplayMessageAsync("Are you sure you want to permanently delete this key and all of its subkeys? This operation can not be undone and may cause system instability.", "Confirm Delete", MessageType.Warning, true))
+                if (!await RCFUI.MessageUI.DisplayMessageAsync("Are you sure you want to permanently delete this key and all of its subkeys? This operation can not be undone and may cause system instability.", "Confirm Delete", MessageType.Warning, true))
                     return;
 
                 // Check all sub keys for write permission
                 if (!GetKey().RunAndDispose(x => x.HasSubKeyTreeWritePermissions()))
                 {
-                    await RCF.MessageUI.DisplayMessageAsync(@"You do not have the required permissions to delete this key", "Error", MessageType.Error);
+                    await RCFUI.MessageUI.DisplayMessageAsync(@"You do not have the required permissions to delete this key", "Error", MessageType.Error);
                     return;
                 }
 
@@ -482,7 +484,7 @@ namespace RayCarrot.WPF
                 catch (Exception ex)
                 {
                     ex.HandleError("Deleting key");
-                    await RCF.MessageUI.DisplayMessageAsync("The key could not be deleted. Some of its subkeys may have been deleted.", "Operation Failed", MessageType.Error);
+                    await RCFUI.MessageUI.DisplayMessageAsync("The key could not be deleted. Some of its subkeys may have been deleted.", "Operation Failed", MessageType.Error);
 
                     VM.RefreshCommand.Execute();
                     return;

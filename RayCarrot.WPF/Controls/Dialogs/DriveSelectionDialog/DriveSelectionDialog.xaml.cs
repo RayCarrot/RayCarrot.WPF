@@ -1,11 +1,13 @@
-﻿using RayCarrot.CarrotFramework;
-using System;
+﻿using System;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using RayCarrot.CarrotFramework.Abstractions;
+using RayCarrot.IO;
+using RayCarrot.UI;
 
 namespace RayCarrot.WPF
 {
@@ -80,12 +82,12 @@ namespace RayCarrot.WPF
 
             if (DriveSelectionVM.Result.SelectedDrives == null || !DriveSelectionVM.Result.SelectedDrives.Any())
             {
-                await RCF.MessageUI.DisplayMessageAsync("At least one drive has to be selected", "No drive selected", MessageType.Information);
+                await RCFUI.MessageUI.DisplayMessageAsync("At least one drive has to be selected", "No drive selected", MessageType.Information);
                 return;
             }
             if (!DriveSelectionVM.Result.SelectedDrives.Select(x => new FileSystemPath(x)).DirectoriesExist())
             {
-                await RCF.MessageUI.DisplayMessageAsync("One or more of the selected drives could not be found", "Invalid selection", MessageType.Information);
+                await RCFUI.MessageUI.DisplayMessageAsync("One or more of the selected drives could not be found", "Invalid selection", MessageType.Information);
                 await DriveSelectionVM.RefreshAsync();
                 return;
             }
@@ -102,7 +104,7 @@ namespace RayCarrot.WPF
                 }
             }))
             {
-                await RCF.MessageUI.DisplayMessageAsync("One or more of the selected drives are not ready", "Invalid selection", MessageType.Information);
+                await RCFUI.MessageUI.DisplayMessageAsync("One or more of the selected drives are not ready", "Invalid selection", MessageType.Information);
                 await DriveSelectionVM.RefreshAsync();
                 return;
             }

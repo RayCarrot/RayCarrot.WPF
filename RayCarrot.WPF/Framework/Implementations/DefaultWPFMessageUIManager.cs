@@ -1,7 +1,8 @@
-﻿using RayCarrot.CarrotFramework;
-using System.Runtime.CompilerServices;
+﻿using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using System.Windows;
+using RayCarrot.CarrotFramework.Abstractions;
+using RayCarrot.UI;
 
 namespace RayCarrot.WPF
 {
@@ -29,7 +30,7 @@ namespace RayCarrot.WPF
         public virtual Task<bool> DisplayMessageAsync(string message, string header, MessageType messageType, bool allowCancel, [CallerMemberName]string origin = "", [CallerFilePath]string filePath = "", [CallerLineNumber]int lineNumber = 0)
         {
             if (LogRequests)
-                RCF.Logger.LogTraceSource($"A message was displayed with the content of: {message}", origin: origin, filePath: filePath, lineNumber: lineNumber);
+                RCFCore.Logger?.LogTraceSource($"A message was displayed with the content of: {message}", origin: origin, filePath: filePath, lineNumber: lineNumber);
 
             MessageBoxImage image = MessageBoxImage.None;
 

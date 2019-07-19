@@ -2,7 +2,7 @@
 using System.Collections;
 using System.Globalization;
 using System.Windows;
-using RayCarrot.CarrotFramework;
+using RayCarrot.Extensions;
 
 namespace RayCarrot.WPF
 {

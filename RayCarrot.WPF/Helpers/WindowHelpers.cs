@@ -2,7 +2,8 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Windows;
-using RayCarrot.CarrotFramework;
+using RayCarrot.CarrotFramework.Abstractions;
+using RayCarrot.Extensions;
 
 namespace RayCarrot.WPF
 {
@@ -66,7 +67,7 @@ namespace RayCarrot.WPF
                     // Get the window type
                     Type type = typeof(Win);
 
-                    RCF.Logger.LogDebugSource($"A custom window of type {type} has been requested to show");
+                    RCFCore.Logger?.LogDebugSource($"A custom window of type {type} has been requested to show");
 
                     // Get the currently available windows and copy them to a list
                     var windows = Application.Current.Windows.Cast<Window>().ToList();
@@ -78,7 +79,7 @@ namespace RayCarrot.WPF
 
                         if (window != null)
                         {
-                            RCF.Logger.LogInformationSource($"The window is not being shown due to a window of the same type being available");
+                            RCFCore.Logger?.LogInformationSource($"The window is not being shown due to a window of the same type being available");
 
                             if (!flags.HasFlag(ShowWindowFlags.DoNotFocusBlockingWindow))
                                 window.Focus();
@@ -100,7 +101,7 @@ namespace RayCarrot.WPF
                         if (gn?.FindItem(groupNames.Contains) == null)
                             continue;
 
-                        RCF.Logger.LogInformationSource($"The window is not being shown due to a window with the same ID being available");
+                        RCFCore.Logger?.LogInformationSource($"The window is not being shown due to a window with the same ID being available");
 
                         if (!flags.HasFlag(ShowWindowFlags.DoNotFocusBlockingWindow))
                             window.Focus();
@@ -117,7 +118,7 @@ namespace RayCarrot.WPF
                     // Show the window
                     instance.Show();
 
-                    RCF.Logger.LogInformationSource($"The window of type {type} has been shown");
+                    RCFCore.Logger?.LogInformationSource($"The window of type {type} has been shown");
 
                     return true;
                 }

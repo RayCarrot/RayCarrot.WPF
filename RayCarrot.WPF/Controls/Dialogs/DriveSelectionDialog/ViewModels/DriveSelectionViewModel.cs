@@ -1,5 +1,4 @@
 ﻿using ByteSizeLib;
-using RayCarrot.CarrotFramework;
 using System;
 using System.Collections;
 using System.Collections.ObjectModel;
@@ -10,6 +9,9 @@ using System.Threading.Tasks;
 using System.Windows.Input;
 using Microsoft.WindowsAPICodePack.Shell;
 using Nito.AsyncEx;
+using RayCarrot.CarrotFramework.Abstractions;
+using RayCarrot.IO;
+using RayCarrot.UI;
 using RayCarrot.Windows.Shell;
 
 namespace RayCarrot.WPF
@@ -247,7 +249,7 @@ namespace RayCarrot.WPF
                 catch (Exception ex)
                 {
                     ex.HandleUnexpected("Getting drives");
-                    await RCF.MessageUI.DisplayMessageAsync("An error occurred getting the drives", "Error", MessageType.Error);
+                    await RCFUI.MessageUI.DisplayMessageAsync("An error occurred getting the drives", "Error", MessageType.Error);
                 }
             }
         }

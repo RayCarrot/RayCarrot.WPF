@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Windows.Input;
-using RayCarrot.CarrotFramework;
+using RayCarrot.UI;
 
 namespace RayCarrot.WPF
 {

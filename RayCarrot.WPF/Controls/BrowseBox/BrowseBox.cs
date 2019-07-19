@@ -7,7 +7,9 @@ using System.Windows.Controls;
 using System.Windows.Input;
 using Microsoft.Win32;
 using Nito.AsyncEx;
-using RayCarrot.CarrotFramework;
+using RayCarrot.CarrotFramework.Abstractions;
+using RayCarrot.IO;
+using RayCarrot.UI;
 using RayCarrot.Windows.Registry;
 using RayCarrot.Windows.Shell;
 
@@ -159,7 +161,7 @@ namespace RayCarrot.WPF
                 switch (BrowseType)
                 {
                     case BrowseTypes.File:
-                        var fileResult = await RCF.BrowseUI.BrowseFileAsync(new FileBrowserViewModel()
+                        var fileResult = await RCFUI.BrowseUI.BrowseFileAsync(new FileBrowserViewModel()
                         {
                             Title = "Select a file",
                             DefaultDirectory = IsPathValid() ? new FileSystemPath(SelectedPath).Parent.FullPath : InitialLocation,
@@ -175,7 +177,7 @@ namespace RayCarrot.WPF
                         break;
 
                     case BrowseTypes.Directory:
-                        var dirResult = await RCF.BrowseUI.BrowseDirectoryAsync(new DirectoryBrowserViewModel()
+                        var dirResult = await RCFUI.BrowseUI.BrowseDirectoryAsync(new DirectoryBrowserViewModel()
                         {
                             Title = "Select a file",
                             DefaultDirectory = UseCurrentPathAsDefaultLocationIfValid && IsPathValid() ? new FileSystemPath(SelectedPath).FullPath : InitialLocation,
@@ -207,7 +209,7 @@ namespace RayCarrot.WPF
                         break;
 
                     case BrowseTypes.Drive:
-                        var driveResult = await RCF.BrowseUI.BrowseDriveAsync(new DriveBrowserViewModel()
+                        var driveResult = await RCFUI.BrowseUI.BrowseDriveAsync(new DriveBrowserViewModel()
                         {
                             Title = "Select a drive",
                             DefaultDirectory = UseCurrentPathAsDefaultLocationIfValid && IsPathValid() ? new FileSystemPath(SelectedPath).FullPath : InitialLocation,
@@ -234,7 +236,7 @@ namespace RayCarrot.WPF
         {
             if (!IsPathValid())
             {
-                await RCF.MessageUI.DisplayMessageAsync($"The path {SelectedPath} does not exist", "Path not found", MessageType.Error);
+                await RCFUI.MessageUI.DisplayMessageAsync($"The path {SelectedPath} does not exist", "Path not found", MessageType.Error);
                 return;
             }
 

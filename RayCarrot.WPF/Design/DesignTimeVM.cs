@@ -1,6 +1,6 @@
-﻿using RayCarrot.CarrotFramework;
-using RayCarrot.Windows.Registry;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
+using RayCarrot.UI;
+
 // ReSharper disable StringLiteralTypo
 
 namespace RayCarrot.WPF
@@ -10,20 +10,6 @@ namespace RayCarrot.WPF
     /// </summary>
     public static class DesignTimeVM
     {
-        private static void BuildFramework()
-        {
-            if (!RCF.IsBuilt)
-            {
-                RCF.Build(x =>
-                {
-                    //x.AddWindowsFileInfoManager<DefaultWindowsFileInfoManager>();
-                    //x.AddWindowsManager<DefaultWindowsManager>();
-                    x.AddExceptionHandler<DefaultExceptionHandler>();
-                    x.AddRegistryManager<DefaultRegistryManager>();
-                });
-            }
-        }
-
         public static DialogMessageViewModel DialogMessageViewModel => new DialogMessageViewModel()
         {
             MessageText = "This is a text message which will appear for the user to read before pressing a button. Great huh?",
@@ -50,8 +36,6 @@ namespace RayCarrot.WPF
         {
             get
             {
-                BuildFramework();
-
                 var vm = new DriveSelectionViewModel(new DriveBrowserViewModel()
                 {
                     Title = "Select a Drive"
@@ -61,14 +45,6 @@ namespace RayCarrot.WPF
             }
         }
 
-        public static RegistrySelectionViewModel RegistrySelectionViewModel
-        {
-            get
-            {
-                BuildFramework();
-
-                return new RegistrySelectionViewModel();
-            }
-        }
+        public static RegistrySelectionViewModel RegistrySelectionViewModel => new RegistrySelectionViewModel();
     }
 }

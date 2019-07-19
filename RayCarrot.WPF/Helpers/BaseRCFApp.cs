@@ -12,6 +12,9 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Threading;
+using RayCarrot.CarrotFramework.Abstractions;
+using RayCarrot.Extensions;
+using RayCarrot.IO;
 
 namespace RayCarrot.WPF
 {
@@ -131,7 +134,7 @@ namespace RayCarrot.WPF
             // Log the current environment
             try
             {
-                RCF.Logger.LogTraceSource($"Current platform: {Environment.OSVersion.VersionString}");
+                RCFCore.Logger?.LogTraceSource($"Current platform: {Environment.OSVersion.VersionString}");
 
             }
             catch (Exception ex)
@@ -140,7 +143,7 @@ namespace RayCarrot.WPF
             }
 
             // Log some debug information
-            RCF.Logger.LogDebugSource($"Executing assembly path: {Assembly.GetExecutingAssembly().Location}");
+            RCFCore.Logger?.LogDebugSource($"Executing assembly path: {Assembly.GetExecutingAssembly().Location}");
 
             LogStartupTime("Debug info has been logged");
 
@@ -196,10 +199,10 @@ namespace RayCarrot.WPF
             // Build the framework
             construction.Build();
 
-            RCF.Logger.LogInformationSource($"The log level has been set to {logLevel}");
+            RCFCore.Logger?.LogInformationSource($"The log level has been set to {logLevel}");
 
             // Retrieve arguments
-            RCF.Data.Arguments = args;
+            RCFCore.Data.Arguments = args;
         }
 
         #endregion
@@ -250,7 +253,7 @@ namespace RayCarrot.WPF
                     // Handle the exception
                     e.Exception.HandleCritical("Unhandled exception");
 
-                    RCF.Logger.LogCriticalSource("An unhandled exception has occurred");
+                    RCFCore.Logger?.LogCriticalSource("An unhandled exception has occurred");
                 }
 
                 // Get the path to log to
@@ -291,7 +294,7 @@ namespace RayCarrot.WPF
 
             // Log all startup time logs
             foreach (string log in StartupTimeLogs)
-                RCF.Logger.LogDebugSource(log);
+                RCFCore.Logger?.LogDebugSource(log);
 
             // Clear the startup time logs
             StartupTimeLogs.Clear();
@@ -315,7 +318,7 @@ namespace RayCarrot.WPF
 
             IsClosing = true;
 
-            RCF.Logger.LogInformationSource("The main window is closing...");
+            RCFCore.Logger?.LogInformationSource("The main window is closing...");
 
             try
             {
@@ -335,7 +338,7 @@ namespace RayCarrot.WPF
                 // Make sure all other windows have been closed
                 if (Windows.Count > 1)
                 {
-                    RCF.Logger.LogInformationSource("The shutdown was cancelled due to one or more windows still being open");
+                    RCFCore.Logger?.LogInformationSource("The shutdown was cancelled due to one or more windows still being open");
 
                     IsClosing = false;
                     return;
@@ -378,7 +381,7 @@ namespace RayCarrot.WPF
         /// </summary>
         /// <param name="construction">The construction</param>
         /// <param name="logLevel">The level to log</param>
-        protected abstract void SetupFramework(FrameworkConstruction construction, LogLevel logLevel);
+        protected abstract void SetupFramework(IFrameworkConstruction construction, LogLevel logLevel);
 
         #endregion
 

@@ -1,5 +1,5 @@
-﻿using RayCarrot.CarrotFramework;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
+using RayCarrot.UI;
 
 namespace RayCarrot.WPF
 {

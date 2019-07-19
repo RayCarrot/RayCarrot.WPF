@@ -1,6 +1,6 @@
-﻿using RayCarrot.CarrotFramework;
-using System.Runtime.CompilerServices;
+﻿using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
+using RayCarrot.CarrotFramework.Abstractions;
 using RayCarrot.Windows.Registry;
 
 namespace RayCarrot.WPF
@@ -26,11 +26,11 @@ namespace RayCarrot.WPF
         public async Task<RegistryBrowserResult> BrowseRegistryKeyAsync(RegistryBrowserViewModel registryBrowserViewModel, [CallerMemberName] string origin = "", [CallerFilePath] string filePath = "", [CallerLineNumber] int lineNumber = 0)
         {
             if (LogRequests)
-                RCF.Logger.LogTraceSource($"A browse Registry key dialog was opened with the title of: {registryBrowserViewModel.Title}", origin: origin, filePath: filePath, lineNumber: lineNumber);
+                RCFCore.Logger?.LogTraceSource($"A browse Registry key dialog was opened with the title of: {registryBrowserViewModel.Title}", origin: origin, filePath: filePath, lineNumber: lineNumber);
 
             var result = await new RegistrySelectionDialog(registryBrowserViewModel).ShowDialogAsync();
 
-            RCF.Logger.LogTraceSource(result.CanceledByUser
+            RCFCore.Logger?.LogTraceSource(result.CanceledByUser
                 ? "The browse Registry key dialog was canceled by the user"
                 : $"The browse Registry key dialog returned the selected key path '{result.KeyPath}' and selected value '{result.ValueName}'");
 
