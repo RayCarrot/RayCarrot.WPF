@@ -3,6 +3,7 @@ using System.Windows.Controls;
 
 namespace RayCarrot.WPF
 {
+    // TODO: Move to behavior
     /// <summary>
     /// A <see cref="TextBox"/> which only accepts integers
     /// </summary>

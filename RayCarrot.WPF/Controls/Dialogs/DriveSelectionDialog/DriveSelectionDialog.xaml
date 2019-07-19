@@ -58,7 +58,7 @@
 
                 <!-- Format -->
 
-                <DataGridTextColumn Header="Path" Binding="{Binding Path=DisplayFormat}"/>
+                <DataGridTextColumn Header="Format" Binding="{Binding Path=DisplayFormat}"/>
                 
                 <!-- Free Space -->
 

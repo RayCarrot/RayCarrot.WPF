@@ -1,6 +1,7 @@
 ﻿using Microsoft.Extensions.Logging;
 using RayCarrot.CarrotFramework;
 using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
@@ -28,6 +29,13 @@ namespace RayCarrot.WPF
         /// This requires a valid GUID in the entry assembly.</param>
         protected BaseRCFApp(bool useMutex)
         {
+            // Create the startup timer and start it
+            AppStartupTimer = new Stopwatch();
+            AppStartupTimer.Start();
+
+            StartupTimeLogs = new List<string>();
+
+            // Subscribe to events
             Startup += BaseRCFApp_Startup;
             DispatcherUnhandledException += BaseRCFApp_DispatcherUnhandledException;
             Exit += BaseRCFApp_Exit;
@@ -44,6 +52,8 @@ namespace RayCarrot.WPF
                     throw new InvalidOperationException("The application can not use a Mutex for forcing a single instance if the entry assembly does not have a valid GUID identifier", ex);
                 }
             }
+
+            LogStartupTime("Construction finished");
         }
 
         #endregion
@@ -65,6 +75,30 @@ namespace RayCarrot.WPF
         /// </summary>
         private bool DoneClosing { get; set; }
 
+        /// <summary>
+        /// The timer for the application startup
+        /// </summary>
+        private Stopwatch AppStartupTimer { get; }
+
+        /// <summary>
+        /// The startup time logs to log once the app has started to improve performance
+        /// </summary>
+        private List<string> StartupTimeLogs { get; }
+
+        #endregion
+
+        #region Public Properties
+
+        /// <summary>
+        /// Gets the <see cref="Application"/> object for the current <see cref="AppDomain"/> as a <see cref="BaseRCFApp"/>.
+        /// </summary>
+        public new static BaseRCFApp Current => Application.Current as BaseRCFApp;
+
+        /// <summary>
+        /// Gets the active <see cref="Window"/>
+        /// </summary>
+        public Window CurrentActiveWindow => Windows.OfType<Window>().FindItem(x => x.IsActive);
+
         #endregion
 
         #region Private Methods
@@ -75,6 +109,8 @@ namespace RayCarrot.WPF
         /// <param name="args">The launch arguments</param>
         private async void AppStartupAsync(string[] args)
         {
+            LogStartupTime("App startup begins");
+
             // Set the shutdown mode to avoid any license windows to close the application
             ShutdownMode = ShutdownMode.OnExplicitShutdown;
 
@@ -85,8 +121,12 @@ namespace RayCarrot.WPF
                 return;
             }
 
+            LogStartupTime("Initial setup has been verified");
+
             // Set up the framework
             SetupFramework(args);
+
+            LogStartupTime("Framework has been setup");
 
             // Log the current environment
             try
@@ -102,13 +142,20 @@ namespace RayCarrot.WPF
             // Log some debug information
             RCF.Logger.LogDebugSource($"Executing assembly path: {Assembly.GetExecutingAssembly().Location}");
 
+            LogStartupTime("Debug info has been logged");
+
             // Run startup
             await OnSetupAsync(args);
+
+            LogStartupTime("Startup has run");
 
             // Get the main window
             var mainWindow = GetMainWindow();
 
+            LogStartupTime("Main window has been created");
+
             // Subscribe to events
+            mainWindow.Loaded += MainWindow_Loaded;
             mainWindow.Closing += MainWindow_ClosingAsync;
             mainWindow.Closed += MainWindow_Closed;
 
@@ -153,6 +200,19 @@ namespace RayCarrot.WPF
 
             // Retrieve arguments
             RCF.Data.Arguments = args;
+        }
+
+        #endregion
+
+        #region Protected Methods
+
+        /// <summary>
+        /// Logs the startup time
+        /// </summary>
+        /// <param name="logDescription">The log description</param>
+        protected void LogStartupTime(string logDescription)
+        {
+            StartupTimeLogs.Add($"Startup: {AppStartupTimer.ElapsedMilliseconds} ms - {logDescription}");
         }
 
         #endregion
@@ -219,6 +279,22 @@ namespace RayCarrot.WPF
         {
             // Dispose mutex
             Mutex?.Dispose();
+        }
+
+        private void MainWindow_Loaded(object sender, RoutedEventArgs e)
+        {
+            // Add startup time log
+            LogStartupTime("Main window loaded");
+
+            // Stop the stopwatch
+            AppStartupTimer.Stop();
+
+            // Log all startup time logs
+            foreach (string log in StartupTimeLogs)
+                RCF.Logger.LogDebugSource(log);
+
+            // Clear the startup time logs
+            StartupTimeLogs.Clear();
         }
 
         private void MainWindow_Closed(object sender, EventArgs e)

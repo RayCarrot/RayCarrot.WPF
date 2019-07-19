@@ -3,6 +3,7 @@ using System.Windows.Controls;
 
 namespace RayCarrot.WPF
 {
+    // TODO: Move to behavior
     /// <summary>
     /// An extension to <see cref="RadioButton"/> which fixes an issue when binding 
     /// <see cref="IsChecked"/> on multiple controls to a data context

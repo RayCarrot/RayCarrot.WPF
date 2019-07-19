@@ -4,6 +4,7 @@ using System.Windows.Controls;
 
 namespace RayCarrot.WPF
 {
+    // TODO: Move to behavior
     /// <summary>
     /// A <see cref="DataGrid"/> with support for binding to a list of selected items
     /// </summary>

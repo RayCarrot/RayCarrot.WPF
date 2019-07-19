@@ -36,20 +36,23 @@ namespace RayCarrot.WPF
                 child.Measure(constraint);
                 Size sz = child.DesiredSize;
 
-                if (curLineSize.Width + sz.Width > constraint.Width) //need to switch to another line
+                // Need to switch to another line
+                if (curLineSize.Width + sz.Width > constraint.Width)
                 {
                     panelSize.Width = Math.Max(curLineSize.Width, panelSize.Width);
                     panelSize.Height += curLineSize.Height;
                     curLineSize = sz;
 
-                    if (sz.Width > constraint.Width) // if the element is wider then the constraint - give it a separate line                    
-                    {
-                        panelSize.Width = Math.Max(sz.Width, panelSize.Width);
-                        panelSize.Height += sz.Height;
-                        curLineSize = new Size();
-                    }
+                    if (!(sz.Width > constraint.Width))
+                        continue;
+
+                    // If the element is wider then the constraint - give it a separate line
+                    panelSize.Width = Math.Max(sz.Width, panelSize.Width);
+                    panelSize.Height += sz.Height;
+                    curLineSize = new Size();
                 }
-                else //continue to accumulate a line
+                // Continue to accumulate a line
+                else
                 {
                     curLineSize.Width += sz.Width;
                     curLineSize.Height = Math.Max(sz.Height, curLineSize.Height);

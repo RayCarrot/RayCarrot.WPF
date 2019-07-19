@@ -7,7 +7,7 @@
         mc:Ignorable="d"
         d:DataContext="{x:Static local:DesignTimeVM.DialogMessageViewModel}">
 
-    <Grid Margin="1" MinWidth="430" MinHeight="170" MaxWidth="400">
+    <Grid Margin="1" MinWidth="430" MinHeight="170" MaxWidth="600">
         <Grid.RowDefinitions>
             <RowDefinition MinHeight="100"/>
             <RowDefinition Height="50"/>
