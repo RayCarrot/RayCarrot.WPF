@@ -1,4 +1,5 @@
-﻿using System.ComponentModel;
+﻿using System;
+using System.ComponentModel;
 using System.Windows;
 
 namespace RayCarrot.WPF
@@ -14,12 +15,19 @@ namespace RayCarrot.WPF
 
         public VMWindow()
         {
+            if (DesignerProperties.GetIsInDesignMode(this))
+                return;
+
             ViewModel = new VM();
+
+            Loaded += VMUserControl_Loaded;
         }
 
         public VMWindow(VM viewModel)
         {
             ViewModel = viewModel;
+
+            Loaded += VMUserControl_Loaded;
         }
 
         #endregion
@@ -30,6 +38,16 @@ namespace RayCarrot.WPF
         {
             get => DataContext as VM;
             set => DataContext = value;
+        }
+
+        #endregion
+
+        #region Event Handlers
+
+        private void VMUserControl_Loaded(object sender, RoutedEventArgs e)
+        {
+            if (ViewModel is IDisposable disposable)
+                Closed += (ss, ee) => disposable?.Dispose();
         }
 
         #endregion

@@ -47,8 +47,13 @@ namespace RayCarrot.WPF
             {
                 try
                 {
+                    var entry = Assembly.GetEntryAssembly();
+
+                    if (entry == null)
+                        throw new InvalidOperationException("The application can not use a Mutex for forcing a single instance if no valid entry assembly is found");
+
                     // Use mutex to only allow one instance of the application at a time
-                    Mutex = new Mutex(false, "Global\\" + ((GuidAttribute)Assembly.GetEntryAssembly().GetCustomAttributes(typeof(GuidAttribute), false).GetValue(0)).Value);
+                    Mutex = new Mutex(false, "Global\\" + ((GuidAttribute)entry.GetCustomAttributes(typeof(GuidAttribute), false).GetValue(0)).Value);
                 }
                 catch (IndexOutOfRangeException ex)
                 {
@@ -134,7 +139,7 @@ namespace RayCarrot.WPF
             // Log the current environment
             try
             {
-                RCFCore.Logger?.LogTraceSource($"Current platform: {Environment.OSVersion.VersionString}");
+                RCFCore.Logger?.LogInformationSource($"Current platform: {Environment.OSVersion.VersionString}");
 
             }
             catch (Exception ex)
@@ -143,7 +148,7 @@ namespace RayCarrot.WPF
             }
 
             // Log some debug information
-            RCFCore.Logger?.LogDebugSource($"Executing assembly path: {Assembly.GetExecutingAssembly().Location}");
+            RCFCore.Logger?.LogDebugSource($"Entry assembly path: {Assembly.GetEntryAssembly()?.Location}");
 
             LogStartupTime("Debug info has been logged");
 
@@ -194,7 +199,7 @@ namespace RayCarrot.WPF
             var construction = new FrameworkConstruction();
 
             // Set up the framework
-            SetupFramework(construction, logLevel);
+            SetupFramework(construction, logLevel, args);
 
             // Build the framework
             construction.Build();
@@ -224,6 +229,8 @@ namespace RayCarrot.WPF
 
         private void BaseRCFApp_Startup(object sender, StartupEventArgs e)
         {
+            LogStartupTime("Startup event called");
+
             try
             {
                 if (!Mutex.WaitOne(0, false))
@@ -269,7 +276,7 @@ namespace RayCarrot.WPF
             catch (Exception)
             {
                 // Notify user
-                MessageBox.Show($"The application crashed with the following exception message:{Environment.NewLine}{e.Exception.Message}{Environment.NewLine}{Environment.NewLine}{Environment.NewLine}", "Critical error", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show($"The application crashed with the following exception message:{Environment.NewLine}{e?.Exception?.Message}{Environment.NewLine}{Environment.NewLine}{Environment.NewLine}", "Critical error", MessageBoxButton.OK, MessageBoxImage.Error);
             }
             finally
             {
@@ -381,7 +388,8 @@ namespace RayCarrot.WPF
         /// </summary>
         /// <param name="construction">The construction</param>
         /// <param name="logLevel">The level to log</param>
-        protected abstract void SetupFramework(IFrameworkConstruction construction, LogLevel logLevel);
+        /// <param name="args">The launch arguments</param>
+        protected abstract void SetupFramework(IFrameworkConstruction construction, LogLevel logLevel, string[] args);
 
         #endregion
 

@@ -1,6 +1,8 @@
-﻿using System.ComponentModel;
+﻿using RayCarrot.UI;
+using System;
+using System.ComponentModel;
+using System.Windows;
 using System.Windows.Controls;
-using RayCarrot.UI;
 
 namespace RayCarrot.WPF
 {
@@ -20,6 +22,8 @@ namespace RayCarrot.WPF
                 return;
 
             ViewModel = new VM();
+
+            Loaded += VMUserControl_Loaded;
         }
 
         /// <summary>
@@ -29,6 +33,8 @@ namespace RayCarrot.WPF
         public VMUserControl(VM instance)
         {
             ViewModel = instance;
+
+            Loaded += VMUserControl_Loaded;
         }
 
         /// <summary>
@@ -38,6 +44,12 @@ namespace RayCarrot.WPF
         {
             get => DataContext as VM;
             set => DataContext = value;
+        }
+
+        private void VMUserControl_Loaded(object sender, RoutedEventArgs e)
+        {
+            if (ViewModel is IDisposable disposable)
+                Window.GetWindow(this).Closed += (ss, ee) => disposable?.Dispose();
         }
     }
 }

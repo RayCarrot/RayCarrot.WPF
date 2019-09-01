@@ -38,7 +38,7 @@ namespace RayCarrot.WPF
             {
                 try
                 {
-                    DisplayLog = SessionLogger.Logs.Where(x => x.LogLevel >= ShowLogLevel).ToObservableCollection();
+                    DisplayLog = SessionLogger.Logs?.Where(x => x.LogLevel >= ShowLogLevel).ToObservableCollection();
                 }
                 catch (Exception ex)
                 {
