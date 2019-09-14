@@ -30,11 +30,20 @@ namespace RayCarrot.WPF
         /// </summary>
         /// <param name="useMutex">Indicates if a <see cref="Mutex"/> should be used to only allow a single instance of the application.
         /// This requires a valid GUID in the entry assembly.</param>
-        protected BaseRCFApp(bool useMutex)
+        /// <param name="splashScreenResourceName">The resource name for a splash screen if one is to be used</param>
+        protected BaseRCFApp(bool useMutex, string splashScreenResourceName = null)
         {
             // Create the startup timer and start it
             AppStartupTimer = new Stopwatch();
             AppStartupTimer.Start();
+
+            // Create and show the splash screen if one is to be used
+            if (splashScreenResourceName != null)
+            {
+                SplashScreenFadeout = TimeSpan.MinValue;
+                SplashScreen = new SplashScreen(splashScreenResourceName);
+                SplashScreen.Show(false);
+            }
 
             StartupTimeLogs = new List<string>();
 
@@ -69,6 +78,11 @@ namespace RayCarrot.WPF
         #region Private Properties
 
         /// <summary>
+        /// The splash screen, if one is used
+        /// </summary>
+        private SplashScreen SplashScreen { get; }
+
+        /// <summary>
         /// The mutex
         /// </summary>
         private Mutex Mutex { get; }
@@ -92,6 +106,15 @@ namespace RayCarrot.WPF
         /// The startup time logs to log once the app has started to improve performance
         /// </summary>
         private List<string> StartupTimeLogs { get; }
+
+        #endregion
+
+        #region Protected Properties
+
+        /// <summary>
+        /// The fadeout for the splash screen
+        /// </summary>
+        protected TimeSpan SplashScreenFadeout { get; set; }
 
         #endregion
 
@@ -167,6 +190,9 @@ namespace RayCarrot.WPF
             mainWindow.Closing += MainWindow_ClosingAsync;
             mainWindow.Closed += MainWindow_Closed;
 
+            // Close splash screen
+            CloseSplashScreen();
+
             // Show the main window
             mainWindow.Show();
 
@@ -199,10 +225,10 @@ namespace RayCarrot.WPF
             var construction = new FrameworkConstruction();
 
             // Set up the framework
-            SetupFramework(construction, logLevel, args);
+            var config = SetupFramework(construction, logLevel, args);
 
             // Build the framework
-            construction.Build();
+            construction.Build(config);
 
             RCFCore.Logger?.LogInformationSource($"The log level has been set to {logLevel}");
 
@@ -223,6 +249,15 @@ namespace RayCarrot.WPF
             StartupTimeLogs.Add($"Startup: {AppStartupTimer.ElapsedMilliseconds} ms - {logDescription}");
         }
 
+        /// <summary>
+        /// Closes the splash screen if showing
+        /// </summary>
+        protected void CloseSplashScreen()
+        {
+            // Close splash screen
+            SplashScreen?.Close(SplashScreenFadeout);
+        }
+
         #endregion
 
         #region Event Handlers
@@ -233,7 +268,7 @@ namespace RayCarrot.WPF
 
             try
             {
-                if (!Mutex.WaitOne(0, false))
+                if (Mutex != null && !Mutex.WaitOne(0, false))
                 {
                     OnOtherInstanceFound(e.Args);
                     Shutdown();
@@ -280,6 +315,9 @@ namespace RayCarrot.WPF
             }
             finally
             {
+                // Close splash screen
+                CloseSplashScreen();
+
                 // Dispose mutex
                 Mutex?.Dispose();
             }
@@ -287,6 +325,9 @@ namespace RayCarrot.WPF
 
         private void BaseRCFApp_Exit(object sender, ExitEventArgs e)
         {
+            // Close splash screen
+            CloseSplashScreen();
+
             // Dispose mutex
             Mutex?.Dispose();
         }
@@ -389,7 +430,8 @@ namespace RayCarrot.WPF
         /// <param name="construction">The construction</param>
         /// <param name="logLevel">The level to log</param>
         /// <param name="args">The launch arguments</param>
-        protected abstract void SetupFramework(IFrameworkConstruction construction, LogLevel logLevel, string[] args);
+        /// <returns>The configuration values to pass on to the framework, if any</returns>
+        protected abstract IDictionary<string, object> SetupFramework(IFrameworkConstruction construction, LogLevel logLevel, string[] args);
 
         #endregion
 
