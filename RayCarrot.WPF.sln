@@ -13,7 +13,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Libraries", "Libraries", "{BCB45954-2E36-4755-BD5B-8887104DD941}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RayCarrot.Windows.Shell", "..\Carrot Framework\RayCarrot.Windows.Shell\RayCarrot.Windows.Shell.csproj", "{55F49D1E-C9BD-4CC4-9FF0-D646D9F42A21}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RayCarrot.Windows.Shell", "..\RayCarrot.CarrotFramework\RayCarrot.Windows.Shell\RayCarrot.Windows.Shell.csproj", "{55F49D1E-C9BD-4CC4-9FF0-D646D9F42A21}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

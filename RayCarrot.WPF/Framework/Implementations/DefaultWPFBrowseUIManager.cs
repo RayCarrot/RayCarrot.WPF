@@ -3,6 +3,8 @@ using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using System.Windows;
+using Microsoft.WindowsAPICodePack.Dialogs;
+using Microsoft.WindowsAPICodePack.Shell;
 using RayCarrot.CarrotFramework.Abstractions;
 using RayCarrot.Extensions;
 using RayCarrot.IO;
@@ -13,19 +15,12 @@ namespace RayCarrot.WPF
     /// <summary>
     /// The default <see cref="IBrowseUIManager"/> for WPF
     /// </summary>
-    public abstract class DefaultWPFBrowseUIManager : IBrowseUIManager
+    public class DefaultWPFBrowseUIManager : IBrowseUIManager
     {
         /// <summary>
         /// Indicates if the browse requests should be logged
         /// </summary>
         public virtual bool LogRequests { get; set; }
-
-        /// <summary>
-        /// The implementation for allowing the user to browse for a directory
-        /// </summary>
-        /// <param name="directoryBrowserModel">The directory browser information</param>
-        /// <returns>The directory browser result</returns>
-        protected abstract Task<DirectoryBrowserResult> BrowseDirectoryImplementationAsync(DirectoryBrowserViewModel directoryBrowserModel);
 
         /// <summary>
         /// Allows the user to browse for a directory
@@ -35,18 +30,41 @@ namespace RayCarrot.WPF
         /// <param name="filePath">The caller file path (leave at default for compiler-time value)</param>
         /// <param name="lineNumber">The caller line number (leave at default for compiler-time value)</param>
         /// <returns>The directory browser result</returns>
-        public virtual async Task<DirectoryBrowserResult> BrowseDirectoryAsync(DirectoryBrowserViewModel directoryBrowserModel, [CallerMemberName] string origin = "", [CallerFilePath] string filePath = "", [CallerLineNumber] int lineNumber = 0)
+        public virtual Task<DirectoryBrowserResult> BrowseDirectoryAsync(DirectoryBrowserViewModel directoryBrowserModel, [CallerMemberName] string origin = "", [CallerFilePath] string filePath = "", [CallerLineNumber] int lineNumber = 0)
         {
             if (LogRequests)
                 RCFCore.Logger?.LogTraceSource($"A browse directory dialog was opened with the title of: {directoryBrowserModel.Title}", origin: origin, filePath: filePath, lineNumber: lineNumber);
 
-            var result = await BrowseDirectoryImplementationAsync(directoryBrowserModel);
+            using (var dialog = new CommonOpenFileDialog())
+            {
+                dialog.Title = directoryBrowserModel.Title;
+                dialog.AllowNonFileSystemItems = false;
+                dialog.IsFolderPicker = true;
+                dialog.Multiselect = directoryBrowserModel.MultiSelection;
+                dialog.InitialDirectory = directoryBrowserModel.DefaultDirectory;
+                dialog.DefaultFileName = directoryBrowserModel.DefaultName;
+                dialog.EnsureFileExists = true;
+                dialog.EnsurePathExists = true;
+                
+                // Show the dialog
+                var dialogResult = dialog.ShowDialog(Application.Current.Windows.Cast<Window>().FindItem(x => x.IsActive));
 
-            RCFCore.Logger?.LogTraceSource(result.CanceledByUser
-                ? "The browse directory dialog was canceled by the user"
-                : $"The browse directory dialog returned the selected directory paths {result.SelectedDirectories.JoinItems(", ")}");
+                var result = dialogResult != CommonFileDialogResult.Ok ? new DirectoryBrowserResult()
+                {
+                    CanceledByUser = true
+                } : new DirectoryBrowserResult()
+                {
+                    CanceledByUser = false,
+                    SelectedDirectory = dialog.FileName,
+                    SelectedDirectories = dialog.FileNames.Select(x => new FileSystemPath(x))
+                };
 
-            return result;
+                RCFCore.Logger?.LogTraceSource(result.CanceledByUser
+                    ? "The browse directory dialog was canceled by the user"
+                    : $"The browse directory dialog returned the selected directory paths {result.SelectedDirectories.JoinItems(", ")}");
+
+                return Task.FromResult(result);
+            }
         }
 
         /// <summary>
