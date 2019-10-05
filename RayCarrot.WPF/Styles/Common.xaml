@@ -1,0 +1,49 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:local="clr-namespace:RayCarrot.WPF">
+
+    <!-- Default Tool Tip -->
+
+    <Style TargetType="{x:Type ToolTip}" BasedOn="{StaticResource {x:Type ToolTip}}">
+
+        <!-- Do not show tool tip when the content is an empty string -->
+
+        <Setter Property="Visibility" Value="{Binding RelativeSource={RelativeSource Mode=Self}, Path=Content, Converter={local:StringEmptyToVisibilityConverter}}" />
+
+        <!-- Set a max width so it doesn't get too wide -->
+
+        <Setter Property="ContentTemplate">
+            <Setter.Value>
+                <DataTemplate>
+                    <TextBlock Text="{Binding}" MaxWidth="400" TextWrapping='Wrap' />
+                </DataTemplate>
+            </Setter.Value>
+        </Setter>
+
+    </Style>
+
+    <!-- Default Scroll Viewer -->
+
+    <Style TargetType="{x:Type ScrollViewer}" BasedOn="{StaticResource {x:Type ScrollViewer}}">
+
+        <!-- Set vertical scroll bar visibility to auto -->
+
+        <Setter Property="VerticalScrollBarVisibility" Value="Auto" />
+
+        <!-- Remove the focus visual style -->
+
+        <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+
+    </Style>
+
+    <!-- Default Items Control -->
+
+    <Style TargetType="{x:Type ItemsControl}" BasedOn="{StaticResource {x:Type ItemsControl}}">
+
+        <!-- Disable tab stop -->
+        
+        <Setter Property="IsTabStop" Value="False" />
+
+    </Style>
+
+</ResourceDictionary>

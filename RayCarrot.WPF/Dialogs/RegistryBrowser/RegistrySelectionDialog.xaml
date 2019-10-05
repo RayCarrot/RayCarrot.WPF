@@ -5,9 +5,8 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:local="clr-namespace:RayCarrot.WPF"
              mc:Ignorable="d"
-             d:DataContext="{Binding Source={x:Static local:DesignTimeVM.RegistrySelectionViewModel}}"
              d:DesignHeight="450" d:DesignWidth="800"
-             Background="{DynamicResource MaterialDesignPaper}">
+             Background="{DynamicResource MaterialDesignPaper}" d:DataContext="{d:DesignInstance local:RegistrySelectionViewModel}">
 
     <!-- Keyboard Shortcuts -->
 

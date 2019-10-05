@@ -4,6 +4,9 @@ using Microsoft.Xaml.Behaviors;
 
 namespace RayCarrot.WPF
 {
+    /// <summary>
+    /// Behavior for setting a unified margin in the items of a <see cref="Panel"/>
+    /// </summary>
     public class UnifiedMarginBehavior : Behavior<Panel>
     {
         #region Public Properties
@@ -17,9 +20,7 @@ namespace RayCarrot.WPF
             set => SetValue(MarginProperty, value);
         }
 
-        public static readonly DependencyProperty MarginProperty =
-            DependencyProperty.Register(nameof(Margin), typeof(Thickness), typeof(UnifiedMarginBehavior), 
-                new FrameworkPropertyMetadata(new Thickness(0), FrameworkPropertyMetadataOptions.BindsTwoWayByDefault));
+        public static readonly DependencyProperty MarginProperty = DependencyProperty.Register(nameof(Margin), typeof(Thickness), typeof(UnifiedMarginBehavior), new FrameworkPropertyMetadata(new Thickness(0), FrameworkPropertyMetadataOptions.BindsTwoWayByDefault));
 
         #endregion
 

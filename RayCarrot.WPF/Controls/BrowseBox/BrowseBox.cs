@@ -33,10 +33,12 @@ namespace RayCarrot.WPF
 
         #region Constructor
 
+        /// <summary>
+        /// Default constructor
+        /// </summary>
         public BrowseBox()
         {
             BrowseAsyncLock = new AsyncLock();
-            OpenLocationCommand = new AsyncRelayCommand(OpenLocationAsync);
         }
 
         #endregion
@@ -59,8 +61,14 @@ namespace RayCarrot.WPF
 
         #region Private Properties
 
+        /// <summary>
+        /// The async lock for browsing
+        /// </summary>
         private AsyncLock BrowseAsyncLock { get; }
 
+        /// <summary>
+        /// The browse button
+        /// </summary>
         private Button BrowseButton
         {
             get => _browseButton;
@@ -84,6 +92,9 @@ namespace RayCarrot.WPF
             }
         }
 
+        /// <summary>
+        /// The menu item for opening the location
+        /// </summary>
         private MenuItem OpenLocationMenuItem
         {
             get => _openLocationMenuItem;
@@ -107,12 +118,6 @@ namespace RayCarrot.WPF
 
         #endregion
 
-        #region Commands
-
-        public ICommand OpenLocationCommand { get; }
-
-        #endregion
-
         #region Public Methods
 
         public override void OnApplyTemplate()
@@ -127,6 +132,10 @@ namespace RayCarrot.WPF
 
         #region Protected Methods
 
+        /// <summary>
+        /// Checks if the current path is valid based on the browse type
+        /// </summary>
+        /// <returns>True if the path is valid, otherwise false</returns>
         protected virtual bool IsPathValid()
         {
             switch (BrowseType)
@@ -139,7 +148,7 @@ namespace RayCarrot.WPF
 
                 case BrowseTypes.Drive:
                     FileSystemPath path = SelectedPath;
-                    return path.DirectoryExists && path.IsDirectoryRoot();
+                    return path.DirectoryExists && path.IsDirectoryRoot;
 
                 case BrowseTypes.RegistryKey:
                     return RCFWinReg.RegistryManager.KeyExists(SelectedPath, SelectedRegistryView);
@@ -149,6 +158,10 @@ namespace RayCarrot.WPF
             }
         }
 
+        /// <summary>
+        /// Checks if the file drag/drop is allowed based on the current properties
+        /// </summary>
+        /// <returns>True if it's allowed, otherwise false</returns>
         protected virtual bool AllowFileDragDrop()
         {
             return BrowseType == BrowseTypes.Directory || BrowseType == BrowseTypes.File || BrowseType == BrowseTypes.Drive;

@@ -12,6 +12,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Threading;
+using Nito.AsyncEx;
 using RayCarrot.CarrotFramework.Abstractions;
 using RayCarrot.Extensions;
 using RayCarrot.IO;
@@ -33,6 +34,10 @@ namespace RayCarrot.WPF
         /// <param name="splashScreenResourceName">The resource name for a splash screen if one is to be used</param>
         protected BaseRCFApp(bool useMutex, string splashScreenResourceName = null)
         {
+            // Create properties
+            StartupEventsCalledAsyncLock = new AsyncLock();
+            HasRunStartupEvents = false;
+
             // Create the startup timer and start it
             AppStartupTimer = new Stopwatch();
             AppStartupTimer.Start();
@@ -88,6 +93,11 @@ namespace RayCarrot.WPF
         private Mutex Mutex { get; }
 
         /// <summary>
+        /// Indicates if the startup events have run
+        /// </summary>
+        protected bool HasRunStartupEvents { get; set; }
+
+        /// <summary>
         /// Indicates if the main window is currently closing
         /// </summary>
         private bool IsClosing { get; set; }
@@ -115,6 +125,11 @@ namespace RayCarrot.WPF
         /// The fadeout for the splash screen
         /// </summary>
         protected TimeSpan SplashScreenFadeout { get; set; }
+
+        /// <summary>
+        /// Async lock for calling the startup events
+        /// </summary>
+        protected AsyncLock StartupEventsCalledAsyncLock { get; }
 
         #endregion
 
@@ -186,7 +201,7 @@ namespace RayCarrot.WPF
             LogStartupTime("Main window has been created");
 
             // Subscribe to events
-            mainWindow.Loaded += MainWindow_Loaded;
+            mainWindow.Loaded += MainWindow_LoadedAsync;
             mainWindow.Closing += MainWindow_ClosingAsync;
             mainWindow.Closed += MainWindow_Closed;
 
@@ -221,14 +236,11 @@ namespace RayCarrot.WPF
                 }
             }
 
-            // Create the construction
-            var construction = new FrameworkConstruction();
+            // Create the configuration
+            var config = new Dictionary<string, object>();
 
             // Set up the framework
-            var config = SetupFramework(construction, logLevel, args);
-
-            // Build the framework
-            construction.Build(config);
+            SetupFramework(config, logLevel, args);
 
             RCFCore.Logger?.LogInformationSource($"The log level has been set to {logLevel}");
 
@@ -275,9 +287,9 @@ namespace RayCarrot.WPF
                     return;
                 }
             }
-#pragma warning disable CS0168 // Variable is declared but never used
-            catch (AbandonedMutexException ex)
-#pragma warning restore CS0168 // Variable is declared but never used
+#pragma warning disable 168
+            catch (AbandonedMutexException _)
+#pragma warning restore 168
             {
                 // Break if debugging
                 Debugger.Break();
@@ -302,7 +314,7 @@ namespace RayCarrot.WPF
                 FileSystemPath logPath = Path.Combine(Directory.GetCurrentDirectory(), "crashlog.txt");
 
                 // Write log
-                File.WriteAllLines(logPath, SessionLogger.Logs?.Select(x => $"[{x.LogLevel}] {x.Message}") ?? new string[] { "Service not available" });
+                File.WriteAllLines(logPath, RCFCore.Logs?.GetLogs().Select(x => $"[{x.LogLevel}] {x.Message}") ?? new string[] { "Service not available" });
 
                 // Notify user
                 MessageBox.Show($"The application crashed with the following exception message:{Environment.NewLine}{e.Exception.Message}{Environment.NewLine}{Environment.NewLine}{Environment.NewLine}" +
@@ -332,7 +344,7 @@ namespace RayCarrot.WPF
             Mutex?.Dispose();
         }
 
-        private void MainWindow_Loaded(object sender, RoutedEventArgs e)
+        private async void MainWindow_LoadedAsync(object sender, RoutedEventArgs e)
         {
             // Add startup time log
             LogStartupTime("Main window loaded");
@@ -346,6 +358,17 @@ namespace RayCarrot.WPF
 
             // Clear the startup time logs
             StartupTimeLogs.Clear();
+
+            using (await StartupEventsCalledAsyncLock.LockAsync())
+            {
+                // Call all startup events
+                await (LocalStartupComplete?.RaiseAsync(this, new EventArgs()) ?? Task.CompletedTask);
+
+                // Remove events as they'll not get called again
+                LocalStartupComplete = null;
+
+                HasRunStartupEvents = true;
+            }
         }
 
         private void MainWindow_Closed(object sender, EventArgs e)
@@ -427,11 +450,10 @@ namespace RayCarrot.WPF
         /// <summary>
         /// Sets up the framework with loggers and other services
         /// </summary>
-        /// <param name="construction">The construction</param>
+        /// <param name="config">The configuration values to pass on to the framework, if any</param>
         /// <param name="logLevel">The level to log</param>
         /// <param name="args">The launch arguments</param>
-        /// <returns>The configuration values to pass on to the framework, if any</returns>
-        protected abstract IDictionary<string, object> SetupFramework(IFrameworkConstruction construction, LogLevel logLevel, string[] args);
+        protected abstract void SetupFramework(IDictionary<string, object> config, LogLevel logLevel, string[] args);
 
         #endregion
 
@@ -475,6 +497,41 @@ namespace RayCarrot.WPF
         protected virtual Task<bool> InitialSetupAsync(string[] args)
         {
             return Task.FromResult(true);
+        }
+
+        #endregion
+
+        #region Protected Events
+
+        /// <summary>
+        /// Contains events to be called once after startup completes
+        /// </summary>
+        protected event AsyncEventHandler<EventArgs> LocalStartupComplete;
+
+        #endregion
+
+        #region Public Events
+
+        /// <summary>
+        /// Occurs on startup, after the main window has been loaded
+        /// </summary>
+        public event AsyncEventHandler<EventArgs> StartupComplete
+        {
+            add
+            {
+                using (StartupEventsCalledAsyncLock.Lock())
+                {
+                    if (HasRunStartupEvents)
+                        Task.Run(async () => await (value?.Invoke(this, EventArgs.Empty) ?? Task.CompletedTask));
+                    else
+                        LocalStartupComplete += value;
+                }
+            }
+            remove
+            {
+                if (!HasRunStartupEvents)
+                    LocalStartupComplete -= value;
+            }
         }
 
         #endregion

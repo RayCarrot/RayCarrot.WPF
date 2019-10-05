@@ -4,6 +4,7 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:local="clr-namespace:RayCarrot.WPF"
+             xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
              mc:Ignorable="d"
              d:DesignHeight="300" d:DesignWidth="600"
              d:DataContext="{Binding Source={x:Static local:DesignTimeVM.DriveSelectionViewModel}}"
@@ -22,10 +23,26 @@
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
-        <local:MultiDataGrid Grid.Row="0" AutoGenerateColumns="False" CanUserAddRows="False" CanUserDeleteRows="False" CanUserReorderColumns="True"
-                             CanUserResizeColumns="True" CanUserResizeRows="False" CanUserSortColumns="True" IsReadOnly="True" PreviewKeyDown="DataGrid_KeyDown"
-                             ItemsSource="{Binding Path=Drives}" SelectedItem="{Binding Path=SelectedItem}" SelectedItemsList="{Binding Path=SelectedItems, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                             GridLinesVisibility="Horizontal" BorderThickness="0" SelectionMode="{Binding Path=BrowseVM.MultiSelection, Converter={local:BooleanToDataGridSelectionModeConverter}}">
+        <DataGrid Grid.Row="0" 
+                  Margin="5"
+                  AutoGenerateColumns="False" 
+                  CanUserAddRows="False" 
+                  CanUserDeleteRows="False" 
+                  CanUserReorderColumns="True"
+                  CanUserResizeColumns="True" 
+                  CanUserResizeRows="False" 
+                  CanUserSortColumns="True" 
+                  IsReadOnly="True" 
+                  PreviewKeyDown="DataGrid_KeyDown"
+                  ItemsSource="{Binding Path=Drives}" 
+                  SelectedItem="{Binding Path=SelectedItem}" 
+                  GridLinesVisibility="Horizontal" 
+                  BorderThickness="0"
+                  SelectionMode="{Binding Path=BrowseVM.MultiSelection, Converter={local:BooleanToDataGridSelectionModeConverter}}">
+            <i:Interaction.Behaviors>
+                <local:DataGridSelectedItemsBehavior SelectedItems="{Binding Path=SelectedItems, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+            </i:Interaction.Behaviors>
+
             <DataGrid.CellStyle>
                 <Style TargetType="DataGridCell" BasedOn="{StaticResource {x:Type DataGridCell}}">
                     <Setter Property="BorderThickness" Value="0"/>
@@ -77,7 +94,7 @@
                 <DataGridTextColumn Header="Is Ready" Binding="{Binding Path=DisplayIsReady}"/>
 
             </DataGrid.Columns>
-        </local:MultiDataGrid>
+        </DataGrid>
 
         <Grid Grid.Row="1" Margin="5">
             <Button Content="Refresh" HorizontalAlignment="Left" Command="{Binding Path=RefreshCommand}"/>

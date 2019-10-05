@@ -12,7 +12,7 @@ namespace RayCarrot.WPF
     /// <summary>
     /// View model for a log viewer
     /// </summary>
-    public class LogViewerViewModel : BaseViewModel
+    public class LogViewerViewModel : UserInputViewModel
     {
         #region Constructor
 
@@ -21,8 +21,14 @@ namespace RayCarrot.WPF
         /// </summary>
         public LogViewerViewModel()
         {
+            // Set a default title
+            Title = "Log Viewer";
+
+            // Refresh the logs
             RefreshDisplayLog();
-            SessionLogger.LogAdded += (s, e) => RefreshDisplayLog();
+
+            // Subscribe to when new logs get added
+            RCFCore.Logs.LogAdded += (s, e) => RefreshDisplayLog();
         }
 
         #endregion
@@ -38,7 +44,7 @@ namespace RayCarrot.WPF
             {
                 try
                 {
-                    DisplayLog = SessionLogger.Logs?.Where(x => x.LogLevel >= ShowLogLevel).ToObservableCollection();
+                    DisplayLog = RCFCore.Logs?.GetLogs().Where(x => x.LogLevel >= ShowLogLevel).ToObservableCollection();
                 }
                 catch (Exception ex)
                 {

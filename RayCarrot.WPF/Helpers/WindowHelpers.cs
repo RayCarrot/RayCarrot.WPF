@@ -56,6 +56,31 @@ namespace RayCarrot.WPF
         public static bool ShowWindow<Win>(Func<Win> createWindowFunc, ShowWindowFlags flags = ShowWindowFlags.None, params string[] groupNames)
             where Win : Window
         {
+            return ShowWindow(createWindowFunc, typeof(Win), flags, groupNames);
+        }
+
+        /// <summary>
+        /// Shows the specified <see cref="Window"/>
+        /// </summary>
+        /// <param name="window">The window to show</param>
+        /// <param name="flags">The flags</param>
+        /// <param name="groupNames">The group names for this instance</param>
+        /// <returns>True if the <see cref="Window"/> is showing or false if it is not</returns>
+        public static bool ShowWindow(Window window, ShowWindowFlags flags = ShowWindowFlags.None, params string[] groupNames)
+        {
+            return ShowWindow(() => window, window.GetType(), flags, groupNames);
+        }
+
+        /// <summary>
+        /// Shows the specified <see cref="Window"/>
+        /// </summary>
+        /// <param name="createWindowFunc">The func for creating a new instance of the <see cref="Window"/></param>
+        /// <param name="windowType">The type of <see cref="Window"/> to show</param>
+        /// <param name="flags">The flags</param>
+        /// <param name="groupNames">The group names for this instance</param>
+        /// <returns>True if the <see cref="Window"/> is showing or false if it is not</returns>
+        public static bool ShowWindow(Func<Window> createWindowFunc, Type windowType, ShowWindowFlags flags = ShowWindowFlags.None, params string[] groupNames)
+        {
             // Lock to the current application
             lock (Application.Current)
             {
@@ -64,10 +89,7 @@ namespace RayCarrot.WPF
                     // Remove unused entries
                     Windows.RemoveWhere(x => !x.Key.TryGetTarget(out Window _));
 
-                    // Get the window type
-                    Type type = typeof(Win);
-
-                    RCFCore.Logger?.LogDebugSource($"A custom window of type {type} has been requested to show");
+                    RCFCore.Logger?.LogDebugSource($"A custom window of type {windowType} has been requested to show");
 
                     // Get the currently available windows and copy them to a list
                     var windows = Application.Current.Windows.Cast<Window>().ToList();
@@ -75,7 +97,7 @@ namespace RayCarrot.WPF
                     // If no duplicates are allowed, make sure there is no Window of the same type
                     if (!flags.HasFlag(ShowWindowFlags.DuplicatesAllowed))
                     {
-                        var window = windows.Find(x => type == x.GetType());
+                        var window = windows.Find(x => windowType == x.GetType());
 
                         if (window != null)
                         {
@@ -118,7 +140,7 @@ namespace RayCarrot.WPF
                     // Show the window
                     instance.Show();
 
-                    RCFCore.Logger?.LogInformationSource($"The window of type {type} has been shown");
+                    RCFCore.Logger?.LogInformationSource($"The window of type {windowType} has been shown");
 
                     return true;
                 }

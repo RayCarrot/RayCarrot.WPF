@@ -1,0 +1,9 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:local="clr-namespace:RayCarrot.WPF">
+
+    <!-- Default radio button extended -->
+
+    <Style TargetType="{x:Type local:RadioButtonExtended}" BasedOn="{StaticResource {x:Type RadioButton}}" />
+
+</ResourceDictionary>

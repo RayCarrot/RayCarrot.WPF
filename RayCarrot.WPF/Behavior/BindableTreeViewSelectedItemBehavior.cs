@@ -90,7 +90,7 @@ namespace RayCarrot.WPF
             else
             {
                 // The Tree template has not named the ItemsPresenter, 
-                // so walk the descendents and find the child.
+                // so walk the descendants and find the child.
                 itemsPresenter = container.GetDescendantByType<ItemsPresenter>();
                 if (itemsPresenter == null)
                 {
@@ -119,8 +119,7 @@ namespace RayCarrot.WPF
                 {
                     subContainer = (TreeViewItem) container.ItemContainerGenerator.ContainerFromIndex(i);
 
-                    // Bring the item into view to maintain the 
-                    // same behavior as with a virtualizing panel.
+                    // Bring the item into view to maintain the same behavior as with a virtualizing panel.
                     subContainer.BringIntoView();
                 }
 

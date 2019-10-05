@@ -37,5 +37,33 @@ namespace RayCarrot.WPF
         {
             return await new D().ShowDialogAsync(dialog, owner);
         }
+
+        /// <summary>
+        /// Shows the Window without waiting for it to close
+        /// </summary>
+        /// <typeparam name="VM">The view model type</typeparam>
+        /// <param name="window">The window content to show</param>
+        /// <param name="owner">The owner window</param>
+        /// <returns>The task</returns>
+        public static async Task ShowWindowAsync<VM>(this IWindowBaseControl<VM> window, object owner = null)
+            where VM : UserInputViewModel
+        {
+            await RCFWPF.DialogBaseManager.ShowWindowAsync(window, owner);
+        }
+
+        /// <summary>
+        /// Shows the Window without waiting for it to close
+        /// </summary>
+        /// <typeparam name="D">The dialog base manager type</typeparam>
+        /// <typeparam name="V">The view model type</typeparam>
+        /// <param name="window">The window content to show</param>
+        /// <param name="owner">The owner window</param>
+        /// <returns>The task</returns>
+        public static async Task ShowWindowAsync<D, V>(this IWindowBaseControl<V> window, object owner = null)
+            where D : IDialogBaseManager, new()
+            where V : UserInputViewModel
+        {
+            await new D().ShowWindowAsync(window, owner);
+        }
     }
 }

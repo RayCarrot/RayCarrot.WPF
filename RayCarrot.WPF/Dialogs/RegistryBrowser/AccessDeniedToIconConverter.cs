@@ -12,7 +12,7 @@ namespace RayCarrot.WPF
     {
         public override ImageSource ConvertValue(bool value, Type targetType, object parameter, CultureInfo culture)
         {
-            var path = "pack://application:,,,/RayCarrot.WPF;component/Controls/Dialogs/RegistryBrowser/Icons/";
+            var path = "pack://application:,,,/RayCarrot.WPF;component/Dialogs/RegistryBrowser/Icons/";
 
             return new BitmapImage(new Uri(value ? path + "Hidden Folder.png" : path + "Folder.png"));
         }

@@ -4,24 +4,23 @@ using RayCarrot.UI;
 namespace RayCarrot.WPF
 {
     /// <summary>
-    /// Used for dialog controls for <see cref="IDialogBaseControl{V, R}"/>
+    /// Used for window controls
     /// </summary>
-    /// <typeparam name="V">The view model type</typeparam>
-    /// <typeparam name="R">The result type</typeparam>
-    public interface IDialogBaseControl<out V, out R> : IDisposable
-        where V : UserInputViewModel
+    /// <typeparam name="VM">The view model type</typeparam>
+    public interface IWindowBaseControl<out VM> : IDisposable
+        where VM : UserInputViewModel
     {
         #region Properties
 
         /// <summary>
         /// The view model
         /// </summary>
-        V ViewModel { get; }
+        VM ViewModel { get; }
 
         /// <summary>
         /// The dialog content
         /// </summary>
-        object DialogContent { get; }
+        object UIContent { get; }
 
         /// <summary>
         /// Indicates if the dialog should be resizable
@@ -32,16 +31,6 @@ namespace RayCarrot.WPF
         /// The base size for the dialog
         /// </summary>
         DialogBaseSize BaseSize { get; }
-
-        #endregion
-
-        #region Methods
-
-        /// <summary>
-        /// Gets the current result
-        /// </summary>
-        /// <returns>The result</returns>
-        R GetResult();
 
         #endregion
 

@@ -68,11 +68,21 @@
     <Compile Include="Behavior\UnifiedMarginBehavior.cs" />
     <Compile Include="Controls\BrowseBox\BrowseBox.cs" />
     <Compile Include="Controls\BrowseBox\BrowseValidationRules.cs" />
-    <Compile Include="Controls\DecimalTextBox.cs" />
+    <Compile Include="Behavior\DecimalTextBoxBehavior.cs" />
+    <Compile Include="Dialogs\Base\IWindowBaseControl.cs" />
+    <Compile Include="Dialogs\LogViewer\LogTypeToBrushConverter.cs" />
+    <Compile Include="Dialogs\RegistryBrowser\AccessDeniedToIconConverter.cs" />
+    <Compile Include="Dialogs\RegistryBrowser\RegistrySelectionDialog.xaml.cs">
+      <DependentUpon>RegistrySelectionDialog.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Dialogs\RegistryBrowser\ViewModels\FavoritesItemViewModel.cs" />
+    <Compile Include="Dialogs\RegistryBrowser\ViewModels\RegistryKeyViewModel.cs" />
+    <Compile Include="Dialogs\RegistryBrowser\ViewModels\RegistrySelectionViewModel.cs" />
+    <Compile Include="Dialogs\RegistryBrowser\ViewModels\RegistryValueViewModel.cs" />
     <Compile Include="Controls\VMUserControl.cs" />
     <Compile Include="Controls\BrowseBox\BrowseTypes.cs" />
-    <Compile Include="Controls\Dialogs\DialogBaseSize.cs" />
-    <Compile Include="Controls\Dialogs\IDialogBaseControl.cs" />
+    <Compile Include="Dialogs\Base\DialogBaseSize.cs" />
+    <Compile Include="Dialogs\Base\IDialogBaseControl.cs" />
     <Compile Include="Converters\BooleanToVisibilityHiddenConverter.cs" />
     <Compile Include="Converters\GetDescendantByTypeConverter.cs" />
     <Compile Include="Converters\IsNotTypeToVisibilityConverter.cs" />
@@ -84,45 +94,36 @@
     <Compile Include="DataModels\WindowSessionState.cs" />
     <Compile Include="Extensions\BitmapExtensions.cs" />
     <Compile Include="Extensions\VisualExtensions.cs" />
-    <Compile Include="Framework\Implementations\WindowDialogBaseManager.cs" />
-    <Compile Include="Framework\Interfaces\IDialogBaseManager.cs" />
+    <Compile Include="Dialogs\Base\Manager\WindowDialogBaseManager.cs" />
+    <Compile Include="Dialogs\Base\Manager\IDialogBaseManager.cs" />
     <Compile Include="Framework\RCFWPF.cs" />
     <Compile Include="Extensions\DialogBaseControlExtensions.cs" />
-    <Compile Include="Controls\Dialogs\StringInputDialog\StringInputDialog.xaml.cs">
+    <Compile Include="Dialogs\StringInputDialog\StringInputDialog.xaml.cs">
       <DependentUpon>StringInputDialog.xaml</DependentUpon>
     </Compile>
     <Compile Include="Framework\Implementations\DefaultWPFRegistryBrowseUIManager.cs" />
     <Compile Include="Framework\FrameworkConstructionExtensions.cs" />
-    <Compile Include="Framework\Interfaces\IWPFStyle.cs" />
-    <Compile Include="Controls\Dialogs\RegistryBrowser\ViewModels\FavoritesItemViewModel.cs" />
-    <Compile Include="Controls\Dialogs\RegistryBrowser\ViewModels\RegistryValueViewModel.cs" />
-    <Compile Include="Controls\Dialogs\StringInputDialog\ViewModels\StringInputResult.cs" />
-    <Compile Include="Controls\Dialogs\StringInputDialog\ViewModels\StringInputViewModel.cs" />
-    <Compile Include="Controls\Dialogs\DriveSelectionDialog\DriveSelectionDialog.xaml.cs">
+    <Compile Include="Dialogs\Base\Manager\IWPFStyle.cs" />
+    <Compile Include="Dialogs\StringInputDialog\ViewModels\StringInputResult.cs" />
+    <Compile Include="Dialogs\StringInputDialog\ViewModels\StringInputViewModel.cs" />
+    <Compile Include="Dialogs\DriveSelectionDialog\DriveSelectionDialog.xaml.cs">
       <DependentUpon>DriveSelectionDialog.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Controls\Dialogs\RegistryBrowser\AccessDeniedToIconConverter.cs" />
-    <Compile Include="Controls\Dialogs\RegistryBrowser\ViewModels\RegistryKeyViewModel.cs" />
-    <Compile Include="Controls\Dialogs\RegistryBrowser\RegistrySelectionDialog.xaml.cs">
-      <DependentUpon>RegistrySelectionDialog.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="Controls\Dialogs\RegistryBrowser\ViewModels\RegistrySelectionViewModel.cs" />
     <Compile Include="Controls\VMWindow.cs" />
-    <Compile Include="Controls\Dialogs\DriveSelectionDialog\ViewModels\DriveViewModel.cs" />
-    <Compile Include="Controls\Dialogs\DriveSelectionDialog\ViewModels\DriveSelectionViewModel.cs" />
-    <Compile Include="Controls\MultiDataGrid.cs" />
+    <Compile Include="Dialogs\DriveSelectionDialog\ViewModels\DriveViewModel.cs" />
+    <Compile Include="Dialogs\DriveSelectionDialog\ViewModels\DriveSelectionViewModel.cs" />
+    <Compile Include="Behavior\DataGridSelectedItemsBehavior.cs" />
     <Compile Include="Converters\BooleanToDataGridSelectionModeConverter.cs" />
     <Compile Include="Converters\BooleanToVisibilityConverter.cs" />
     <Compile Include="Converters\EnumerableEmptyVisibilityConverter.cs" />
     <Compile Include="Converters\InvertedEnumerableEmptyVisibilityConverter.cs" />
     <Compile Include="Converters\PathExistsConverter.cs" />
     <Compile Include="EventArgs\DialogMessageActionHandledEventArgs.cs" />
-    <Compile Include="Controls\Dialogs\DialogMessageBox\ViewModels\DialogMessageActionViewModel.cs" />
-    <Compile Include="Controls\Dialogs\DialogMessageBox\DialogMessageBox.xaml.cs">
+    <Compile Include="Dialogs\DialogMessageBox\ViewModels\DialogMessageActionViewModel.cs" />
+    <Compile Include="Dialogs\DialogMessageBox\DialogMessageBox.xaml.cs">
       <DependentUpon>DialogMessageBox.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Controls\Dialogs\DialogMessageBox\ViewModels\DialogMessageViewModel.cs" />
-    <Compile Include="Design\DesignTimeVM.cs" />
+    <Compile Include="Dialogs\DialogMessageBox\ViewModels\DialogMessageViewModel.cs" />
     <Compile Include="Framework\Implementations\DefaultWPFBrowseUIManager.cs" />
     <Compile Include="Framework\Implementations\DefaultWPFMessageUIManager.cs" />
     <Compile Include="Framework\WPFRegistryPaths.cs" />
@@ -133,7 +134,10 @@
     <Compile Include="Helpers\WPFTraceListener.cs" />
     <Compile Include="Controls\BrowseBox\BrowseBoxValidationRule.cs" />
     <Compile Include="Controls\BrowseBox\BrowseValidationRuleData.cs" />
-    <Compile Include="ViewModels\LogViewerViewModel.cs" />
+    <Compile Include="Dialogs\LogViewer\LogViewer.xaml.cs">
+      <DependentUpon>LogViewer.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Dialogs\LogViewer\LogViewerViewModel.cs" />
     <Compile Include="ValidationRules\Files and Directories\DirectoryExistsAndNotEmptyValidationRule.cs" />
     <Compile Include="ValidationRules\Files and Directories\DirectoryExistsValidationRule.cs" />
     <Compile Include="ValidationRules\Files and Directories\FileExistsAndNotEmptyValidationRule.cs" />
@@ -142,7 +146,6 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Controls\AlignableWrapPanel.cs" />
-    <Compile Include="Controls\IntTextBox.cs" />
     <Compile Include="Controls\RadioButtonExtended.cs" />
     <Compile Include="Converters\BitmapToImageSourceConverter.cs" />
     <Compile Include="Converters\BooleanAndConverter.cs" />
@@ -165,21 +168,33 @@
     <None Include="app.config" />
   </ItemGroup>
   <ItemGroup>
-    <Page Include="Controls\Dialogs\DialogMessageBox\DialogMessageBox.xaml">
+    <Page Include="Dialogs\DialogMessageBox\DialogMessageBox.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
-    <Page Include="Controls\Dialogs\DriveSelectionDialog\DriveSelectionDialog.xaml">
+    <Page Include="Dialogs\DriveSelectionDialog\DriveSelectionDialog.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Controls\Dialogs\RegistryBrowser\RegistrySelectionDialog.xaml">
-      <SubType>Designer</SubType>
+    <Page Include="Dialogs\RegistryBrowser\RegistrySelectionDialog.xaml">
       <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
     </Page>
-    <Page Include="Controls\Dialogs\StringInputDialog\StringInputDialog.xaml">
+    <Page Include="Dialogs\StringInputDialog\StringInputDialog.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Dialogs\LogViewer\LogViewer.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Styles\Common.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Styles\Controls.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Themes\Generic.xaml">
       <Generator>MSBuild:Compile</Generator>
@@ -189,13 +204,7 @@
   <ItemGroup>
     <Resource Include="FodyWeavers.xml" />
   </ItemGroup>
-  <ItemGroup>
-    <Resource Include="Controls\Dialogs\RegistryBrowser\Icons\Folder.png" />
-    <Resource Include="Controls\Dialogs\RegistryBrowser\Icons\Hidden Folder.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Controls\Registry\" />
-  </ItemGroup>
+  <ItemGroup />
   <ItemGroup>
     <PackageReference Include="Microsoft-WindowsAPICodePack-Shell">
       <Version>1.1.3.3</Version>
@@ -209,14 +218,11 @@
     <PackageReference Include="PropertyChanged.Fody">
       <Version>3.1.3</Version>
     </PackageReference>
-    <PackageReference Include="RayCarrot.CarrotFramework">
-      <Version>3.1.1</Version>
-    </PackageReference>
     <PackageReference Include="RayCarrot.CarrotFramework.Abstractions">
-      <Version>1.1.3</Version>
+      <Version>1.4.0</Version>
     </PackageReference>
     <PackageReference Include="RayCarrot.IO">
-      <Version>1.1.7</Version>
+      <Version>1.2.2</Version>
     </PackageReference>
     <PackageReference Include="RayCarrot.UI">
       <Version>1.1.4</Version>
@@ -230,6 +236,12 @@
       <Project>{55f49d1e-c9bd-4cc4-9ff0-d646d9f42a21}</Project>
       <Name>RayCarrot.Windows.Shell</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Dialogs\RegistryBrowser\Icons\Folder.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Dialogs\RegistryBrowser\Icons\Hidden Folder.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

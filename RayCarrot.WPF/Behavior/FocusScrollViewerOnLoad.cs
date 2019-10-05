@@ -6,7 +6,7 @@ using System.Windows.Media;
 namespace RayCarrot.WPF
 {
     /// <summary>
-    /// Focuses on parent <see cref="ScrollViewer"/> on load
+    /// Behavior for focusing the parent <see cref="ScrollViewer"/> on load
     /// </summary>
     public class FocusScrollViewerOnLoad : Behavior<FrameworkElement>
     {

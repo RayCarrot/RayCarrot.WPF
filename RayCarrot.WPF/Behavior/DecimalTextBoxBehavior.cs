@@ -3,22 +3,27 @@ using System.Globalization;
 using System.Linq;
 using System.Threading;
 using System.Windows.Controls;
+using Microsoft.Xaml.Behaviors;
 using RayCarrot.Extensions;
 
 namespace RayCarrot.WPF
 {
-    // TODO: Move to behavior
     /// <summary>
-    /// A <see cref="TextBox"/> which only accepts decimals
+    /// Behavior for a <see cref="TextBox"/> which limits it to only accept decimals
     /// </summary>
-    public class DecimalTextBox : TextBox
+    public class DecimalTextBoxBehavior : Behavior<TextBox>
     {
-        #region Constructor
+        #region Overrides
 
-        public DecimalTextBox()
+        protected override void OnAttached()
         {
-            TextChanged += IntTextBox_TextChanged;
-            MaxLength = 9;
+            AssociatedObject.TextChanged += IntTextBox_TextChanged;
+            AssociatedObject.MaxLength = 9;
+        }
+
+        protected override void OnDetaching()
+        {
+            AssociatedObject.TextChanged -= IntTextBox_TextChanged;
         }
 
         #endregion
@@ -33,11 +38,14 @@ namespace RayCarrot.WPF
 
         private void IntTextBox_TextChanged(object sender, TextChangedEventArgs e)
         {
-            var caretIndex = CaretIndex;
+            // Save the caret index
+            var caretIndex = AssociatedObject.CaretIndex;
 
+            // Refresh the value
             Value = Value;
 
-            CaretIndex = caretIndex;
+            // Restore the caret index
+            AssociatedObject.CaretIndex = caretIndex;
         }
 
         #endregion
@@ -53,11 +61,11 @@ namespace RayCarrot.WPF
             {
                 var separator = Thread.CurrentThread.CurrentCulture.NumberFormat.NumberDecimalSeparator;
 
-                var text = Text;
+                var text = AssociatedObject.Text;
 
                 var indexes = text.AllIndexesOf(separator).ToArray();
 
-                var caretIndex = CaretIndex;
+                var caretIndex = AssociatedObject.CaretIndex;
 
                 if (indexes.Any())
                 {
@@ -84,7 +92,7 @@ namespace RayCarrot.WPF
             set
             {
                 _lastValue = value;
-                Text = value.ToString(CultureInfo.CurrentCulture);
+                AssociatedObject.Text = value.ToString(CultureInfo.CurrentCulture);
             }
         }
 
