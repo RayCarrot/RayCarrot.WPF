@@ -148,7 +148,7 @@ namespace RayCarrot.WPF
 
         #region Event Handlers
 
-        private async void Continue_Click(object sender, RoutedEventArgs e)
+        private async void Continue_ClickAsync(object sender, RoutedEventArgs e)
         {
             await AttemptConfirmAsync();
         }
@@ -159,7 +159,7 @@ namespace RayCarrot.WPF
             CloseDialog?.Invoke(this, new EventArgs());
         }
 
-        private async void DataGrid_KeyDown(object sender, KeyEventArgs e)
+        private async void DataGrid_KeyDownAsync(object sender, KeyEventArgs e)
         {
             if (e.Key == Key.Enter)
             {
@@ -168,7 +168,13 @@ namespace RayCarrot.WPF
             }
         }
 
-        private async void UserControl_Loaded(object sender, RoutedEventArgs e)
+        private async void DataGridRow_OnHandlerAsync(object sender, MouseButtonEventArgs e)
+        {
+            e.Handled = true;
+            await AttemptConfirmAsync();
+        }
+
+        private async void UserControl_LoadedAsync(object sender, RoutedEventArgs e)
         {
             await DriveSelectionVM.RefreshAsync();
         }

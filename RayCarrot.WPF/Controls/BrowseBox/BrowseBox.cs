@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -280,9 +281,9 @@ namespace RayCarrot.WPF
                 return;
 
             // Get the path
-            FileSystemPath filePath = ((string[])e.Data.GetData(DataFormats.FileDrop))[0];
+            FileSystemPath filePath = (e.Data.GetData(DataFormats.FileDrop) as string[])?.FirstOrDefault() ?? FileSystemPath.EmptyPath;
 
-            // Get the the target if it's a shortcut
+            // Get the target if it's a shortcut
             if (filePath.FullPath.EndsWith(".lnk"))
                 filePath = WindowsHelpers.GetShortCutTarget(filePath);
 
@@ -381,7 +382,7 @@ namespace RayCarrot.WPF
             set => SetValue(InitialFileDirectoryProperty, value);
         }
 
-        public static readonly DependencyProperty InitialFileDirectoryProperty = DependencyProperty.Register(nameof(InitialLocation), typeof(string), typeof(BrowseBox), new FrameworkPropertyMetadata(Environment.GetFolderPath(Environment.SpecialFolder.MyComputer), FrameworkPropertyMetadataOptions.BindsTwoWayByDefault));
+        public static readonly DependencyProperty InitialFileDirectoryProperty = DependencyProperty.Register(nameof(InitialLocation), typeof(string), typeof(BrowseBox), new FrameworkPropertyMetadata(Environment.SpecialFolder.MyComputer.GetFolderPath().FullPath, FrameworkPropertyMetadataOptions.BindsTwoWayByDefault));
 
         #endregion
 
@@ -411,7 +412,7 @@ namespace RayCarrot.WPF
             set => SetValue(BrowseTypeProperty, value);
         }
 
-        public static readonly DependencyProperty BrowseTypeProperty = DependencyProperty.Register(nameof(BrowseType), typeof(BrowseTypes), typeof(BrowseBox), new FrameworkPropertyMetadata(BrowseTypes.File, FrameworkPropertyMetadataOptions.BindsTwoWayByDefault));
+        public static readonly DependencyProperty BrowseTypeProperty = DependencyProperty.Register(nameof(BrowseType), typeof(BrowseTypes), typeof(BrowseBox), new FrameworkPropertyMetadata(BrowseTypes.File));
 
         #endregion
 
@@ -426,7 +427,7 @@ namespace RayCarrot.WPF
             set => SetValue(AllowedDriveTypesProperty, value);
         }
 
-        public static readonly DependencyProperty AllowedDriveTypesProperty = DependencyProperty.Register(nameof(AllowedDriveTypes), typeof(IEnumerable<DriveType>), typeof(BrowseBox), new FrameworkPropertyMetadata(null, FrameworkPropertyMetadataOptions.BindsTwoWayByDefault));
+        public static readonly DependencyProperty AllowedDriveTypesProperty = DependencyProperty.Register(nameof(AllowedDriveTypes), typeof(IEnumerable<DriveType>), typeof(BrowseBox));
 
         #endregion
 

@@ -32,7 +32,7 @@ namespace RayCarrot.WPF
         /// <returns></returns>
         public override object ProvideValue(IServiceProvider serviceProvider)
         {
-            return _converter ?? (_converter = new T());
+            return _converter ??= new T();
         }
 
         #endregion
@@ -59,7 +59,7 @@ namespace RayCarrot.WPF
         /// <returns></returns>
         public virtual object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            throw new NotImplementedException();
+            throw new Exception("The ConvertBack method has not been implemented for this converter");
         }
 
         #endregion
@@ -106,7 +106,7 @@ namespace RayCarrot.WPF
 
         public virtual TValue1 ConvertValueBack(TValue2 value, Type targetType, object parameter, CultureInfo culture)
         {
-            throw new NotImplementedException();
+            throw new Exception("The ConvertBack method has not been implemented for this converter");
         }
 
         #endregion
@@ -166,7 +166,7 @@ namespace RayCarrot.WPF
 
         public virtual TValue1 ConvertValueBack(TValue2 value, Type targetType, TParamater parameter, CultureInfo culture)
         {
-            throw new NotImplementedException();
+            throw new Exception("The ConvertBack method has not been implemented for this converter");
         }
 
         #endregion

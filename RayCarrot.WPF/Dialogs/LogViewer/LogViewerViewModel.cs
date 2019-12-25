@@ -1,8 +1,8 @@
 ﻿using System;
 using Microsoft.Extensions.Logging;
-using RayCarrot.CarrotFramework;
 using System.Collections.ObjectModel;
 using System.Linq;
+using System.Windows.Input;
 using RayCarrot.CarrotFramework.Abstractions;
 using RayCarrot.Extensions;
 using RayCarrot.UI;
@@ -24,6 +24,10 @@ namespace RayCarrot.WPF
             // Set a default title
             Title = "Log Viewer";
 
+            // Create commands
+            RefreshDisplayLogCommand = new RelayCommand(RefreshDisplayLog);
+            ClearLogCommand = new RelayCommand(ClearLog);
+
             // Refresh the logs
             RefreshDisplayLog();
 
@@ -33,7 +37,7 @@ namespace RayCarrot.WPF
 
         #endregion
 
-        #region Methods
+        #region Public Methods
 
         /// <summary>
         /// Refreshes the display log
@@ -53,13 +57,25 @@ namespace RayCarrot.WPF
             }
         }
 
+        /// <summary>
+        /// Clears the log
+        /// </summary>
+        public void ClearLog()
+        {
+            lock (this)
+            {
+                RCFCore.Logs?.Clear();
+                DisplayLog.Clear();
+            }
+        }
+
         #endregion
 
         #region Commands
 
-        private RelayCommand _RefreshDisplayLogCommand;
+        public ICommand RefreshDisplayLogCommand { get; }
 
-        public RelayCommand RefreshDisplayLogCommand => _RefreshDisplayLogCommand ?? (_RefreshDisplayLogCommand = new RelayCommand(RefreshDisplayLog));
+        public ICommand ClearLogCommand { get; }
 
         #endregion
 

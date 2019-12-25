@@ -6,7 +6,6 @@ using System.Windows.Interop;
 using RayCarrot.CarrotFramework.Abstractions;
 using RayCarrot.Extensions;
 using RayCarrot.UI;
-using RayCarrot.Windows.Shell;
 
 namespace RayCarrot.WPF
 {
@@ -36,7 +35,7 @@ namespace RayCarrot.WPF
                     throw new Exception("A dialog can not be created before the application has been loaded");
 
                 // Run on UI thread
-                dispatcher.Invoke(() =>
+                return dispatcher.Invoke(() =>
                 {
                     // Create the window
                     var window = GetWindow();
@@ -57,10 +56,10 @@ namespace RayCarrot.WPF
 
                     // Unsubscribe
                     dialog.CloseDialog -= Dialog_CloseDialog;
-                });
 
-                // Return the result
-                return Task.FromResult(dialog.GetResult());
+                    // Return the result
+                    return Task.FromResult(dialog.GetResult());
+                });
             }
         }
 
@@ -70,32 +69,35 @@ namespace RayCarrot.WPF
         /// <typeparam name="VM">The view model</typeparam>
         /// <param name="windowContent">The window content to show</param>
         /// <param name="owner">The owner window</param>
-        /// <returns>The result</returns>
-        public Task ShowWindowAsync<VM>(IWindowBaseControl<VM> windowContent, object owner)
+        /// <returns>The window</returns>
+        public Task<Window> ShowWindowAsync<VM>(IWindowBaseControl<VM> windowContent, object owner)
             where VM : UserInputViewModel
         {
-            // Get the dispatcher
-            var dispatcher = Application.Current.Dispatcher;
-
-            // Make sure the dispatcher is not null
-            if (dispatcher == null)
-                throw new Exception("A dialog can not be created before the application has been loaded");
-
-            // Run on UI thread
-            dispatcher.Invoke(() =>
+            lock (Application.Current)
             {
-                // Create the window
-                var window = GetWindow();
+                // Get the dispatcher
+                var dispatcher = Application.Current.Dispatcher;
 
-                // Configure the window
-                ConfigureWindow(window, windowContent, owner);
+                // Make sure the dispatcher is not null
+                if (dispatcher == null)
+                    throw new Exception("A dialog can not be created before the application has been loaded");
 
-                // Show the window
-                WindowHelpers.ShowWindow(window, WindowHelpers.ShowWindowFlags.DuplicatesAllowed, window.GetType().FullName);
-            });
+                // Run on UI thread
+                return Task.FromResult(dispatcher.Invoke(() =>
+                {
+                    // Create the window
+                    var window = GetWindow();
 
-            // Return
-            return Task.CompletedTask;
+                    // Configure the window
+                    ConfigureWindow(window, windowContent, owner);
+
+                    // Show the window
+                    WindowHelpers.ShowWindow(window, WindowHelpers.ShowWindowFlags.DuplicatesAllowed, windowContent.GetType().FullName);
+
+                    // Return the window
+                    return window;
+                }));
+            }
         }
 
         /// <summary>
@@ -111,7 +113,7 @@ namespace RayCarrot.WPF
             // Set window properties
             window.Content = windowContent.UIContent;
             window.ResizeMode = windowContent.Resizable ? ResizeMode.CanResize : ResizeMode.NoResize;
-            window.Title = windowContent.ViewModel.Title;
+            window.Title = windowContent.ViewModel.Title ?? String.Empty;
             window.SizeToContent = windowContent.Resizable ? SizeToContent.Manual : SizeToContent.WidthAndHeight;
 
             // Set size properties

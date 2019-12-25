@@ -32,7 +32,7 @@
                                         <Binding.ValidationRules>
                                             <local:BrowseBoxValidationRule ValidatesOnTargetUpdated="True">
                                                 <local:BrowseBoxValidationRule.ValidationData>
-                                                    <local:BrowseValidationRuleData ValidationRule="{Binding Path=Data.PathValidation, Source={StaticResource proxy}}" />
+                                                    <local:BrowseValidationRuleData ValidationRule="{Binding Path=Data.(local:BrowseBox.PathValidation), Source={StaticResource proxy}}" />
                                                 </local:BrowseBoxValidationRule.ValidationData>
                                             </local:BrowseBoxValidationRule>
                                         </Binding.ValidationRules>

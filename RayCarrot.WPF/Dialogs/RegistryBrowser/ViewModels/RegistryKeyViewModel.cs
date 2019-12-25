@@ -420,9 +420,10 @@ namespace RayCarrot.WPF
                         await ExpandAsync();
 
                     // Get this key
-                    using (var key = GetKey(true))
-                        // Create the sub key
-                        key.CreateSubKey(name + keyNum)?.Dispose();
+                    using var key = GetKey(true);
+                    
+                    // Create the sub key
+                    key.CreateSubKey(name + keyNum)?.Dispose();
                 }
                 catch (Exception ex)
                 {
@@ -549,7 +550,7 @@ namespace RayCarrot.WPF
         /// <returns>The task</returns>
         protected async Task ResetAsync()
         {
-            await Task.Run(() => Reset());
+            await Task.Run(Reset);
         }
 
         /// <summary>
@@ -602,56 +603,56 @@ namespace RayCarrot.WPF
         /// <summary>
         /// Command for adding the key to the favorites
         /// </summary>
-        public AsyncRelayCommand AddFavoritesCommand => _AddFavoritesCommand ?? (_AddFavoritesCommand = new AsyncRelayCommand(AddFavoritesAsync));
+        public AsyncRelayCommand AddFavoritesCommand => _AddFavoritesCommand ??= new AsyncRelayCommand(AddFavoritesAsync);
 
         private AsyncRelayCommand _OpenInRegeditCommand;
 
         /// <summary>
         /// Command for opening the key in RegEdit
         /// </summary>
-        public AsyncRelayCommand OpenInRegeditCommand => _OpenInRegeditCommand ?? (_OpenInRegeditCommand = new AsyncRelayCommand(OpenInRegeditAsync));
+        public AsyncRelayCommand OpenInRegeditCommand => _OpenInRegeditCommand ??= new AsyncRelayCommand(OpenInRegeditAsync);
 
         private AsyncRelayCommand _LoadSubItemsCommand;
 
         /// <summary>
         /// Command for loading all sub items
         /// </summary>
-        public AsyncRelayCommand LoadSubItemsCommand => _LoadSubItemsCommand ?? (_LoadSubItemsCommand = new AsyncRelayCommand(LoadSubItemsAsync));
+        public AsyncRelayCommand LoadSubItemsCommand => _LoadSubItemsCommand ??= new AsyncRelayCommand(LoadSubItemsAsync);
 
         private AsyncRelayCommand _ResetCommand;
 
         /// <summary>
         /// Command for resetting the collection of sub keys
         /// </summary>
-        public AsyncRelayCommand ResetCommand => _ResetCommand ?? (_ResetCommand = new AsyncRelayCommand(ResetAsync));
+        public AsyncRelayCommand ResetCommand => _ResetCommand ??= new AsyncRelayCommand(ResetAsync);
 
         private AsyncRelayCommand _RenameCommand;
 
         /// <summary>
         /// Command for renaming the key
         /// </summary>
-        public AsyncRelayCommand RenameCommand => _RenameCommand ?? (_RenameCommand = new AsyncRelayCommand(RenameAsync, CanEditKey));
+        public AsyncRelayCommand RenameCommand => _RenameCommand ??= new AsyncRelayCommand(RenameAsync, CanEditKey);
 
         private AsyncRelayCommand _AddSubKeyCommand;
 
         /// <summary>
         /// Command for adding a new sub key
         /// </summary>
-        public AsyncRelayCommand AddSubKeyCommand => _AddSubKeyCommand ?? (_AddSubKeyCommand = new AsyncRelayCommand(AddSubKeyAsync, CanAddSubKey));
+        public AsyncRelayCommand AddSubKeyCommand => _AddSubKeyCommand ??= new AsyncRelayCommand(AddSubKeyAsync, CanAddSubKey);
 
         private AsyncRelayCommand _DeleteCommand;
 
         /// <summary>
         /// Command for deleting the key
         /// </summary>
-        public AsyncRelayCommand DeleteCommand => _DeleteCommand ?? (_DeleteCommand = new AsyncRelayCommand(DeleteKeyAsync, CanEditKey));
+        public AsyncRelayCommand DeleteCommand => _DeleteCommand ??= new AsyncRelayCommand(DeleteKeyAsync, CanEditKey);
 
         private RelayCommand _CopyKeyNameCommand;
 
         /// <summary>
         /// Command for copying the key name
         /// </summary>
-        public RelayCommand CopyKeyNameCommand => _CopyKeyNameCommand ?? (_CopyKeyNameCommand = new RelayCommand(CopyKeyName));
+        public RelayCommand CopyKeyNameCommand => _CopyKeyNameCommand ??= new RelayCommand(CopyKeyName);
 
         #endregion
     }

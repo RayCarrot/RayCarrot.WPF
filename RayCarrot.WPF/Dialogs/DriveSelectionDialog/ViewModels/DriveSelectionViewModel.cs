@@ -163,12 +163,10 @@ namespace RayCarrot.WPF
 
                             try
                             {
-                                using (var shellObj = ShellObject.FromParsingName(path))
-                                {
-                                    var thumb = shellObj.Thumbnail;
-                                    thumb.CurrentSize = new System.Windows.Size(16, 16);
-                                    icon = thumb.GetTransparentBitmap();
-                                }
+                                using var shellObj = ShellObject.FromParsingName(path);
+                                var thumb = shellObj.Thumbnail;
+                                thumb.CurrentSize = new System.Windows.Size(16, 16);
+                                icon = thumb.GetTransparentBitmap();
                             }
                             catch (Exception ex)
                             {
@@ -263,7 +261,7 @@ namespace RayCarrot.WPF
         /// <summary>
         /// A command for <see cref="RefreshAsync"/>
         /// </summary>
-        public ICommand RefreshCommand => _RefreshCommand ?? (_RefreshCommand = new AsyncRelayCommand(RefreshAsync));
+        public ICommand RefreshCommand => _RefreshCommand ??= new AsyncRelayCommand(RefreshAsync);
 
         #endregion
     }

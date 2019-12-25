@@ -45,7 +45,7 @@ namespace RayCarrot.WPF
         /// <summary>
         /// Command for when the user selects this action
         /// </summary>
-        public ICommand ActionCommand => _ActionCommand ?? (_ActionCommand = new RelayCommand(HandleAction));
+        public ICommand ActionCommand => _ActionCommand ??= new RelayCommand(HandleAction);
 
         #endregion
 

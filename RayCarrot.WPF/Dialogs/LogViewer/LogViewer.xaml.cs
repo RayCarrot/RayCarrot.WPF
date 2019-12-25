@@ -1,14 +1,11 @@
-﻿using System;
+﻿using RayCarrot.CarrotFramework.Abstractions;
+using RayCarrot.Extensions;
+using RayCarrot.UI;
+using System;
 using System.ComponentModel;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
-using RayCarrot.CarrotFramework;
-using RayCarrot.CarrotFramework.Abstractions;
-using RayCarrot.Extensions;
-using RayCarrot.UI;
-using RayCarrot.Windows.Registry;
-using RayCarrot.WPF;
 
 namespace RayCarrot.WPF
 {
@@ -89,10 +86,14 @@ namespace RayCarrot.WPF
             MainScrollViewer.ScrollToBottom();
 
             // Scroll to bottom when a new log is added
-            RCFCore.Logs.LogAdded += (ss, ee) => Dispatcher?.Invoke(() => MainScrollViewer.ScrollToBottom());
+            RCFCore.Logs.LogAdded += async (ss, ee) =>
+            {
+                if (Dispatcher != null) 
+                    await Dispatcher.InvokeAsync(() => MainScrollViewer.ScrollToBottom());
+            };
         }
 
-        private void Button_Click(object sender, RoutedEventArgs e)
+        private void ButtonCopyToClipboard_Click(object sender, RoutedEventArgs e)
         {
             Clipboard.SetText(ViewModel.DisplayLog.Select(x => x.Message).JoinItems(Environment.NewLine));
         }
@@ -104,7 +105,9 @@ namespace RayCarrot.WPF
         /// <summary>
         /// Invoke to request the dialog to close
         /// </summary>
+        #pragma warning disable 67
         public event EventHandler CloseDialog;
+        #pragma warning restore 67
 
         #endregion
     }

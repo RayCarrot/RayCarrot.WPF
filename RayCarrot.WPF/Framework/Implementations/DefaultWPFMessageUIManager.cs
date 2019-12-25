@@ -32,10 +32,11 @@ namespace RayCarrot.WPF
             if (LogRequests)
                 RCFCore.Logger?.LogTraceSource($"A message was displayed with the content of: {message}", origin: origin, filePath: filePath, lineNumber: lineNumber);
 
-            MessageBoxImage image = MessageBoxImage.None;
+            MessageBoxImage image;
 
             switch (messageType)
             {
+                default:
                 case MessageType.Generic:
                     image = MessageBoxImage.None;
                     break;
@@ -61,7 +62,6 @@ namespace RayCarrot.WPF
                     break;
             }
 
-            // TODO: Run on UI thread?
             var result = MessageBox.Show(message, header, allowCancel ? MessageBoxButton.OKCancel : MessageBoxButton.OK, image);
 
             return Task.FromResult(!allowCancel || result == MessageBoxResult.OK);

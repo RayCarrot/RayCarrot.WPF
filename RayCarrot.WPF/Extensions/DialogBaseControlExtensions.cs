@@ -1,4 +1,5 @@
 ﻿using System.Threading.Tasks;
+using System.Windows;
 using RayCarrot.UI;
 
 namespace RayCarrot.WPF
@@ -44,11 +45,11 @@ namespace RayCarrot.WPF
         /// <typeparam name="VM">The view model type</typeparam>
         /// <param name="window">The window content to show</param>
         /// <param name="owner">The owner window</param>
-        /// <returns>The task</returns>
-        public static async Task ShowWindowAsync<VM>(this IWindowBaseControl<VM> window, object owner = null)
+        /// <returns>The window</returns>
+        public static Task<Window> ShowWindowAsync<VM>(this IWindowBaseControl<VM> window, object owner = null)
             where VM : UserInputViewModel
         {
-            await RCFWPF.DialogBaseManager.ShowWindowAsync(window, owner);
+            return RCFWPF.DialogBaseManager.ShowWindowAsync(window, owner);
         }
 
         /// <summary>
@@ -58,12 +59,12 @@ namespace RayCarrot.WPF
         /// <typeparam name="V">The view model type</typeparam>
         /// <param name="window">The window content to show</param>
         /// <param name="owner">The owner window</param>
-        /// <returns>The task</returns>
-        public static async Task ShowWindowAsync<D, V>(this IWindowBaseControl<V> window, object owner = null)
+        /// <returns>The window</returns>
+        public static Task<Window> ShowWindowAsync<D, V>(this IWindowBaseControl<V> window, object owner = null)
             where D : IDialogBaseManager, new()
             where V : UserInputViewModel
         {
-            await new D().ShowWindowAsync(window, owner);
+            return new D().ShowWindowAsync(window, owner);
         }
     }
 }

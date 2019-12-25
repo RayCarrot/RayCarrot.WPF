@@ -46,8 +46,7 @@ namespace RayCarrot.WPF
 
         private void VMUserControl_Loaded(object sender, RoutedEventArgs e)
         {
-            if (ViewModel is IDisposable disposable)
-                Closed += (ss, ee) => disposable?.Dispose();
+            Closed += (ss, ee) => (ViewModel as IDisposable)?.Dispose();
         }
 
         #endregion

@@ -1,10 +1,10 @@
-﻿using Microsoft.Win32;
+﻿using System;
+using Microsoft.Win32;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using System.Windows;
 using Microsoft.WindowsAPICodePack.Dialogs;
-using Microsoft.WindowsAPICodePack.Shell;
 using RayCarrot.CarrotFramework.Abstractions;
 using RayCarrot.Extensions;
 using RayCarrot.IO;
@@ -35,36 +35,36 @@ namespace RayCarrot.WPF
             if (LogRequests)
                 RCFCore.Logger?.LogTraceSource($"A browse directory dialog was opened with the title of: {directoryBrowserModel.Title}", origin: origin, filePath: filePath, lineNumber: lineNumber);
 
-            using (var dialog = new CommonOpenFileDialog())
+            using var dialog = new CommonOpenFileDialog
             {
-                dialog.Title = directoryBrowserModel.Title;
-                dialog.AllowNonFileSystemItems = false;
-                dialog.IsFolderPicker = true;
-                dialog.Multiselect = directoryBrowserModel.MultiSelection;
-                dialog.InitialDirectory = directoryBrowserModel.DefaultDirectory;
-                dialog.DefaultFileName = directoryBrowserModel.DefaultName;
-                dialog.EnsureFileExists = true;
-                dialog.EnsurePathExists = true;
-                
-                // Show the dialog
-                var dialogResult = dialog.ShowDialog(Application.Current.Windows.Cast<Window>().FindItem(x => x.IsActive));
+                Title = directoryBrowserModel.Title,
+                AllowNonFileSystemItems = false,
+                IsFolderPicker = true,
+                Multiselect = directoryBrowserModel.MultiSelection,
+                InitialDirectory = directoryBrowserModel.DefaultDirectory,
+                DefaultFileName = directoryBrowserModel.DefaultName,
+                EnsureFileExists = true,
+                EnsurePathExists = true
+            };
 
-                var result = dialogResult != CommonFileDialogResult.Ok ? new DirectoryBrowserResult()
-                {
-                    CanceledByUser = true
-                } : new DirectoryBrowserResult()
-                {
-                    CanceledByUser = false,
-                    SelectedDirectory = dialog.FileName,
-                    SelectedDirectories = dialog.FileNames.Select(x => new FileSystemPath(x))
-                };
+            // Show the dialog
+            var dialogResult = dialog.ShowDialog(Application.Current.Windows.Cast<Window>().FindItem(x => x.IsActive));
 
-                RCFCore.Logger?.LogTraceSource(result.CanceledByUser
-                    ? "The browse directory dialog was canceled by the user"
-                    : $"The browse directory dialog returned the selected directory paths {result.SelectedDirectories.JoinItems(", ")}");
+            var result = dialogResult != CommonFileDialogResult.Ok ? new DirectoryBrowserResult()
+            {
+                CanceledByUser = true
+            } : new DirectoryBrowserResult()
+            {
+                CanceledByUser = false,
+                SelectedDirectory = dialog.FileName,
+                SelectedDirectories = dialog.FileNames.Select(x => new FileSystemPath(x))
+            };
 
-                return Task.FromResult(result);
-            }
+            RCFCore.Logger?.LogTraceSource(result.CanceledByUser
+                ? "The browse directory dialog was canceled by the user"
+                : $"The browse directory dialog returned the selected directory paths {result.SelectedDirectories.JoinItems(", ")}");
+
+            return Task.FromResult(result);
         }
 
         /// <summary>
@@ -154,6 +154,9 @@ namespace RayCarrot.WPF
         /// <returns>The browse drive result</returns>
         public virtual async Task<DriveBrowserResult> BrowseDriveAsync(DriveBrowserViewModel driveBrowserModel, [CallerMemberName] string origin = "", [CallerFilePath] string filePath = "", [CallerLineNumber] int lineNumber = 0)
         {
+            if (Application.Current.Dispatcher == null)
+                throw new Exception("A drive selection dialog can not be shown when the application dispatcher is null");
+
             if (LogRequests)
                 RCFCore.Logger?.LogTraceSource($"A browse drive dialog was opened with the title of: {driveBrowserModel.Title}", origin: origin, filePath: filePath, lineNumber: lineNumber);
 

@@ -21,6 +21,7 @@
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
 
             <WrapPanel Orientation="Horizontal">
@@ -54,10 +55,17 @@
 
             </WrapPanel>
 
-            <Button Click="Button_Click"
+            <Button Command="{Binding Path=ClearLogCommand}"
                     Grid.Column="1"
-                    Content="Copy log to clipboard"
+                    Content="Clear"
+                    VerticalAlignment="Center"
+                    Margin="0 0 10 0"/>
+
+            <Button Click="ButtonCopyToClipboard_Click"
+                    Grid.Column="2"
+                    Content="Copy to clipboard"
                     VerticalAlignment="Center"/>
+
         </Grid>
 
         <!-- Log List -->
@@ -69,7 +77,7 @@
                 <ItemsControl.ItemTemplate>
                     <DataTemplate>
                         <TextBlock Text="{Binding Path=Message, Mode=OneTime}"
-                                   Foreground="{Binding Path=LogLevel, Converter={local:LogTypeToBrushConverter}, Mode=OneTime}"
+                                   Foreground="{Binding Path=LogLevel, Converter={local:LogLevelToBrushConverter}, Mode=OneTime}"
                                    Margin="5"
                                    TextWrapping="Wrap"/>
                     </DataTemplate>

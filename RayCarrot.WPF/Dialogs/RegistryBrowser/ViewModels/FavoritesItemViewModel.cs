@@ -59,7 +59,7 @@ namespace RayCarrot.WPF
         /// <summary>
         /// Command for navigating to this favorites item
         /// </summary>
-        public AsyncRelayCommand NavigateCommand => _NavigateCommand ?? (_NavigateCommand = new AsyncRelayCommand(NavigateAsync));
+        public AsyncRelayCommand NavigateCommand => _NavigateCommand ??= new AsyncRelayCommand(NavigateAsync);
 
         #endregion
     }

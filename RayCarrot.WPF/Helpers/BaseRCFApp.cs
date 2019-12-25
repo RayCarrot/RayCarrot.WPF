@@ -1,5 +1,4 @@
 ﻿using Microsoft.Extensions.Logging;
-using RayCarrot.CarrotFramework;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -305,7 +304,7 @@ namespace RayCarrot.WPF
                 if (RCF.IsBuilt)
                 {
                     // Handle the exception
-                    e.Exception.HandleCritical("Unhandled exception");
+                    e?.Exception?.HandleCritical("Unhandled exception");
 
                     RCFCore.Logger?.LogCriticalSource("An unhandled exception has occurred");
                 }
@@ -314,7 +313,11 @@ namespace RayCarrot.WPF
                 FileSystemPath logPath = Path.Combine(Directory.GetCurrentDirectory(), "crashlog.txt");
 
                 // Write log
-                File.WriteAllLines(logPath, RCFCore.Logs?.GetLogs().Select(x => $"[{x.LogLevel}] {x.Message}") ?? new string[] { "Service not available" });
+                File.WriteAllLines(logPath, RCFCore.Logs?.GetLogs().Select(x => $"[{x.LogLevel}] {x.Message}") ?? new string[]
+                {
+                    "Service not available",
+                    e?.Exception?.ToString()
+                });
 
                 // Notify user
                 MessageBox.Show($"The application crashed with the following exception message:{Environment.NewLine}{e.Exception.Message}{Environment.NewLine}{Environment.NewLine}{Environment.NewLine}" +
@@ -362,10 +365,13 @@ namespace RayCarrot.WPF
             using (await StartupEventsCalledAsyncLock.LockAsync())
             {
                 // Call all startup events
-                await (LocalStartupComplete?.RaiseAsync(this, new EventArgs()) ?? Task.CompletedTask);
+                await (LocalStartupComplete?.RaiseAllAsync(this, EventArgs.Empty) ?? Task.CompletedTask);
 
                 // Remove events as they'll not get called again
                 LocalStartupComplete = null;
+
+                // Inform that startup events have run
+                StartupEventsCompleted?.Invoke(this, EventArgs.Empty);
 
                 HasRunStartupEvents = true;
             }
@@ -379,62 +385,21 @@ namespace RayCarrot.WPF
 
         private async void MainWindow_ClosingAsync(object sender, CancelEventArgs e)
         {
+            // If ran RCF closing, ignore
             if (DoneClosing)
                 return;
 
+            // Cancel the native closing
             e.Cancel = true;
 
+            // If already is closing, ignore
             if (IsClosing)
                 return;
 
-            IsClosing = true;
-
             RCFCore.Logger?.LogInformationSource("The main window is closing...");
 
-            try
-            {
-                // Get the main window
-                var mainWindow = sender as Window ?? MainWindow;
-
-                // Attempt to close all other windows
-                foreach (Window window in Windows)
-                {
-                    if (window == mainWindow)
-                        continue;
-
-                    window.Focus();
-                    window.Close();
-                }
-
-                // Make sure all other windows have been closed
-                if (Windows.Count > 1)
-                {
-                    RCFCore.Logger?.LogInformationSource("The shutdown was cancelled due to one or more windows still being open");
-
-                    IsClosing = false;
-                    return;
-                }
-
-                await OnCloseAsync(mainWindow);
-
-                DoneClosing = true;
-
-                // Close application
-                Shutdown();
-            }
-            catch (Exception ex)
-            {
-                // Attempt to log the exception, ignoring any exceptions thrown
-                new Action(() => ex.HandleError("Closing main window")).IgnoreIfException();
-
-                // Notify the user of the error
-                MessageBox.Show($"An error occured when shutting down the application. Error message: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
-
-                DoneClosing = true;
-
-                // Close application
-                Shutdown();
-            }
+            // Shut down the app
+            await ShutdownRCFAppAsync(false);
         }
 
         #endregion
@@ -501,12 +466,91 @@ namespace RayCarrot.WPF
 
         #endregion
 
+        #region Public Methods
+
+        /// <summary>
+        /// Shuts down the RCF app
+        /// </summary>
+        /// <param name="forceShutDown">Indicates if the app should be forced to shut down</param>
+        /// <returns>The task</returns>
+        public async Task ShutdownRCFAppAsync(bool forceShutDown)
+        {
+            // If already is closing, ignore
+            if (IsClosing)
+                return;
+
+            // Flag that we are closing
+            IsClosing = true;
+
+            try
+            {
+                await Dispatcher.InvokeAsync(async () =>
+                {
+                    // Attempt to close all windows except the main one
+                    foreach (Window window in Windows)
+                    {
+                        // Ignore the main window for now
+                        if (window == MainWindow)
+                            continue;
+
+                        // Focus the window
+                        window.Focus();
+
+                        // Attempt to close the window
+                        window.Close();
+                    }
+
+                    // Make sure all other windows have been closed unless forcing a shut down
+                    if (!forceShutDown && Windows.Count > 1)
+                    {
+                        RCFCore.Logger?.LogInformationSource("The shutdown was canceled due to one or more windows still being open");
+
+                        IsClosing = false;
+                        return;
+                    }
+
+                    // Run shut down code
+                    await OnCloseAsync(MainWindow);
+
+                    // Flag that we are done closing the main window
+                    DoneClosing = true;
+
+                    // Shut down application
+                    Shutdown();
+                });
+            }
+            catch (Exception ex)
+            {
+                await Dispatcher.InvokeAsync(() =>
+                {
+                    // Attempt to log the exception, ignoring any exceptions thrown
+                    new Action(() => ex.HandleError("Closing main window")).IgnoreIfException();
+
+                    // Notify the user of the error
+                    MessageBox.Show($"An error occurred when shutting down the application. Error message: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+
+                    // Flag that we are done closing the main window
+                    DoneClosing = true;
+
+                    // Close application
+                    Shutdown();
+                });
+            }
+        }
+
+        #endregion
+
         #region Protected Events
 
         /// <summary>
         /// Contains events to be called once after startup completes
         /// </summary>
         protected event AsyncEventHandler<EventArgs> LocalStartupComplete;
+
+        /// <summary>
+        /// Occurs when all event handlers subscribed to <see cref="StartupComplete"/> have finished
+        /// </summary>
+        protected event EventHandler StartupEventsCompleted;
 
         #endregion
 

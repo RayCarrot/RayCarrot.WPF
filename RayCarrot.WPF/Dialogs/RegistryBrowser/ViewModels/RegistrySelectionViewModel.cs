@@ -3,7 +3,6 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Drawing;
-using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using RayCarrot.CarrotFramework.Abstractions;
@@ -101,7 +100,7 @@ namespace RayCarrot.WPF
             {
                 try
                 {
-                    return new FileSystemPath(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Windows), "regedit.exe")).GetIconOrThumbnail(ShellThumbnailSize.Small);
+                    return new FileSystemPath(Environment.SpecialFolder.Windows.GetFolderPath() + "regedit.exe").GetIconOrThumbnail(ShellThumbnailSize.Small);
                 }
                 catch (Exception ex)
                 {
@@ -332,16 +331,15 @@ namespace RayCarrot.WPF
                 {
                     Favorites.Clear();
 
-                    using (var key = RCFWinReg.RegistryManager.GetKeyFromFullPath(CommonRegistryPaths.RegeditFavoritesPath, RegistryView.Default))
+                    using var key = RCFWinReg.RegistryManager.GetKeyFromFullPath(CommonRegistryPaths.RegeditFavoritesPath, RegistryView.Default);
+
+                    foreach (var value in key.GetValues())
                     {
-                        foreach (var value in key.GetValues())
+                        Favorites.Add(new FavoritesItemViewModel(this)
                         {
-                            Favorites.Add(new FavoritesItemViewModel(this)
-                            {
-                                Name = value.Name,
-                                KeyPath = RCFWinReg.RegistryManager.NormalizePath(value.Value.ToString())
-                            });
-                        }
+                            Name = value.Name,
+                            KeyPath = RCFWinReg.RegistryManager.NormalizePath(value.Value.ToString())
+                        });
                     }
                 }
             }
@@ -505,25 +503,24 @@ namespace RayCarrot.WPF
             {
                 lock (this)
                 {
-                    using (RegistryKey key = RCFWinReg.RegistryManager.GetKeyFromFullPath(SelectedKeyFullPath, CurrentRegistryView))
-                    {
-                        // Add values
-                        Values.AddRange(key.GetValues().Select(x => new RegistryValueViewModel()
-                        {
-                            Name = x.Name,
-                            Data = x.Value,
-                            Type = x.ValueKind
-                        }));
+                    using RegistryKey key = RCFWinReg.RegistryManager.GetKeyFromFullPath(SelectedKeyFullPath, CurrentRegistryView);
 
-                        // Add empty default if non has been added and if set to do so
-                        if (ShowEmptyDefaultValues && !Values.Any(x => x.IsDefault))
+                    // Add values
+                    Values.AddRange(key.GetValues().Select(x => new RegistryValueViewModel()
+                    {
+                        Name = x.Name,
+                        Data = x.Value,
+                        Type = x.ValueKind
+                    }));
+
+                    // Add empty default if non has been added and if set to do so
+                    if (ShowEmptyDefaultValues && !Values.Any(x => x.IsDefault))
+                    {
+                        Values.Add(new RegistryValueViewModel()
                         {
-                            Values.Add(new RegistryValueViewModel()
-                            {
-                                Name = String.Empty,
-                                Type = RegistryValueKind.String
-                            });
-                        }
+                            Name = String.Empty,
+                            Type = RegistryValueKind.String
+                        });
                     }
                 }
             }
@@ -596,42 +593,42 @@ namespace RayCarrot.WPF
         /// <summary>
         /// Command for expanding to key
         /// </summary>
-        public AsyncRelayCommand ExpandToKeyCommand => _ExpandToKeyCommand ?? (_ExpandToKeyCommand = new AsyncRelayCommand(ExpandToKeyAsync));
+        public AsyncRelayCommand ExpandToKeyCommand => _ExpandToKeyCommand ??= new AsyncRelayCommand(ExpandToKeyAsync);
 
         private AsyncRelayCommand _OpenInRegeditCommand;
 
         /// <summary>
         /// Command for opening the selected key in RegEdit
         /// </summary>
-        public AsyncRelayCommand OpenInRegeditCommand => _OpenInRegeditCommand ?? (_OpenInRegeditCommand = new AsyncRelayCommand(OpenInRegeditAsync, SelectedKey != null));
+        public AsyncRelayCommand OpenInRegeditCommand => _OpenInRegeditCommand ??= new AsyncRelayCommand(OpenInRegeditAsync, SelectedKey != null);
 
         private AsyncRelayCommand _RefreshCommand;
 
         /// <summary>
         /// Command for refreshing the key view models
         /// </summary>
-        public AsyncRelayCommand RefreshCommand => _RefreshCommand ?? (_RefreshCommand = new AsyncRelayCommand(RefreshAsync));
+        public AsyncRelayCommand RefreshCommand => _RefreshCommand ??= new AsyncRelayCommand(RefreshAsync);
 
         private AsyncRelayCommand _BeginEditCommand;
 
         /// <summary>
         /// Command for beginning editing of the selected key
         /// </summary>
-        public AsyncRelayCommand BeginEditCommand => _BeginEditCommand ?? (_BeginEditCommand = new AsyncRelayCommand(BeginEditAsync, !BrowseVM.DisableEditing));
+        public AsyncRelayCommand BeginEditCommand => _BeginEditCommand ??= new AsyncRelayCommand(BeginEditAsync, !BrowseVM.DisableEditing);
 
         private AsyncRelayCommand _EndEditCommand;
 
         /// <summary>
         /// Command for ending editing of key in edit state
         /// </summary>
-        public AsyncRelayCommand EndEditCommand => _EndEditCommand ?? (_EndEditCommand = new AsyncRelayCommand(EndEditAsync));
+        public AsyncRelayCommand EndEditCommand => _EndEditCommand ??= new AsyncRelayCommand(EndEditAsync);
 
         private AsyncRelayCommand _DeleteKeyCommand;
 
         /// <summary>
         /// Command for deleting the selected key
         /// </summary>
-        public AsyncRelayCommand DeleteKeyCommand => _DeleteKeyCommand ?? (_DeleteKeyCommand = new AsyncRelayCommand(DeleteKeyAsync, !BrowseVM.DisableEditing));
+        public AsyncRelayCommand DeleteKeyCommand => _DeleteKeyCommand ??= new AsyncRelayCommand(DeleteKeyAsync, !BrowseVM.DisableEditing);
 
         #endregion
     }

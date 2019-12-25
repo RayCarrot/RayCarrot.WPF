@@ -48,8 +48,13 @@ namespace RayCarrot.WPF
 
         private void VMUserControl_Loaded(object sender, RoutedEventArgs e)
         {
-            if (ViewModel is IDisposable disposable)
-                Window.GetWindow(this).Closed += (ss, ee) => disposable?.Dispose();
+            // Attempt to get parent window
+            var window = Window.GetWindow(this);
+
+            if (window == null)
+                return;
+
+            window.Closed += (ss, ee) => (ViewModel as IDisposable)?.Dispose();
         }
     }
 }

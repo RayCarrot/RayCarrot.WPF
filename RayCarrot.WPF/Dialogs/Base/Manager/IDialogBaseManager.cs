@@ -1,4 +1,5 @@
 ﻿using System.Threading.Tasks;
+using System.Windows;
 using RayCarrot.UI;
 
 namespace RayCarrot.WPF
@@ -25,8 +26,8 @@ namespace RayCarrot.WPF
         /// <typeparam name="VM">The view model</typeparam>
         /// <param name="windowContent">The window content to show</param>
         /// <param name="owner">The owner window</param>
-        /// <returns>The result</returns>
-        Task ShowWindowAsync<VM>(IWindowBaseControl<VM> windowContent, object owner)
+        /// <returns>The window</returns>
+        Task<Window> ShowWindowAsync<VM>(IWindowBaseControl<VM> windowContent, object owner)
             where VM : UserInputViewModel;
     }
 }
