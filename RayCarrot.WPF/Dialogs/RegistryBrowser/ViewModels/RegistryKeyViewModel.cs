@@ -354,7 +354,7 @@ namespace RayCarrot.WPF
                         parent.MoveSubKey(Name, EditName);
                     }
 
-                    // TODO: Possibly just refresh and expand to this key?
+                    // IDEA: Possibly just refresh and expand to this key?
 
                     // Update name
                     Name = EditName;

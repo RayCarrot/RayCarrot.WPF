@@ -35,36 +35,39 @@ namespace RayCarrot.WPF
             if (LogRequests)
                 RCFCore.Logger?.LogTraceSource($"A browse directory dialog was opened with the title of: {directoryBrowserModel.Title}", origin: origin, filePath: filePath, lineNumber: lineNumber);
 
-            using var dialog = new CommonOpenFileDialog
+            return Application.Current.Dispatcher.Invoke(() =>
             {
-                Title = directoryBrowserModel.Title,
-                AllowNonFileSystemItems = false,
-                IsFolderPicker = true,
-                Multiselect = directoryBrowserModel.MultiSelection,
-                InitialDirectory = directoryBrowserModel.DefaultDirectory,
-                DefaultFileName = directoryBrowserModel.DefaultName,
-                EnsureFileExists = true,
-                EnsurePathExists = true
-            };
+                using var dialog = new CommonOpenFileDialog
+                {
+                    Title = directoryBrowserModel.Title,
+                    AllowNonFileSystemItems = false,
+                    IsFolderPicker = true,
+                    Multiselect = directoryBrowserModel.MultiSelection,
+                    InitialDirectory = directoryBrowserModel.DefaultDirectory,
+                    DefaultFileName = directoryBrowserModel.DefaultName,
+                    EnsureFileExists = true,
+                    EnsurePathExists = true
+                };
 
-            // Show the dialog
-            var dialogResult = dialog.ShowDialog(Application.Current.Windows.Cast<Window>().FindItem(x => x.IsActive));
+                // Show the dialog
+                var dialogResult = dialog.ShowDialog(Application.Current.Windows.Cast<Window>().FindItem(x => x.IsActive));
 
-            var result = dialogResult != CommonFileDialogResult.Ok ? new DirectoryBrowserResult()
-            {
-                CanceledByUser = true
-            } : new DirectoryBrowserResult()
-            {
-                CanceledByUser = false,
-                SelectedDirectory = dialog.FileName,
-                SelectedDirectories = dialog.FileNames.Select(x => new FileSystemPath(x))
-            };
+                var result = dialogResult != CommonFileDialogResult.Ok ? new DirectoryBrowserResult()
+                {
+                    CanceledByUser = true
+                } : new DirectoryBrowserResult()
+                {
+                    CanceledByUser = false,
+                    SelectedDirectory = dialog.FileName,
+                    SelectedDirectories = dialog.FileNames.Select(x => new FileSystemPath(x))
+                };
 
-            RCFCore.Logger?.LogTraceSource(result.CanceledByUser
-                ? "The browse directory dialog was canceled by the user"
-                : $"The browse directory dialog returned the selected directory paths {result.SelectedDirectories.JoinItems(", ")}");
+                RCFCore.Logger?.LogTraceSource(result.CanceledByUser
+                    ? "The browse directory dialog was canceled by the user"
+                    : $"The browse directory dialog returned the selected directory paths {result.SelectedDirectories.JoinItems(", ")}");
 
-            return Task.FromResult(result);
+                return Task.FromResult(result);
+            });
         }
 
         /// <summary>
@@ -80,30 +83,33 @@ namespace RayCarrot.WPF
             if (LogRequests)
                 RCFCore.Logger?.LogTraceSource($"A browse file dialog was opened with the title of: {fileBrowserModel.Title}", origin: origin, filePath: filePath, lineNumber: lineNumber);
 
-            // Create the dialog
-            OpenFileDialog openFileDialog = new OpenFileDialog()
+            return Application.Current.Dispatcher.Invoke(() =>
             {
-                CheckFileExists = true,
-                FileName = fileBrowserModel.DefaultName,
-                Filter = fileBrowserModel.ExtensionFilter,
-                InitialDirectory = fileBrowserModel.DefaultDirectory,
-                Multiselect = fileBrowserModel.MultiSelection,
-                Title = fileBrowserModel.Title ?? "Select a file"
-            };
+                // Create the dialog
+                OpenFileDialog openFileDialog = new OpenFileDialog()
+                {
+                    CheckFileExists = true,
+                    FileName = fileBrowserModel.DefaultName,
+                    Filter = fileBrowserModel.ExtensionFilter,
+                    InitialDirectory = fileBrowserModel.DefaultDirectory,
+                    Multiselect = fileBrowserModel.MultiSelection,
+                    Title = fileBrowserModel.Title ?? "Select a file"
+                };
 
-            // Show the dialog and get the result
-            bool canceled = openFileDialog.ShowDialog() != true;
+                // Show the dialog and get the result
+                bool canceled = openFileDialog.ShowDialog() != true;
 
-            RCFCore.Logger?.LogTraceSource(canceled
-                ? "The browse file dialog was canceled by the user"
-                : $"The browse file dialog returned the selected file paths {openFileDialog.FileNames.JoinItems(", ")}");
+                RCFCore.Logger?.LogTraceSource(canceled
+                    ? "The browse file dialog was canceled by the user"
+                    : $"The browse file dialog returned the selected file paths {openFileDialog.FileNames.JoinItems(", ")}");
 
-            // Return the result
-            return Task.FromResult(new FileBrowserResult()
-            {
-                CanceledByUser = canceled,
-                SelectedFile = openFileDialog.FileName,
-                SelectedFiles = openFileDialog.FileNames.Select(x => new FileSystemPath(x))
+                // Return the result
+                return Task.FromResult(new FileBrowserResult()
+                {
+                    CanceledByUser = canceled,
+                    SelectedFile = openFileDialog.FileName,
+                    SelectedFiles = openFileDialog.FileNames.Select(x => new FileSystemPath(x))
+                });
             });
         }
 
@@ -120,27 +126,30 @@ namespace RayCarrot.WPF
             if (LogRequests)
                 RCFCore.Logger?.LogTraceSource($"A save file dialog was opened with the title of: {saveFileModel.Title}", origin: origin, filePath: filePath, lineNumber: lineNumber);
 
-            // Create the dialog
-            SaveFileDialog saveFileDialog = new SaveFileDialog()
+            return Application.Current.Dispatcher.Invoke(() =>
             {
-                FileName = saveFileModel.DefaultName,
-                Filter = saveFileModel.Extensions,
-                InitialDirectory = saveFileModel.DefaultDirectory,
-                Title = saveFileModel.Title ?? "Save file"
-            };
+                // Create the dialog
+                SaveFileDialog saveFileDialog = new SaveFileDialog()
+                {
+                    FileName = saveFileModel.DefaultName,
+                    Filter = saveFileModel.Extensions,
+                    InitialDirectory = saveFileModel.DefaultDirectory,
+                    Title = saveFileModel.Title ?? "Save file"
+                };
 
-            // Show the dialog and get the result
-            bool canceled = saveFileDialog.ShowDialog() != true;
+                // Show the dialog and get the result
+                bool canceled = saveFileDialog.ShowDialog() != true;
 
-            RCFCore.Logger?.LogTraceSource(canceled
-                ? "The save file dialog was canceled by the user"
-                : $"The save file dialog returned the selected file path {saveFileDialog.FileName}");
+                RCFCore.Logger?.LogTraceSource(canceled
+                    ? "The save file dialog was canceled by the user"
+                    : $"The save file dialog returned the selected file path {saveFileDialog.FileName}");
 
-            // Return the result
-            return Task.FromResult(new SaveFileResult()
-            {
-                CanceledByUser = canceled,
-                SelectedFileLocation = saveFileDialog.FileName
+                // Return the result
+                return Task.FromResult(new SaveFileResult()
+                {
+                    CanceledByUser = canceled,
+                    SelectedFileLocation = saveFileDialog.FileName
+                });
             });
         }
 

@@ -8,7 +8,7 @@ using RayCarrot.Windows.Registry;
 
 namespace RayCarrot.WPF
 {
-    // TODO: Split into controls (tree, etc.), use binding and allow styles and other usages besides dialog
+    // IDEA: Split into controls (tree, etc.), use binding and allow styles and other usages besides dialog
 
     /// <summary>
     /// Interaction logic for RegistrySelectionDialog.xaml
