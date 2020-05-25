@@ -1,4 +1,10 @@
-﻿using System;
+﻿using Microsoft.Win32;
+using Nito.AsyncEx;
+using RayCarrot.Common;
+using RayCarrot.IO;
+using RayCarrot.Logging;
+using RayCarrot.Windows.Shell;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -6,13 +12,6 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
-using Microsoft.Win32;
-using Nito.AsyncEx;
-using RayCarrot.CarrotFramework.Abstractions;
-using RayCarrot.IO;
-using RayCarrot.UI;
-using RayCarrot.Windows.Registry;
-using RayCarrot.Windows.Shell;
 
 namespace RayCarrot.WPF
 {
@@ -141,6 +140,21 @@ namespace RayCarrot.WPF
         {
             switch (BrowseType)
             {
+                case BrowseTypes.SaveFile:
+                    try
+                    {
+                        if (SelectedPath.IsNullOrWhiteSpace())
+                            return false;
+                        else
+                            return Directory.Exists(Path.GetDirectoryName(SelectedPath));
+                    }
+                    catch (Exception ex)
+                    {
+                        ex.HandleUnexpected("Validating browse save file type");
+
+                        return false;
+                    }
+
                 case BrowseTypes.File:
                     return File.Exists(SelectedPath);
 
@@ -151,9 +165,6 @@ namespace RayCarrot.WPF
                     FileSystemPath path = SelectedPath;
                     return path.DirectoryExists && path.IsDirectoryRoot;
 
-                case BrowseTypes.RegistryKey:
-                    return RCFWinReg.RegistryManager.KeyExists(SelectedPath, SelectedRegistryView);
-
                 default:
                     return false;
             }
@@ -163,10 +174,7 @@ namespace RayCarrot.WPF
         /// Checks if the file drag/drop is allowed based on the current properties
         /// </summary>
         /// <returns>True if it's allowed, otherwise false</returns>
-        protected virtual bool AllowFileDragDrop()
-        {
-            return BrowseType == BrowseTypes.Directory || BrowseType == BrowseTypes.File || BrowseType == BrowseTypes.Drive;
-        }
+        protected virtual bool AllowFileDragDrop() => BrowseType == BrowseTypes.Directory || BrowseType == BrowseTypes.SaveFile || BrowseType == BrowseTypes.File || BrowseType == BrowseTypes.Drive;
 
         protected virtual async Task BrowseAsync()
         {
@@ -174,8 +182,25 @@ namespace RayCarrot.WPF
             {
                 switch (BrowseType)
                 {
+                    case BrowseTypes.SaveFile:
+
+                        var saveFileResult = await Services.BrowseUI.SaveFileAsync(new SaveFileViewModel()
+                        {
+                            Title = "Save file",
+                            DefaultDirectory = IsPathValid() ? new FileSystemPath(SelectedPath).Parent.FullPath : InitialLocation,
+                            DefaultName = UseCurrentPathAsDefaultLocationIfValid && IsPathValid() ? new FileSystemPath(SelectedPath).Name : String.Empty,
+                            Extensions = FileFilter
+                        });
+
+                        if (saveFileResult.CanceledByUser)
+                            return;
+
+                        SelectedPath = saveFileResult.SelectedFileLocation;
+
+                        break;
+
                     case BrowseTypes.File:
-                        var fileResult = await RCFUI.BrowseUI.BrowseFileAsync(new FileBrowserViewModel()
+                        var fileResult = await Services.BrowseUI.BrowseFileAsync(new FileBrowserViewModel()
                         {
                             Title = "Select a file",
                             DefaultDirectory = IsPathValid() ? new FileSystemPath(SelectedPath).Parent.FullPath : InitialLocation,
@@ -191,7 +216,7 @@ namespace RayCarrot.WPF
                         break;
 
                     case BrowseTypes.Directory:
-                        var dirResult = await RCFUI.BrowseUI.BrowseDirectoryAsync(new DirectoryBrowserViewModel()
+                        var dirResult = await Services.BrowseUI.BrowseDirectoryAsync(new DirectoryBrowserViewModel()
                         {
                             Title = "Select a file",
                             DefaultDirectory = UseCurrentPathAsDefaultLocationIfValid && IsPathValid() ? new FileSystemPath(SelectedPath).FullPath : InitialLocation,
@@ -205,25 +230,8 @@ namespace RayCarrot.WPF
 
                         break;
 
-                    case BrowseTypes.RegistryKey:
-                        var keyResult = await RCFWinReg.RegistryBrowseUIManager.BrowseRegistryKeyAsync(new RegistryBrowserViewModel()
-                        {
-                            Title = "Select a Registry key",
-                            AllowCustomRegistryView = AllowCustomRegistryView,
-                            DefaultRegistryView = SelectedRegistryView,
-                            BrowseValue = false,
-                            DefaultKeyPath = UseCurrentPathAsDefaultLocationIfValid && IsPathValid() ? SelectedPath : InitialLocation,
-                        });
-
-                        if (keyResult.CanceledByUser)
-                            return;
-
-                        SelectedPath = keyResult.KeyPath;
-                        SelectedRegistryView = keyResult.SelectedRegistryView;
-                        break;
-
                     case BrowseTypes.Drive:
-                        var driveResult = await RCFUI.BrowseUI.BrowseDriveAsync(new DriveBrowserViewModel()
+                        var driveResult = await Services.BrowseUI.BrowseDriveAsync(new DriveBrowserViewModel()
                         {
                             Title = "Select a drive",
                             DefaultDirectory = UseCurrentPathAsDefaultLocationIfValid && IsPathValid() ? new FileSystemPath(SelectedPath).FullPath : InitialLocation,
@@ -250,7 +258,7 @@ namespace RayCarrot.WPF
         {
             if (!IsPathValid())
             {
-                await RCFUI.MessageUI.DisplayMessageAsync($"The path {SelectedPath} does not exist", "Path not found", MessageType.Error);
+                await Services.MessageUI.DisplayMessageAsync($"The path {SelectedPath} does not exist", "Path not found", MessageType.Error);
                 return;
             }
 
@@ -259,14 +267,14 @@ namespace RayCarrot.WPF
                 switch (BrowseType)
                 {
                     case BrowseTypes.File:
+                    case BrowseTypes.SaveFile:
                     case BrowseTypes.Directory:
                     case BrowseTypes.Drive:
                         WindowsHelpers.OpenExplorerPath(SelectedPath);
                         break;
-
-                    case BrowseTypes.RegistryKey:
-                        WindowsHelpers.OpenRegistryPath(SelectedPath);
-                        break;
+                    
+                    default:
+                        throw new ArgumentOutOfRangeException();
                 }
             }
             catch (Exception ex)
@@ -428,21 +436,6 @@ namespace RayCarrot.WPF
         }
 
         public static readonly DependencyProperty AllowedDriveTypesProperty = DependencyProperty.Register(nameof(AllowedDriveTypes), typeof(IEnumerable<DriveType>), typeof(BrowseBox));
-
-        #endregion
-
-        #region SelectedRegistryView
-
-        /// <summary>
-        /// The selected <see cref="RegistryView"/>
-        /// </summary>
-        public RegistryView SelectedRegistryView
-        {
-            get => (RegistryView)GetValue(SelectedRegistryViewProperty);
-            set => SetValue(SelectedRegistryViewProperty, value);
-        }
-
-        public static readonly DependencyProperty SelectedRegistryViewProperty = DependencyProperty.Register(nameof(SelectedRegistryView), typeof(RegistryView), typeof(BrowseBox), new FrameworkPropertyMetadata(RegistryView.Default, FrameworkPropertyMetadataOptions.BindsTwoWayByDefault));
 
         #endregion
 

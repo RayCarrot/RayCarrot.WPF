@@ -1,6 +1,5 @@
 ﻿using System.Threading.Tasks;
 using System.Windows;
-using RayCarrot.UI;
 
 namespace RayCarrot.WPF
 {
@@ -20,7 +19,7 @@ namespace RayCarrot.WPF
         public static async Task<R> ShowDialogAsync<V, R>(this IDialogBaseControl<V, R> dialog, object owner = null)
             where V : UserInputViewModel
         {
-            return await RCFWPF.DialogBaseManager.ShowDialogAsync(dialog, owner);
+            return await Services.DialogBaseManager.ShowDialogAsync(dialog, owner);
         }
 
         /// <summary>
@@ -49,7 +48,7 @@ namespace RayCarrot.WPF
         public static Task<Window> ShowWindowAsync<VM>(this IWindowBaseControl<VM> window, object owner = null)
             where VM : UserInputViewModel
         {
-            return RCFWPF.DialogBaseManager.ShowWindowAsync(window, owner);
+            return Services.DialogBaseManager.ShowWindowAsync(window, owner);
         }
 
         /// <summary>

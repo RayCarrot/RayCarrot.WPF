@@ -2,8 +2,8 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Windows;
-using RayCarrot.CarrotFramework.Abstractions;
-using RayCarrot.Extensions;
+using RayCarrot.Common;
+using RayCarrot.Logging;
 
 namespace RayCarrot.WPF
 {
@@ -89,7 +89,7 @@ namespace RayCarrot.WPF
                     // Remove unused entries
                     Windows.RemoveWhere(x => !x.Key.TryGetTarget(out Window _));
 
-                    RCFCore.Logger?.LogDebugSource($"A custom window of type {windowType} has been requested to show");
+                    RL.Logger?.LogDebugSource($"A custom window of type {windowType} has been requested to show");
 
                     // Get the currently available windows and copy them to a list
                     var windows = Application.Current.Windows.Cast<Window>().ToList();
@@ -101,7 +101,7 @@ namespace RayCarrot.WPF
 
                         if (window != null)
                         {
-                            RCFCore.Logger?.LogInformationSource($"The window is not being shown due to a window of the same type being available");
+                            RL.Logger?.LogInformationSource($"The window is not being shown due to a window of the same type being available");
 
                             if (!flags.HasFlag(ShowWindowFlags.DoNotFocusBlockingWindow))
                                 window.Focus();
@@ -123,7 +123,7 @@ namespace RayCarrot.WPF
                         if (gn?.FindItem(groupNames.Contains) == null)
                             continue;
 
-                        RCFCore.Logger?.LogInformationSource($"The window is not being shown due to a window with the same ID being available");
+                        RL.Logger?.LogInformationSource($"The window is not being shown due to a window with the same ID being available");
 
                         if (!flags.HasFlag(ShowWindowFlags.DoNotFocusBlockingWindow))
                             window.Focus();
@@ -140,7 +140,7 @@ namespace RayCarrot.WPF
                     // Show the window
                     instance.Show();
 
-                    RCFCore.Logger?.LogInformationSource($"The window of type {windowType} has been shown");
+                    RL.Logger?.LogInformationSource($"The window of type {windowType} has been shown");
 
                     return true;
                 }

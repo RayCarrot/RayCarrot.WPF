@@ -6,6 +6,11 @@
     public enum BrowseTypes
     {
         /// <summary>
+        /// Save file browsing
+        /// </summary>
+        SaveFile,
+        
+        /// <summary>
         /// File browsing
         /// </summary>
         File,
@@ -19,10 +24,5 @@
         /// Drive browsing
         /// </summary>
         Drive,
-
-        /// <summary>
-        /// Registry Key browsing
-        /// </summary>
-        RegistryKey
     }
 }

@@ -4,7 +4,7 @@ using System.Linq;
 using System.Threading;
 using System.Windows.Controls;
 using Microsoft.Xaml.Behaviors;
-using RayCarrot.Extensions;
+using RayCarrot.Common;
 
 namespace RayCarrot.WPF
 {

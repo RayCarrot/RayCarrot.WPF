@@ -1,6 +1,6 @@
 ﻿using System.Diagnostics;
 using Microsoft.Extensions.Logging;
-using RayCarrot.CarrotFramework.Abstractions;
+using RayCarrot.Logging;
 
 namespace RayCarrot.WPF
 {
@@ -39,12 +39,12 @@ namespace RayCarrot.WPF
 
         public override void Write(string message)
         {
-            RCFCore.Logger?.LogSource(message, LogLevel);
+            RL.Logger?.LogSource(message, LogLevel);
         }
 
         public override void WriteLine(string message)
         {
-            RCFCore.Logger?.LogSource(message, LogLevel);
+            RL.Logger?.LogSource(message, LogLevel);
         }
 
         #endregion

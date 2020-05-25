@@ -1,20 +1,25 @@
 ## RayCarrot.WPF
-This is a WPF helper library for the [Carrot Framework](https://github.com/RayCarrot/Carrot-Framework).
+This library provides a base for a WPF app using the RayCarrot libraries.
 
 ## Features
-- Common value converters, behaviors and atached properties
-- Common controls, such as a BrowseBox
-- Common dialogs, such as a Registry browser, string input dialog and a message box
-- General WPF helper methods and extensions
+- Base WPF app class with async startup support
+- Common dialog support
+- Dependency Injection and Logging support
+- WPF helpers
 
 ## Dependencies
 RayCarrot.WPF uses these main dependencies:
 
-- [RayCarrot.CarrotFramework](https://github.com/RayCarrot/Carrot-Framework)
-- [RayCarrot.Windows.Registry](https://github.com/RayCarrot/Carrot-Framework-Extensions/tree/master/RayCarrot.Windows.Registry)
-- [RayCarrot.Windows.Shell](https://github.com/RayCarrot/Carrot-Framework-Extensions/tree/master/RayCarrot.Windows.Shell)
-- [ByteSize](https://github.com/omar/ByteSize)
-- [Newtonsoft.Json](https://github.com/JamesNK/Newtonsoft.Json)
+- [RayCarrot.Logging](https://github.com/RayCarrot/RayCarrot.Logging)
+- [RayCarrot.Common](https://github.com/RayCarrot/RayCarrot.Common)
+- [RayCarrot.IO](https://github.com/RayCarrot/RayCarrot.IO)
+- [RayCarrot.UI](https://github.com/RayCarrot/RayCarrot.UI)
+- [RayCarrot.Windows.Shell](https://github.com/RayCarrot/RayCarrot.Windows.Shell)
+- [Microsoft.Extensions.DependencyInjection](https://www.nuget.org/packages/Microsoft.Extensions.DependencyInjection)
+- [Microsoft.Extensions.Logging](https://www.nuget.org/packages/Microsoft.Extensions.Logging)
+- [Microsoft.Extensions.Logging.Console](https://www.nuget.org/packages/Microsoft.Extensions.Logging.Console)
+- [Microsoft.Extensions.Logging.Debug](https://www.nuget.org/packages/Microsoft.Extensions.Logging.Debug/)
+- [Microsoft.Xaml.Behaviors.Wpf](https://github.com/Microsoft/XamlBehaviorsWpf)
 - [Nito.AsyncEx](https://github.com/StephenCleary/AsyncEx)
 - [PropertyChanged.Fody](https://github.com/Fody/PropertyChanged)
 

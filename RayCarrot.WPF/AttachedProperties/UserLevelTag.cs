@@ -1,5 +1,4 @@
-﻿using RayCarrot.CarrotFramework.Abstractions;
-using System;
+﻿using System;
 using System.ComponentModel;
 using System.Windows;
 
@@ -90,7 +89,7 @@ namespace RayCarrot.WPF
             var element = new WeakReference<FrameworkElement>(uIElement);
 
             // Subscribe to when the current user level changes
-            RCFCore.Data.UserLevelChanged += RefreshItem;
+            Services.Data.UserLevelChanged += RefreshItem;
 
             // Refresh the element
             RefreshElement(uIElement);
@@ -100,7 +99,7 @@ namespace RayCarrot.WPF
                 if (element.TryGetTarget(out FrameworkElement ue))
                     RefreshElement(ue);
                 else
-                    RCFCore.Data.UserLevelChanged -= RefreshItem;
+                    Services.Data.UserLevelChanged -= RefreshItem;
             }
         }
 
@@ -117,9 +116,9 @@ namespace RayCarrot.WPF
             var b = GetBehavior(element);
 
             if (b == UserLevelTagBehavior.Collapse)
-                element.Visibility = GetMinUserLevel(element) <= RCFCore.Data.CurrentUserLevel ? Visibility.Visible : Visibility.Collapsed;
+                element.Visibility = GetMinUserLevel(element) <= Services.Data.CurrentUserLevel ? Visibility.Visible : Visibility.Collapsed;
             else if (b == UserLevelTagBehavior.Disable)
-                element.IsEnabled = GetMinUserLevel(element) <= RCFCore.Data.CurrentUserLevel;
+                element.IsEnabled = GetMinUserLevel(element) <= Services.Data.CurrentUserLevel;
         }
 
         #endregion

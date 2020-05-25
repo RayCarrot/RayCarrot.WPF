@@ -9,8 +9,8 @@ using System.Threading.Tasks;
 using System.Windows.Input;
 using Microsoft.WindowsAPICodePack.Shell;
 using Nito.AsyncEx;
-using RayCarrot.CarrotFramework.Abstractions;
 using RayCarrot.IO;
+using RayCarrot.Logging;
 using RayCarrot.UI;
 using RayCarrot.Windows.Shell;
 
@@ -190,7 +190,7 @@ namespace RayCarrot.WPF
 
                         try
                         {
-                            freeSpace = new ByteSize(drive.TotalFreeSpace);
+                            freeSpace = ByteSize.FromBytes(drive.TotalFreeSpace);
                         }
                         catch (Exception ex)
                         {
@@ -199,7 +199,7 @@ namespace RayCarrot.WPF
 
                         try
                         {
-                            totalSize = new ByteSize(drive.TotalSize);
+                            totalSize = ByteSize.FromBytes(drive.TotalSize);
                         }
                         catch (Exception ex)
                         {
@@ -247,7 +247,7 @@ namespace RayCarrot.WPF
                 catch (Exception ex)
                 {
                     ex.HandleUnexpected("Getting drives");
-                    await RCFUI.MessageUI.DisplayMessageAsync("An error occurred getting the drives", "Error", MessageType.Error);
+                    await Services.MessageUI.DisplayMessageAsync("An error occurred getting the drives", "Error", MessageType.Error);
                 }
             }
         }

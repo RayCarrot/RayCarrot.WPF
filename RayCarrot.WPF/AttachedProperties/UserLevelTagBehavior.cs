@@ -1,6 +1,4 @@
-﻿using RayCarrot.CarrotFramework.Abstractions;
-
-namespace RayCarrot.WPF
+﻿namespace RayCarrot.WPF
 {
     /// <summary>
     /// The behavior to use for <see cref="UserLevelTag"/>

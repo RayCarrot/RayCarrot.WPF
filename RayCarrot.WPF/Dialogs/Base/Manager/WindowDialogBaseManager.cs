@@ -3,9 +3,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Interop;
-using RayCarrot.CarrotFramework.Abstractions;
-using RayCarrot.Extensions;
-using RayCarrot.UI;
+using RayCarrot.Common;
 
 namespace RayCarrot.WPF
 {
@@ -90,6 +88,21 @@ namespace RayCarrot.WPF
 
                     // Configure the window
                     ConfigureWindow(window, windowContent, owner);
+
+                    void Dialog_CloseDialog(object sender, EventArgs e)
+                    {
+                        window.Close();
+                    }
+
+                    void Dialog_Closed(object sender, EventArgs e)
+                    {
+                        windowContent.CloseDialog -= Dialog_CloseDialog;
+                        window.Closed -= Dialog_Closed;
+                    }
+
+                    // Close window on request
+                    windowContent.CloseDialog += Dialog_CloseDialog;
+                    window.Closed += Dialog_Closed;
 
                     // Show the window
                     WindowHelpers.ShowWindow(window, WindowHelpers.ShowWindowFlags.DuplicatesAllowed, windowContent.GetType().FullName);
@@ -191,8 +204,8 @@ namespace RayCarrot.WPF
             // Set startup location
             window.WindowStartupLocation = window.Owner == null ? WindowStartupLocation.CenterScreen : WindowStartupLocation.CenterOwner;
 
-            // Attempt to get default Window style from Framework
-            window.Style = RCF.GetService<IWPFStyle>(false)?.WindowStyle ?? window.Style;
+            // Attempt to get default Window style from the services
+            window.Style = Services.WPFStyle?.WindowStyle ?? window.Style;
         }
 
         /// <summary>

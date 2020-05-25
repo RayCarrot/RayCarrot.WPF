@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Globalization;
 using System.Windows;
-using RayCarrot.Extensions;
+using RayCarrot.Common;
 
 namespace RayCarrot.WPF
 {

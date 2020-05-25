@@ -1,6 +1,5 @@
 ﻿using System.Threading.Tasks;
 using System.Windows;
-using RayCarrot.UI;
 
 namespace RayCarrot.WPF
 {

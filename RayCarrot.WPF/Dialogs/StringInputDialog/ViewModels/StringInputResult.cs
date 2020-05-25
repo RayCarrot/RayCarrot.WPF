@@ -1,6 +1,4 @@
-﻿using RayCarrot.UI;
-
-namespace RayCarrot.WPF
+﻿namespace RayCarrot.WPF
 {
     /// <summary>
     /// Result for a string input dialog

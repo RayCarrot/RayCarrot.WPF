@@ -3,7 +3,7 @@ using System.Globalization;
 using System.Windows;
 using System.Windows.Data;
 using System.Windows.Markup;
-using RayCarrot.CarrotFramework.Abstractions;
+using RayCarrot.Logging;
 
 namespace RayCarrot.WPF
 {
@@ -80,7 +80,7 @@ namespace RayCarrot.WPF
         {
             if (!(value is TValue1 converterValue))
             {
-                RCFCore.Logger?.LogWarningSource($"The converter {typeof(TConverter).Name} returned null due to the value not being of the expected type {typeof(TValue1).FullName}");
+                RL.Logger?.LogWarningSource($"The converter {typeof(TConverter).Name} returned null due to the value not being of the expected type {typeof(TValue1).FullName}");
                 return DependencyProperty.UnsetValue;
             }
 
@@ -91,7 +91,7 @@ namespace RayCarrot.WPF
         {
             if (!(value is TValue2 converterValue))
             {
-                RCFCore.Logger?.LogWarningSource($"The converter {typeof(TConverter).Name} returned null due to the value not being of the expected type {typeof(TValue2).FullName}");
+                RL.Logger?.LogWarningSource($"The converter {typeof(TConverter).Name} returned null due to the value not being of the expected type {typeof(TValue2).FullName}");
                 return DependencyProperty.UnsetValue;
             }
 
@@ -128,13 +128,13 @@ namespace RayCarrot.WPF
         {
             if (!(value is TValue1 converterValue))
             {
-                RCFCore.Logger?.LogWarningSource($"The converter {typeof(TConverter).Name} returned null due to the value not being of the expected type {typeof(TValue1).FullName}");
+                RL.Logger?.LogWarningSource($"The converter {typeof(TConverter).Name} returned null due to the value not being of the expected type {typeof(TValue1).FullName}");
                 return DependencyProperty.UnsetValue;
             }
 
             if (!(parameter is TParamater parameterValue))
             {
-                RCFCore.Logger?.LogWarningSource($"The converter {typeof(TConverter).Name} returned null due to the parameter value not being of the expected type {typeof(TParamater).FullName}");
+                RL.Logger?.LogWarningSource($"The converter {typeof(TConverter).Name} returned null due to the parameter value not being of the expected type {typeof(TParamater).FullName}");
                 return DependencyProperty.UnsetValue;
             }
 
@@ -145,13 +145,13 @@ namespace RayCarrot.WPF
         {
             if (!(value is TValue2 converterValue))
             {
-                RCFCore.Logger?.LogWarningSource($"The converter {typeof(TConverter).Name} returned null due to the value not being of the expected type {typeof(TValue2).FullName}");
+                RL.Logger?.LogWarningSource($"The converter {typeof(TConverter).Name} returned null due to the value not being of the expected type {typeof(TValue2).FullName}");
                 return DependencyProperty.UnsetValue;
             }
 
             if (!(parameter is TParamater parameterValue))
             {
-                RCFCore.Logger?.LogWarningSource($"The converter {typeof(TConverter).Name} returned null due to the parameter value not being of the expected type {typeof(TParamater).FullName}");
+                RL.Logger?.LogWarningSource($"The converter {typeof(TConverter).Name} returned null due to the parameter value not being of the expected type {typeof(TParamater).FullName}");
                 return DependencyProperty.UnsetValue;
             }
 
