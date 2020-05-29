@@ -95,8 +95,12 @@ namespace RayCarrot.WPF
 
         private void DialogAction_ActionHandled(object sender, DialogMessageActionHandledEventArgs e)
         {
+            // Set the result
             DialogResult = e.ActionResult;
-            CloseDialog?.Invoke(this, new EventArgs());
+            
+            // Close if set to do so
+            if (e.ShouldCloseDialog)
+                CloseDialog?.Invoke(this, new EventArgs());
         }
 
         #endregion

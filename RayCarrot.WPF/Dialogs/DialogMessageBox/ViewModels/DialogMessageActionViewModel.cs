@@ -36,6 +36,16 @@ namespace RayCarrot.WPF
         /// </summary>
         public bool IsCancel { get; set; }
 
+        /// <summary>
+        /// True if the dialog should close when this action is handled
+        /// </summary>
+        public bool ShouldCloseDialog { get; set; } = true;
+
+        /// <summary>
+        /// Optional action for when this action is handled
+        /// </summary>
+        public Action OnHandled { get; set; }
+
         #endregion
 
         #region Commands
@@ -56,8 +66,11 @@ namespace RayCarrot.WPF
         /// </summary>
         public virtual void HandleAction()
         {
+            // Invoke optional action
+            OnHandled?.Invoke();
+
             // Invoke event
-            ActionHandled?.Invoke(this, new DialogMessageActionHandledEventArgs(ActionResult));
+            ActionHandled?.Invoke(this, new DialogMessageActionHandledEventArgs(ActionResult, ShouldCloseDialog));
         }
 
         #endregion

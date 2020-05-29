@@ -14,9 +14,11 @@ namespace RayCarrot.WPF
         /// Default constructor
         /// </summary>
         /// <param name="actionResult">The action result</param>
-        public DialogMessageActionHandledEventArgs(object actionResult)
+        /// <param name="shouldCloseDialog">True if the dialog should close when this action is handled</param>
+        public DialogMessageActionHandledEventArgs(object actionResult, bool shouldCloseDialog)
         {
             ActionResult = actionResult;
+            ShouldCloseDialog = shouldCloseDialog;
         }
 
         #endregion
@@ -27,6 +29,11 @@ namespace RayCarrot.WPF
         /// The action result
         /// </summary>
         public object ActionResult { get; }
+
+        /// <summary>
+        /// True if the dialog should close when this action is handled
+        /// </summary>
+        public bool ShouldCloseDialog { get; }
 
         #endregion
     }
@@ -42,7 +49,8 @@ namespace RayCarrot.WPF
         /// Default constructor
         /// </summary>
         /// <param name="actionResult">The action result</param>
-        public DialogMessageActionHandledEventArgs(T actionResult) : base(actionResult)
+        /// <param name="shouldCloseDialog">True if the dialog should close when this action is handled</param>
+        public DialogMessageActionHandledEventArgs(T actionResult, bool shouldCloseDialog) : base(actionResult, shouldCloseDialog)
         {
         }
 
