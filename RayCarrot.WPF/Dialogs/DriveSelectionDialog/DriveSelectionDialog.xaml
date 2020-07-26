@@ -62,7 +62,7 @@
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate DataType="local:DriveViewModel">
                             <StackPanel Orientation="Horizontal">
-                                <Image Source="{Binding Path=Icon, Converter={local:BitmapToImageSourceConverter}}" Width="16" Height="16"/>
+                                <Image Source="{Binding Path=Icon}" Width="16" Height="16"/>
                                 <TextBlock Text="{Binding Path=DisplayLabel}" Margin="10 0 2 0"/>
                             </StackPanel>
                         </DataTemplate>

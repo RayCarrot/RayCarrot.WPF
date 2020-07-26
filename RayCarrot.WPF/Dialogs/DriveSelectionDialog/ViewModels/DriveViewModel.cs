@@ -1,8 +1,8 @@
 ﻿using ByteSizeLib;
-using System.Drawing;
-using System.IO;
 using RayCarrot.IO;
 using RayCarrot.UI;
+using System.IO;
+using System.Windows.Media;
 
 namespace RayCarrot.WPF
 {
@@ -16,7 +16,7 @@ namespace RayCarrot.WPF
         /// <summary>
         /// The drive icon
         /// </summary>
-        public Bitmap Icon { get; set; }
+        public ImageSource Icon { get; set; }
 
         /// <summary>
         /// The drive label

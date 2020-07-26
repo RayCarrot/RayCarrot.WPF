@@ -1,18 +1,18 @@
 ﻿using ByteSizeLib;
-using System;
-using System.Collections;
-using System.Collections.ObjectModel;
-using System.Drawing;
-using System.IO;
-using System.Linq;
-using System.Threading.Tasks;
-using System.Windows.Input;
 using Microsoft.WindowsAPICodePack.Shell;
 using Nito.AsyncEx;
 using RayCarrot.IO;
 using RayCarrot.Logging;
 using RayCarrot.UI;
 using RayCarrot.Windows.Shell;
+using System;
+using System.Collections;
+using System.Collections.ObjectModel;
+using System.IO;
+using System.Linq;
+using System.Threading.Tasks;
+using System.Windows.Input;
+using System.Windows.Media;
 
 namespace RayCarrot.WPF
 {
@@ -139,7 +139,7 @@ namespace RayCarrot.WPF
                         if (BrowseVM.AllowedTypes != null && !BrowseVM.AllowedTypes.Contains(drive.DriveType))
                             continue;
 
-                        Bitmap icon = null;
+                        ImageSource icon = null;
                         string label = null;
                         string path;
                         string format = null;
@@ -166,7 +166,7 @@ namespace RayCarrot.WPF
                                 using var shellObj = ShellObject.FromParsingName(path);
                                 var thumb = shellObj.Thumbnail;
                                 thumb.CurrentSize = new System.Windows.Size(16, 16);
-                                icon = thumb.GetTransparentBitmap();
+                                icon = thumb.GetTransparentBitmap()?.ToImageSource();
                             }
                             catch (Exception ex)
                             {
