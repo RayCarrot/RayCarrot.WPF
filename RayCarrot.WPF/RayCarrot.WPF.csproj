@@ -241,16 +241,16 @@
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Microsoft.Extensions.DependencyInjection">
-      <Version>3.1.4</Version>
+      <Version>3.1.6</Version>
     </PackageReference>
     <PackageReference Include="Microsoft.Extensions.Logging">
-      <Version>3.1.4</Version>
+      <Version>3.1.6</Version>
     </PackageReference>
     <PackageReference Include="Microsoft.Extensions.Logging.Console">
-      <Version>3.1.4</Version>
+      <Version>3.1.6</Version>
     </PackageReference>
     <PackageReference Include="Microsoft.Extensions.Logging.Debug">
-      <Version>3.1.4</Version>
+      <Version>3.1.6</Version>
     </PackageReference>
     <PackageReference Include="Microsoft.Xaml.Behaviors.Wpf">
       <Version>1.1.19</Version>
