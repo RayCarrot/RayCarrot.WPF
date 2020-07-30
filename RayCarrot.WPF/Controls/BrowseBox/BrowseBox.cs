@@ -186,7 +186,7 @@ namespace RayCarrot.WPF
 
                         var saveFileResult = await Services.BrowseUI.SaveFileAsync(new SaveFileViewModel()
                         {
-                            Title = "Save file",
+                            Title = SaveFileHeader,
                             DefaultDirectory = IsPathValid() ? new FileSystemPath(SelectedPath).Parent.FullPath : InitialLocation,
                             DefaultName = UseCurrentPathAsDefaultLocationIfValid && IsPathValid() ? new FileSystemPath(SelectedPath).Name : String.Empty,
                             Extensions = FileFilter
@@ -202,7 +202,7 @@ namespace RayCarrot.WPF
                     case BrowseTypes.File:
                         var fileResult = await Services.BrowseUI.BrowseFileAsync(new FileBrowserViewModel()
                         {
-                            Title = "Select a file",
+                            Title = SelectFileHeader,
                             DefaultDirectory = IsPathValid() ? new FileSystemPath(SelectedPath).Parent.FullPath : InitialLocation,
                             DefaultName = UseCurrentPathAsDefaultLocationIfValid && IsPathValid() ? new FileSystemPath(SelectedPath).Name : String.Empty,
                             ExtensionFilter = FileFilter
@@ -218,7 +218,7 @@ namespace RayCarrot.WPF
                     case BrowseTypes.Directory:
                         var dirResult = await Services.BrowseUI.BrowseDirectoryAsync(new DirectoryBrowserViewModel()
                         {
-                            Title = "Select a file",
+                            Title = SelectDirectoryHeader,
                             DefaultDirectory = UseCurrentPathAsDefaultLocationIfValid && IsPathValid() ? new FileSystemPath(SelectedPath).FullPath : InitialLocation,
                             DefaultName = IsPathValid() ? new FileSystemPath(SelectedPath).Name : String.Empty
                         });
@@ -233,7 +233,7 @@ namespace RayCarrot.WPF
                     case BrowseTypes.Drive:
                         var driveResult = await Services.BrowseUI.BrowseDriveAsync(new DriveBrowserViewModel()
                         {
-                            Title = "Select a drive",
+                            Title = SelectDriveHeader,
                             DefaultDirectory = UseCurrentPathAsDefaultLocationIfValid && IsPathValid() ? new FileSystemPath(SelectedPath).FullPath : InitialLocation,
                             MultiSelection = false,
                             AllowedTypes = AllowedDriveTypes,
@@ -303,30 +303,15 @@ namespace RayCarrot.WPF
 
         #region Event Handlers
 
-        private async void BrowseFileAsync(object sender, RoutedEventArgs e)
-        {
-            await BrowseAsync();
-        }
+        private async void BrowseFileAsync(object sender, RoutedEventArgs e) => await BrowseAsync();
 
-        private void BrowseButton_DragEnter(object sender, DragEventArgs e)
-        {
-            e.Effects = AllowFileDragDrop() && e.Data.GetDataPresent(DataFormats.FileDrop) ? DragDropEffects.Copy : DragDropEffects.None;
-        }
+        private void BrowseButton_DragEnter(object sender, DragEventArgs e) => e.Effects = AllowFileDragDrop() && e.Data.GetDataPresent(DataFormats.FileDrop) ? DragDropEffects.Copy : DragDropEffects.None;
 
-        private void BrowseButton_Drop(object sender, DragEventArgs e)
-        {
-            FileDrop(e);
-        }
+        private void BrowseButton_Drop(object sender, DragEventArgs e) => FileDrop(e);
 
-        private async void OpenLocationMenuItem_ClickAsync(object sender, RoutedEventArgs e)
-        {
-            await OpenLocationAsync();
-        }
+        private async void OpenLocationMenuItem_ClickAsync(object sender, RoutedEventArgs e) => await OpenLocationAsync();
 
-        private void OpenLocationMenuItem_Loaded(object sender, RoutedEventArgs e)
-        {
-            IsSelectedPathValid = IsPathValid();
-        }
+        private void OpenLocationMenuItem_Loaded(object sender, RoutedEventArgs e) => IsSelectedPathValid = IsPathValid();
 
         #endregion
 
@@ -496,6 +481,54 @@ namespace RayCarrot.WPF
         }
 
         public static readonly DependencyProperty AllowCustomRegistryViewProperty = DependencyProperty.Register(nameof(AllowCustomRegistryView), typeof(bool), typeof(BrowseBox), new FrameworkPropertyMetadata(false, FrameworkPropertyMetadataOptions.BindsTwoWayByDefault));
+
+        #endregion
+
+        #region Browse Strings
+
+        /// <summary>
+        /// The header for the file selection dialog
+        /// </summary>
+        public string SelectFileHeader
+        {
+            get => (string)GetValue(SelectFileHeaderProperty);
+            set => SetValue(SelectFileHeaderProperty, value);
+        }
+
+        public static readonly DependencyProperty SelectFileHeaderProperty = DependencyProperty.Register(nameof(SelectFileHeader), typeof(string), typeof(BrowseBox), new FrameworkPropertyMetadata("Select a file"));
+
+        /// <summary>
+        /// The header for the file saving dialog
+        /// </summary>
+        public string SaveFileHeader
+        {
+            get => (string)GetValue(SaveFileHeaderProperty);
+            set => SetValue(SaveFileHeaderProperty, value);
+        }
+
+        public static readonly DependencyProperty SaveFileHeaderProperty = DependencyProperty.Register(nameof(SaveFileHeader), typeof(string), typeof(BrowseBox), new FrameworkPropertyMetadata("Save a file"));
+
+        /// <summary>
+        /// The header for the directory selection dialog
+        /// </summary>
+        public string SelectDirectoryHeader
+        {
+            get => (string)GetValue(SelectDirectoryHeaderProperty);
+            set => SetValue(SelectDirectoryHeaderProperty, value);
+        }
+
+        public static readonly DependencyProperty SelectDirectoryHeaderProperty = DependencyProperty.Register(nameof(SelectDirectoryHeader), typeof(string), typeof(BrowseBox), new FrameworkPropertyMetadata("Select a folder"));
+
+        /// <summary>
+        /// The header for the drive selection dialog
+        /// </summary>
+        public string SelectDriveHeader
+        {
+            get => (string)GetValue(SelectDriveHeaderProperty);
+            set => SetValue(SelectDriveHeaderProperty, value);
+        }
+
+        public static readonly DependencyProperty SelectDriveHeaderProperty = DependencyProperty.Register(nameof(SelectDriveHeader), typeof(string), typeof(BrowseBox), new FrameworkPropertyMetadata("Select a drive"));
 
         #endregion
 
