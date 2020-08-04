@@ -15,7 +15,13 @@
         <Setter Property="ContentTemplate">
             <Setter.Value>
                 <DataTemplate>
-                    <TextBlock Text="{Binding}" MaxWidth="400" TextWrapping='Wrap' />
+                    <ContentPresenter Content="{Binding}" MaxWidth="400">
+                        <ContentPresenter.Resources>
+                            <Style TargetType="{x:Type TextBlock}" BasedOn="{StaticResource {x:Type TextBlock}}">
+                                <Setter Property="TextWrapping" Value="Wrap" />
+                            </Style>
+                        </ContentPresenter.Resources>
+                    </ContentPresenter>
                 </DataTemplate>
             </Setter.Value>
         </Setter>
