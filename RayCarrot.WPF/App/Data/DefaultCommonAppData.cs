@@ -79,7 +79,7 @@ namespace RayCarrot.WPF
                 _currentCulture = value;
 
                 // Log the change
-                RL.Logger?.LogInformationSource($"The current culture has changed from {oldValue} to {CurrentUserLevel}");
+                RL.Logger?.LogInformationSource($"The current culture has changed from {oldValue} to {CurrentCulture}");
 
                 // Fire event
                 CultureChanged?.Invoke(this, new PropertyChangedEventArgs<CultureInfo>(oldValue, CurrentCulture));
