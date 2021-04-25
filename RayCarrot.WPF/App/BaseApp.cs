@@ -75,7 +75,7 @@ namespace RayCarrot.WPF
                 }
             }
 
-            LogStartupTime("Construction finished");
+            LogStartupTime("BaseApp: Construction finished");
         }
 
         #endregion
@@ -165,7 +165,7 @@ namespace RayCarrot.WPF
         /// <param name="args">The launch arguments</param>
         private async void AppStartupAsync(string[] args)
         {
-            LogStartupTime("App startup begins");
+            LogStartupTime("Startup: App startup begins");
 
             // Set the shutdown mode to avoid any license windows to close the application
             ShutdownMode = ShutdownMode.OnExplicitShutdown;
@@ -177,12 +177,10 @@ namespace RayCarrot.WPF
                 return;
             }
 
-            LogStartupTime("Initial setup has been verified");
+            LogStartupTime("Startup: Initial setup has been verified");
 
             // Set up the app data and services
             SetupAppData(args);
-
-            LogStartupTime("Application data and services have been setup");
 
             // Log the current environment
             try
@@ -198,17 +196,17 @@ namespace RayCarrot.WPF
             // Log some debug information
             RL.Logger?.LogDebugSource($"Entry assembly path: {Assembly.GetEntryAssembly()?.Location}");
 
-            LogStartupTime("Debug info has been logged");
+            LogStartupTime("Startup: Debug info has been logged");
 
             // Run startup
             await OnSetupAsync(args);
 
-            LogStartupTime("Startup has run");
+            LogStartupTime("Startup: Startup has run");
 
             // Get the main window
             var mainWindow = GetMainWindow();
 
-            LogStartupTime("Main window has been created");
+            LogStartupTime("Startup: Main window has been created");
 
             // Subscribe to events
             mainWindow.Loaded += MainWindow_LoadedAsync;
@@ -230,6 +228,8 @@ namespace RayCarrot.WPF
         /// </summary>
         private void SetupAppData(string[] args)
         {
+            LogStartupTime("AppData: Setting up application data");
+
             LogLevel logLevel = LogLevel.Information;
 
             // Get the log level from launch arguments
@@ -253,6 +253,8 @@ namespace RayCarrot.WPF
             if (services.All(x => x.ServiceType != typeof(ICommonAppData)))
                 services.AddSingleton<ICommonAppData>(new DefaultCommonAppData());
 
+            LogStartupTime("AppData: Building app service provider");
+
             // Built the service provider
             ServiceProvider = services.BuildServiceProvider();
 
@@ -262,6 +264,8 @@ namespace RayCarrot.WPF
             // Log that the build is complete
             RL.Logger?.LogInformationSource($"The service provider has been built with {services.Count} services");
             RL.Logger?.LogInformationSource($"The log level has been set to {logLevel}");
+
+            LogStartupTime("AppData: Application data and services have been setup");
         }
 
         #endregion
@@ -272,6 +276,7 @@ namespace RayCarrot.WPF
         /// Logs the startup time
         /// </summary>
         /// <param name="logDescription">The log description</param>
+        [Conditional("DEBUG")]
         protected void LogStartupTime(string logDescription)
         {
             StartupTimeLogs.Add($"Startup: {AppStartupTimer.ElapsedMilliseconds} ms - {logDescription}");
@@ -292,7 +297,7 @@ namespace RayCarrot.WPF
 
         private void BaseRCFApp_Startup(object sender, StartupEventArgs e)
         {
-            LogStartupTime("Startup event called");
+            LogStartupTime("WPF Startup: Startup event called");
 
             try
             {
@@ -367,7 +372,7 @@ namespace RayCarrot.WPF
         private async void MainWindow_LoadedAsync(object sender, RoutedEventArgs e)
         {
             // Add startup time log
-            LogStartupTime("Main window loaded");
+            LogStartupTime("MainWindow: Main window loaded");
 
             // Stop the stopwatch
             AppStartupTimer.Stop();
