@@ -58,6 +58,7 @@
     <Reference Include="PresentationFramework" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="App\Data\CultureChangedWeakEventManager.cs" />
     <Compile Include="AttachedProperties\UnifiedMargin.cs" />
     <Compile Include="AttachedProperties\UserLevelTag.cs" />
     <Compile Include="AttachedProperties\UserLevelTagBehavior.cs" />
