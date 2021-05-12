@@ -70,6 +70,7 @@
     <Compile Include="Controls\BrowseBox\BrowseBox.cs" />
     <Compile Include="Controls\BrowseBox\BrowseValidationRules.cs" />
     <Compile Include="Behavior\DecimalTextBoxBehavior.cs" />
+    <Compile Include="Converters\ByteEnumToIntConverter.cs" />
     <Compile Include="Dialogs\Base\IWindowBaseControl.cs" />
     <Compile Include="Logging\LogViewer\LogLevelToBrushConverter.cs" />
     <Compile Include="Controls\VMUserControl.cs" />
