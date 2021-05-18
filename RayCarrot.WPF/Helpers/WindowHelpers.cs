@@ -40,9 +40,9 @@ namespace RayCarrot.WPF
         /// <param name="groupNames">The group names for this instance</param>
         /// <returns>True if the <see cref="Window"/> is showing or false if it is not</returns>
         public static bool ShowWindow<Win>(ShowWindowFlags flags = ShowWindowFlags.None, params string[] groupNames)
-            where Win : Window, new()
+            where Win : Window
         {
-            return ShowWindow(new Win(), flags, groupNames);
+            return ShowWindow(typeof(Win).CreateInstance<Win>, flags, groupNames);
         }
 
         /// <summary>
