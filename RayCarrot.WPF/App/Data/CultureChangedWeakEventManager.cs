@@ -14,7 +14,7 @@ namespace RayCarrot.WPF
         /// <summary>
         /// Add a handler for the given source's event.
         /// </summary>
-        public static void AddHandler(ICommonAppData source, PropertyChangedEventHandler<CultureInfo> handler)
+        public static void AddHandler(ICommonAppData source, EventHandler<PropertyChangedEventArgs<CultureInfo>> handler)
         {
             if (source == null) 
                 throw new ArgumentNullException(nameof(source));
@@ -27,7 +27,7 @@ namespace RayCarrot.WPF
         /// <summary>
         /// Remove a handler for the given source's event.
         /// </summary>
-        public static void RemoveHandler(ICommonAppData source, PropertyChangedEventHandler<CultureInfo> handler)
+        public static void RemoveHandler(ICommonAppData source, EventHandler<PropertyChangedEventArgs<CultureInfo>> handler)
         {
             if (source == null)
                 throw new ArgumentNullException(nameof(source));
